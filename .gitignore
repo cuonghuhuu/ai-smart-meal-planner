@@ -1,0 +1,344 @@
+# ============================================================
+
+# AI Smart Meal Planner - Monorepo .gitignore
+
+# Flutter + Java Spring Boot + Python AI + Windows
+
+# ============================================================
+
+# ------------------------------------------------------------
+
+# SECRETS / ENVIRONMENT FILES
+
+# ------------------------------------------------------------
+
+.env
+.env.*
+!.env.example
+
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+secrets/
+secret/
+credentials/
+credentials.json
+
+# Local config containing secrets
+
+application-local.properties
+application-local.yml
+application-local.yaml
+
+# ------------------------------------------------------------
+
+# OPERATING SYSTEM
+
+# ------------------------------------------------------------
+
+# Windows
+
+Thumbs.db
+Thumbs.db:encryptable
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+
+*~
+
+# ------------------------------------------------------------
+
+# IDE / EDITOR
+
+# ------------------------------------------------------------
+
+# IntelliJ IDEA / Android Studio
+
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+
+.vscode/
+
+# Eclipse
+
+.project
+.classpath
+.settings/
+
+# ------------------------------------------------------------
+
+# LOGS
+
+# ------------------------------------------------------------
+
+*.log
+logs/
+log/
+
+# ------------------------------------------------------------
+
+# TEMPORARY FILES
+
+# ------------------------------------------------------------
+
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# ------------------------------------------------------------
+
+# FLUTTER / DART
+
+# ------------------------------------------------------------
+
+.dart_tool/
+.packages
+.pub/
+.pub-cache/
+
+build/
+
+flutter_export_environment.sh
+
+# Generated plugin files
+
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Flutter version manager
+
+.fvm/
+.fvmrc
+
+# Coverage
+
+coverage/
+
+# Android generated files
+
+**/android/.gradle/
+**/android/local.properties
+**/android/key.properties
+**/android/app/*.jks
+**/android/app/*.keystore
+
+# iOS generated files
+
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/ephemeral/
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# macOS generated files
+
+**/macos/Flutter/ephemeral/
+
+# Windows Flutter generated files
+
+**/windows/flutter/ephemeral/
+
+# Linux Flutter generated files
+
+**/linux/flutter/ephemeral/
+
+# ------------------------------------------------------------
+
+# JAVA / SPRING BOOT / MAVEN
+
+# ------------------------------------------------------------
+
+target/
+*.class
+
+# Maven
+
+.mvn/timing.properties
+
+# Keep Maven Wrapper
+
+!mvnw
+!mvnw.cmd
+!.mvn/wrapper/maven-wrapper.properties
+!.mvn/wrapper/maven-wrapper.jar
+
+# Gradle if ever used for auxiliary tooling
+
+.gradle/
+.gradle-cache/
+out/
+
+# Spring Boot runtime files
+
+spring.log
+
+# ------------------------------------------------------------
+
+# PYTHON / AI SERVICE
+
+# ------------------------------------------------------------
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtual environments
+
+.venv/
+venv/
+env/
+ENV/
+
+# Python build artifacts
+
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Jupyter
+
+.ipynb_checkpoints/
+
+# ------------------------------------------------------------
+
+# DATABASE
+
+# ------------------------------------------------------------
+
+*.sqlite
+*.sqlite3
+*.db
+
+# Local database dumps may contain sensitive data
+
+*.dump
+*.backup
+
+# Allow explicitly versioned SQL schema/seed files
+
+!database/**/*.sql
+
+# ------------------------------------------------------------
+
+# NODE / TOOLING
+
+# ------------------------------------------------------------
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ------------------------------------------------------------
+
+# AI AGENT LOCAL STATE
+
+# ------------------------------------------------------------
+
+# Claude local/private settings
+
+.claude/settings.local.json
+
+# Codex local state
+
+.codex/
+
+# Agent runtime/cache state
+
+.agent/cache/
+.agents/cache/
+
+# Preserve version-controlled shared instructions/skills
+
+!.agents/
+!.agents/**
+!.agent/
+!.agent/rules/
+!.agent/rules/**
+
+# ------------------------------------------------------------
+
+# SECURITY SCANNERS / LOCAL REPORTS
+
+# ------------------------------------------------------------
+
+.gitleaks-report.json
+gitleaks-report.*
+semgrep-report.*
+trivy-report.*
+
+# ------------------------------------------------------------
+
+# TEST / COVERAGE ARTIFACTS
+
+# ------------------------------------------------------------
+
+test-results/
+reports/
+coverage-reports/
+
+# ------------------------------------------------------------
+
+# ARCHIVES / LARGE LOCAL FILES
+
+# ------------------------------------------------------------
+
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+
+# ------------------------------------------------------------
+
+# LOCAL DEVELOPMENT OVERRIDES
+
+# ------------------------------------------------------------
+
+*.local
+*.local.json
+*.local.yml
+*.local.yaml
+
+# ------------------------------------------------------------
+
+# DO NOT IGNORE IMPORTANT PROJECT FILES
+
+# ------------------------------------------------------------
+
+!README.md
+!AGENTS.md
+!.gitignore
+!docs/
+!docs/**
+!database/
+!database/**
