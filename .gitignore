@@ -269,8 +269,10 @@ pnpm-debug.log*
 .claude/settings.local.json
 
 # Codex local state
-
-.codex/
+.codex/*
+!.codex/config.toml
+!.codex/rules/
+!.codex/rules/**
 
 # Agent runtime/cache state
 

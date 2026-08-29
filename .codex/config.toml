@@ -1,0 +1,45 @@
+approval_policy = "never"
+default_permissions = "mealplanner"
+
+[shell_environment_policy]
+inherit = "all"
+ignore_default_excludes = false
+
+[shell_environment_policy.filters]
+"*PASSWORD*" = "exclude"
+"*PASSWD*" = "exclude"
+"*CREDENTIAL*" = "exclude"
+
+[permissions.mealplanner]
+description = "Autonomous AI Smart Meal Planner development with protected secrets."
+extends = ":workspace"
+
+[permissions.mealplanner.filesystem.":workspace_roots"]
+".env" = "deny"
+".env.local" = "deny"
+".env.development" = "deny"
+".env.production" = "deny"
+".env.staging" = "deny"
+".env.test" = "deny"
+
+"**/.env" = "deny"
+"**/.env.local" = "deny"
+"**/.env.development" = "deny"
+"**/.env.production" = "deny"
+"**/.env.staging" = "deny"
+"**/.env.test" = "deny"
+
+"secrets/**" = "deny"
+"secret/**" = "deny"
+"credentials/**" = "deny"
+
+"**/*.pem" = "deny"
+"**/*.key" = "deny"
+"**/*.p12" = "deny"
+"**/*.pfx" = "deny"
+"**/*.jks" = "deny"
+"**/*.keystore" = "deny"
+
+[permissions.mealplanner.network]
+enabled = true
+mode = "full"
