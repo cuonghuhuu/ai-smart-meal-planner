@@ -1,0 +1,37 @@
+sequenceDiagram
+    autonumber
+    actor User
+    participant Flutter as Flutter client
+    participant Java as Spring Boot backend
+    participant MySQL
+    participant Python as Python AI service
+
+    User->>Flutter: Sign in
+    Flutter->>Java: POST /api/v1/auth with credentials
+    Java->>MySQL: Verify identity and session state
+    MySQL-->>Java: Authentication data
+    Java-->>Flutter: Short-lived access token and renewable session
+
+    User->>Flutter: Request recommendations or a meal plan
+    Flutter->>Java: Authenticated, validated request plus request ID
+    Java->>Java: Authenticate, authorize, and validate
+    Java->>MySQL: Load profile, goals, recipes, nutrition, and pantry snapshot
+    MySQL-->>Java: Authoritative domain snapshot
+    Java->>Python: Typed AI request plus service identity and request ID
+    Python->>Python: Filter, score, rank, or optimize with evidence
+
+    alt AI computation succeeds
+        Python-->>Java: Candidates, scores, explanations, and algorithm version
+        Java->>Java: Validate IDs, bounds, and hard constraints
+        Java-->>Flutter: Preview/result DTO
+    else AI is unavailable, invalid, or times out
+        Python--xJava: Bounded failure
+        Java->>Java: Apply documented safe fallback or degraded error
+        Java-->>Flutter: Degraded result or recoverable problem response
+    end
+
+    User->>Flutter: Accept a meal plan
+    Flutter->>Java: Save selected result plus user edits
+    Java->>MySQL: Revalidate current state and atomically persist accepted plan
+    MySQL-->>Java: Saved plan and version
+    Java-->>Flutter: Accepted plan DTO

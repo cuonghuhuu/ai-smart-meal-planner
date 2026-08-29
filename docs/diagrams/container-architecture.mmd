@@ -1,0 +1,17 @@
+flowchart LR
+    user["End user"]
+
+    subgraph product["AI Smart Meal Planner"]
+        flutter["Flutter application (Android and Web)"]
+        java["Spring Boot modular monolith"]
+        mysql[("MySQL")]
+        python["Python AI service"]
+    end
+
+    external["Optional external integrations"]
+
+    user -->|"Uses"| flutter
+    flutter -->|"HTTPS REST /api/v1"| java
+    java -->|"JPA/Hibernate read and write"| mysql
+    java -->|"Internal HTTP /internal/ai/v1"| python
+    java -.->|"Validated provider adapters"| external

@@ -1,0 +1,38 @@
+flowchart LR
+    auth["Authentication"]
+    profile["User/Profile"]
+    food["Food"]
+    nutrition["Nutrition"]
+    recipe["Recipe"]
+    search["Search"]
+    pantry["Pantry"]
+    recommendation["Recommendation"]
+    mealPlanning["Meal Planning"]
+    notification["Notification"]
+    aiIntegration["AI Integration Adapter"]
+    foundation["Shared Technical Foundation"]
+
+    profile --> auth
+    nutrition --> food
+    recipe --> food
+    recipe --> nutrition
+    search --> food
+    search --> recipe
+    pantry --> profile
+    pantry --> food
+    recommendation --> profile
+    recommendation --> food
+    recommendation --> recipe
+    recommendation --> pantry
+    recommendation --> nutrition
+    recommendation --> aiIntegration
+    mealPlanning --> profile
+    mealPlanning --> recipe
+    mealPlanning --> nutrition
+    mealPlanning --> recommendation
+    mealPlanning --> aiIntegration
+    notification -.->|"Observes stable application events"| pantry
+    notification -.->|"Observes stable application events"| mealPlanning
+    auth --> foundation
+    food --> foundation
+    aiIntegration --> foundation
