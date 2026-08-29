@@ -1,0 +1,207 @@
+%% Domain ERD 3 of 3 - the planning loop: pantry, AI recommendation provenance,
+%% meal plans, notifications and the search log.
+%% Source of truth: database/schema/V001__initial_schema.sql, sections 8-12.
+%% Read it as one cycle: what the user has (pantry) plus who they are feeds a
+%% recommendation request; Java sends that to the Python AI service and stores
+%% only the returned shortlist and its provenance; the user accepts entries into
+%% a meal plan; consuming a planned meal writes a pantry event. Python never
+%% touches any table here - Java is the only writer.
+erDiagram
+    users {
+        bigint id PK
+        varchar email_normalized UK
+        varchar time_zone "interprets every DATE and TIME below"
+    }
+    ingredients {
+        bigint id PK
+        varchar code UK
+        varchar display_name
+        decimal piece_gram_weight
+    }
+    foods {
+        bigint id PK
+        varchar code UK
+        varchar nutrition_basis
+    }
+    recipes {
+        bigint id PK
+        varchar slug UK
+        smallint servings
+        smallint total_minutes
+        varchar status
+    }
+    measurement_units {
+        bigint id PK
+        varchar code UK
+        varchar unit_type
+    }
+    meal_slot_types {
+        bigint id PK
+        varchar code UK "the meal structure is data, not schema"
+        smallint display_order
+        tinyint is_main_meal
+    }
+    pantry_items {
+        bigint id PK
+        binary public_id UK
+        bigint user_id FK
+        bigint ingredient_id FK "always known"
+        bigint food_id FK "optional, pins the exact product"
+        decimal quantity_initial
+        decimal quantity_remaining "never above initial, never below zero"
+        bigint unit_id FK
+        varchar storage_location "PANTRY, FRIDGE, FREEZER, OTHER"
+        date acquired_on
+        date expiry_date "NULL exactly when expiry_kind is UNKNOWN"
+        varchar expiry_kind "USE_BY, BEST_BEFORE, ESTIMATED, UNKNOWN"
+        varchar expiry_confidence "HIGH, MEDIUM, LOW, UNKNOWN"
+        varchar status "AVAILABLE, RESERVED, CONSUMED, DISCARDED, EXPIRED"
+        datetime closed_at "set exactly when the status is terminal"
+        bigint version
+    }
+    pantry_item_events {
+        bigint id PK
+        bigint pantry_item_id FK
+        varchar event_type "ADDED, CONSUMED, ADJUSTED, DISCARDED, EXPIRED, CORRECTED"
+        decimal quantity_delta "signed, matched to the event type"
+        decimal quantity_after "the running balance, auditable"
+        bigint meal_plan_entry_id FK "SET NULL, why the quantity moved"
+        datetime occurred_at
+    }
+    recommendation_requests {
+        bigint id PK
+        binary public_id UK
+        bigint user_id FK
+        varchar request_kind "MEAL_PLAN, SINGLE_MEAL, PANTRY_USE_UP, SUBSTITUTION"
+        bigint target_meal_slot_type_id FK
+        date target_date
+        varchar status "PENDING, SUCCEEDED, FAILED, DEGRADED, TIMED_OUT"
+        char correlation_id "the Java to Python call this row explains"
+        char constraints_hash "SHA-256 of the inputs, not the inputs themselves"
+        varchar algorithm_version "which ranking logic ran"
+        varchar model_identifier "which model, when one was used"
+        datetime requested_at
+        datetime completed_at
+        int duration_ms
+        varchar failure_reason "populated on FAILED, DEGRADED, TIMED_OUT"
+    }
+    recommendation_results {
+        bigint id PK
+        bigint request_id FK
+        smallint rank_position "UK with request_id, the order Python returned"
+        bigint recipe_id FK "exactly one of recipe_id or food_id"
+        bigint food_id FK
+        decimal total_score
+        varchar explanation "human-readable, for the report and the UI"
+        varchar user_decision "PENDING, ACCEPTED, REJECTED, IGNORED"
+        datetime decided_at
+    }
+    ai_score_components {
+        bigint id PK
+        varchar code UK "NUTRITION_FIT, PANTRY_COVERAGE, PREFERENCE_MATCH and more"
+        decimal scale_min "declares what a valid score is"
+        decimal scale_max
+        tinyint higher_is_better
+    }
+    recommendation_result_scores {
+        bigint result_id PK, FK
+        bigint score_component_id PK, FK
+        decimal score_value "checked against the component's own scale"
+        decimal weight
+    }
+    meal_plans {
+        bigint id PK
+        binary public_id UK
+        bigint user_id FK
+        varchar title
+        date start_date "a calendar date, not an instant"
+        date end_date
+        smallint day_count "generated STORED, 1 to 31, covers 3-7 day windows"
+        tinyint meals_per_day_target "a target, never a schema constraint"
+        tinyint default_servings
+        varchar status "DRAFT, ACCEPTED, ACTIVE, COMPLETED, ARCHIVED"
+        bigint source_request_id FK "SET NULL, which AI request produced this"
+        datetime accepted_at
+        datetime completed_at
+        datetime archived_at "archived, never deleted"
+        bigint version
+    }
+    meal_plan_entries {
+        bigint id PK
+        bigint meal_plan_id FK
+        date plan_date "CHECK: inside the plan's own window"
+        bigint meal_slot_type_id FK "any number of slots per day"
+        smallint position_in_slot "UK with plan, date and slot"
+        bigint recipe_id FK "exactly one of recipe_id or food_id"
+        bigint food_id FK
+        decimal servings
+        bigint food_serving_id FK "which household serving, when a food"
+        varchar provenance "AI_GENERATED, AI_MODIFIED, USER_SELECTED, USER_REPLACED"
+        bigint source_result_id FK "SET NULL, the exact AI result accepted"
+        varchar consumption_status "PLANNED, PREPARED, EATEN, SKIPPED"
+        datetime consumed_at
+    }
+    notification_types {
+        bigint id PK
+        varchar code UK "EXPIRY_WARNING, PLAN_REMINDER and more"
+        tinyint default_enabled
+        tinyint supports_lead_time
+    }
+    notifications {
+        bigint id PK
+        bigint user_id FK
+        bigint notification_type_id FK
+        varchar dedup_key UK "with user_id, one notice per real event"
+        bigint pantry_item_id FK "SET NULL, the subject if any"
+        bigint meal_plan_id FK "SET NULL"
+        varchar title
+        varchar body
+        varchar status "PENDING, SENT, READ, FAILED, CANCELLED"
+        datetime scheduled_for "an instant in UTC"
+        datetime sent_at
+        datetime read_at
+        varchar failure_reason
+    }
+    user_notification_preferences {
+        bigint user_id PK, FK
+        bigint notification_type_id PK, FK
+        tinyint is_enabled
+        smallint lead_time_days "days of warning before an expiry"
+        time preferred_time "wall clock in the user's time zone"
+    }
+    search_queries {
+        bigint id PK
+        bigint user_id FK "SET NULL, the trend survives the account"
+        varchar search_scope "RECIPE, FOOD, INGREDIENT"
+        varchar query_text
+        int result_count "zero-result queries reveal catalog gaps"
+        datetime searched_at
+    }
+
+    users ||--o{ pantry_items : "stocks"
+    ingredients ||--o{ pantry_items : "identifies"
+    foods |o--o{ pantry_items : "pins the product of"
+    measurement_units ||--o{ pantry_items : "measures"
+    pantry_items ||--|{ pantry_item_events : "quantity history of"
+    meal_plan_entries |o--o{ pantry_item_events : "was consumed for"
+    users ||--o{ recommendation_requests : "asks for"
+    meal_slot_types |o--o{ recommendation_requests : "targets"
+    recommendation_requests ||--o{ recommendation_results : "returned"
+    recipes |o--o{ recommendation_results : "recommended as"
+    foods |o--o{ recommendation_results : "recommended as"
+    recommendation_results ||--o{ recommendation_result_scores : "explained by"
+    ai_score_components ||--o{ recommendation_result_scores : "defines the scale of"
+    users ||--o{ meal_plans : "owns"
+    recommendation_requests |o--o{ meal_plans : "generated"
+    meal_plans ||--o{ meal_plan_entries : "schedules"
+    meal_slot_types ||--o{ meal_plan_entries : "slots"
+    recipes |o--o{ meal_plan_entries : "planned as"
+    foods |o--o{ meal_plan_entries : "planned as"
+    recommendation_results |o--o{ meal_plan_entries : "is the provenance of"
+    users ||--o{ notifications : "receives"
+    notification_types ||--o{ notifications : "classifies"
+    pantry_items |o--o{ notifications : "is the subject of"
+    meal_plans |o--o{ notifications : "is the subject of"
+    users ||--o{ user_notification_preferences : "configures"
+    notification_types ||--o{ user_notification_preferences : "configured by"
+    users |o--o{ search_queries : "searched"

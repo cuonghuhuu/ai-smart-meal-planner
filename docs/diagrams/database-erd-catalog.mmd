@@ -1,0 +1,234 @@
+%% Domain ERD 2 of 3 - the shared catalog: units, foods, nutrition facts,
+%% ingredients, substitution and recipes.
+%% Source of truth: database/schema/V001__initial_schema.sql, sections 1 and 4-7.
+%% Nothing in this diagram belongs to a user. Catalog rows are retired
+%% (is_active, retired_at, recipes.status) rather than deleted, and every
+%% reference from user data to this catalog is ON DELETE RESTRICT.
+erDiagram
+    measurement_units {
+        bigint id PK
+        varchar code UK "G, KG, ML, L, TSP, TBSP, CUP, PIECE, KCAL and more"
+        varchar unit_type "MASS, VOLUME, COUNT, ENERGY"
+        bigint base_unit_id FK "self reference, null on the base itself"
+        decimal factor_to_base_unit "only within one unit_type"
+    }
+    nutrients {
+        bigint id PK
+        varchar code UK "ENERGY_KCAL, PROTEIN, FAT, CARBOHYDRATE and more"
+        bigint unit_id FK "one unit per nutrient, no ambiguity"
+        varchar nutrient_kind "ENERGY, MACRO, VITAMIN, MINERAL, OTHER"
+        tinyint is_core "shown on every screen"
+        smallint display_order
+    }
+    food_categories {
+        bigint id PK
+        varchar code UK
+        bigint parent_category_id FK "single-parent hierarchy"
+        varchar display_name
+    }
+    foods {
+        bigint id PK
+        binary public_id UK
+        varchar code UK
+        varchar display_name
+        varchar brand
+        bigint food_category_id FK
+        varchar nutrition_basis "PER_100G or PER_100ML, fixes the meaning of amounts"
+        decimal density_g_per_ml "only when volume to mass is real for this food"
+        varchar source "USDA, VIETNAM_TABLE, MANUAL and so on"
+        int revision "bumped when facts change, snapshots record it"
+        tinyint is_active
+        datetime retired_at
+        bigint version
+    }
+    food_nutrients {
+        bigint food_id PK, FK
+        bigint nutrient_id PK, FK
+        decimal amount "per 100 g or 100 ml as the food declares"
+        varchar data_quality "MEASURED, ESTIMATED, IMPUTED"
+    }
+    food_servings {
+        bigint id PK
+        bigint food_id FK
+        varchar display_name "one slice, one medium banana"
+        decimal quantity
+        bigint unit_id FK
+        decimal gram_weight "the bridge from a household serving to mass"
+        decimal milliliters
+        tinyint is_default "functional unique index, at most one per food"
+    }
+    ingredients {
+        bigint id PK
+        binary public_id UK
+        varchar code UK
+        varchar display_name "what a cook calls it"
+        bigint food_category_id FK
+        bigint default_food_id FK "which nutrition row to use by default"
+        bigint default_unit_id FK
+        decimal piece_gram_weight "null when a piece has no stable mass"
+        smallint typical_shelf_life_days "informs, never overrides, real expiry"
+        tinyint is_staple
+        tinyint is_active
+        bigint version
+    }
+    ingredient_aliases {
+        bigint id PK
+        bigint ingredient_id FK
+        varchar alias "spring onion, scallion, hanh la"
+        varchar alias_locale "BCP 47 tag"
+    }
+    ingredient_foods {
+        bigint ingredient_id PK, FK
+        bigint food_id PK, FK
+        varchar preparation_state PK "RAW, COOKED, DRIED, CANNED, FROZEN"
+        decimal yield_factor "mass retained through that preparation"
+        tinyint is_primary "functional unique index, at most one per ingredient"
+    }
+    ingredient_allergens {
+        bigint ingredient_id PK, FK
+        bigint allergen_id PK, FK
+        varchar presence "CONTAINS, MAY_CONTAIN, FREE_FROM"
+        varchar note
+    }
+    ingredient_unit_conversions {
+        bigint id PK
+        bigint ingredient_id FK "conversion is per ingredient, never universal"
+        bigint from_unit_id FK
+        decimal from_quantity
+        bigint to_unit_id FK
+        decimal to_quantity
+        varchar confidence "MEASURED, ESTIMATED, UNKNOWN"
+    }
+    allergens {
+        bigint id PK
+        varchar code UK
+        varchar display_name
+    }
+    ingredient_groups {
+        bigint id PK
+        varchar code UK
+        varchar display_name
+        varchar group_kind "FUNCTIONAL, NUTRITIONAL, CULINARY, ALLERGEN_SAFE"
+    }
+    ingredient_group_members {
+        bigint group_id PK, FK
+        bigint ingredient_id PK, FK
+    }
+    ingredient_substitutions {
+        bigint id PK
+        bigint original_ingredient_id PK, FK "the direction is meaningful"
+        bigint substitute_ingredient_id PK, FK
+        varchar substitution_context PK "BAKING, SAUCE, GENERAL and more"
+        decimal ratio_numerator "exact rational, no rounding"
+        decimal ratio_denominator
+        varchar confidence "HIGH, MEDIUM, LOW"
+        tinyint preserves_allergen_profile "false blocks it for allergic users"
+        varchar sensory_impact
+        varchar guidance
+        tinyint is_active
+    }
+    recipe_tags {
+        bigint id PK
+        varchar code UK
+        varchar tag_kind "CUISINE, DIET, METHOD, OCCASION, DIFFICULTY"
+    }
+    meal_slot_types {
+        bigint id PK
+        varchar code UK
+        smallint display_order
+        time typical_time
+        tinyint is_main_meal
+    }
+    recipes {
+        bigint id PK
+        binary public_id UK
+        varchar title
+        varchar slug UK "stable URL identity"
+        varchar summary
+        smallint servings "the divisor for per-serving nutrition"
+        smallint prep_minutes
+        smallint cook_minutes
+        smallint total_minutes "generated STORED, indexable"
+        varchar difficulty "EASY, MEDIUM, HARD"
+        bigint created_by_user_id FK "SET NULL, the recipe outlives the author"
+        varchar status "DRAFT, PUBLISHED, ARCHIVED"
+        datetime published_at
+        bigint version
+    }
+    recipe_ingredients {
+        bigint id PK
+        bigint recipe_id FK
+        smallint line_number "UK with recipe_id, the printed order"
+        bigint ingredient_id FK "culinary identity is required"
+        bigint food_id FK "optional override of the default nutrition row"
+        decimal quantity "null only when unit is null, as in to taste"
+        bigint unit_id FK
+        varchar preparation_note "finely chopped"
+        tinyint is_optional
+        tinyint allow_substitution "the recipe author's veto"
+        varchar section_label "For the marinade"
+    }
+    recipe_steps {
+        bigint recipe_id PK, FK
+        smallint step_number PK
+        varchar instruction
+        smallint duration_minutes
+    }
+    recipe_tag_assignments {
+        bigint recipe_id PK, FK
+        bigint tag_id PK, FK
+    }
+    recipe_meal_slot_types {
+        bigint recipe_id PK, FK
+        bigint meal_slot_type_id PK, FK "which slots this recipe suits"
+    }
+    recipe_nutrition_snapshots {
+        bigint id PK
+        bigint recipe_id FK
+        datetime computed_at
+        int ingredient_revision "what catalog state produced this"
+        decimal completeness_ratio "how much of the recipe had usable data"
+        varchar computation_note
+        tinyint is_current "functional unique index, at most one per recipe"
+    }
+    recipe_nutrition_values {
+        bigint snapshot_id PK, FK
+        bigint nutrient_id PK, FK
+        decimal amount_per_serving
+    }
+
+    measurement_units |o--o{ measurement_units : "base unit of"
+    measurement_units ||--o{ nutrients : "declares the unit of"
+    measurement_units ||--o{ food_servings : "measures"
+    measurement_units ||--o{ ingredient_unit_conversions : "converts from"
+    measurement_units ||--o{ ingredient_unit_conversions : "converts to"
+    measurement_units |o--o{ ingredients : "default unit of"
+    measurement_units |o--o{ recipe_ingredients : "measures"
+    food_categories |o--o{ food_categories : "parent of"
+    food_categories |o--o{ foods : "classifies"
+    food_categories |o--o{ ingredients : "classifies"
+    foods ||--|{ food_nutrients : "has nutrition facts"
+    nutrients ||--o{ food_nutrients : "quantifies"
+    foods ||--o{ food_servings : "defines servings"
+    ingredients ||--o{ ingredient_aliases : "is also called"
+    ingredients ||--o{ ingredient_foods : "maps to"
+    foods ||--o{ ingredient_foods : "supplies nutrition for"
+    foods |o--o{ ingredients : "is the default source for"
+    ingredients ||--o{ ingredient_allergens : "declares"
+    allergens ||--o{ ingredient_allergens : "declared in"
+    ingredients ||--o{ ingredient_unit_conversions : "owns"
+    ingredient_groups ||--o{ ingredient_group_members : "contains"
+    ingredients ||--o{ ingredient_group_members : "belongs to"
+    ingredients ||--o{ ingredient_substitutions : "can be replaced by"
+    ingredients ||--o{ ingredient_substitutions : "can stand in for"
+    recipes ||--|{ recipe_ingredients : "requires"
+    ingredients ||--o{ recipe_ingredients : "is used in"
+    foods |o--o{ recipe_ingredients : "overrides nutrition of"
+    recipes ||--o{ recipe_steps : "is prepared by"
+    recipes ||--o{ recipe_tag_assignments : "is tagged"
+    recipe_tags ||--o{ recipe_tag_assignments : "tags"
+    recipes ||--o{ recipe_meal_slot_types : "suits"
+    meal_slot_types ||--o{ recipe_meal_slot_types : "suited by"
+    recipes ||--o{ recipe_nutrition_snapshots : "has computed nutrition"
+    recipe_nutrition_snapshots ||--|{ recipe_nutrition_values : "holds"
+    nutrients ||--o{ recipe_nutrition_values : "quantifies"

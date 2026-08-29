@@ -1,0 +1,271 @@
+%% High-level entity relationship diagram - AI Smart Meal Planner, Phase P2.
+%% Source of truth: database/schema/V001__initial_schema.sql
+%% This diagram shows the 28 entities that carry the product's core meaning.
+%% The 25 tables omitted here are reference vocabularies, authentication state and
+%% pure association tables; the three domain ERDs listed in docs/diagrams/README.md
+%% together cover all 53 tables, and every table is documented in
+%% docs/database/data-dictionary.md.
+%% Notation: || exactly one, |o zero or one, o{ zero or more, |{ one or more.
+erDiagram
+    users {
+        bigint id PK
+        binary public_id UK "UUID exposed by the REST API"
+        varchar email_normalized UK "generated, lower and trimmed"
+        varchar password_hash "Argon2id or bcrypt encoded string"
+        varchar account_status "PENDING, ACTIVE, LOCKED, DEACTIVATED, ANONYMIZED"
+        bigint version "optimistic lock"
+    }
+    user_profiles {
+        bigint user_id PK, FK "shares the owner's identity"
+        date birth_date
+        decimal height_cm
+        bigint activity_level_id FK
+        bigint nutrition_goal_id FK
+    }
+    user_body_measurements {
+        bigint id PK
+        bigint user_id FK
+        date measured_on "one row per user per day"
+        decimal weight_kg
+        varchar source "USER_ENTERED, IMPORTED, CORRECTED"
+    }
+    user_nutrition_targets {
+        bigint id PK
+        bigint user_id FK
+        date effective_from "dated, never overwritten"
+        date effective_to
+        varchar origin "CALCULATED, USER_OVERRIDE, CLINICAL"
+    }
+    user_nutrition_target_values {
+        bigint target_id PK, FK
+        bigint nutrient_id PK, FK
+        decimal target_amount "in the nutrient's declared unit"
+        tinyint is_hard_limit
+    }
+    nutrients {
+        bigint id PK
+        varchar code UK
+        bigint unit_id FK "the only unit this nutrient is stored in"
+        varchar nutrient_kind "ENERGY, MACRO, VITAMIN, MINERAL, OTHER"
+    }
+    measurement_units {
+        bigint id PK
+        varchar code UK
+        varchar unit_type "MASS, VOLUME, COUNT, ENERGY"
+        bigint base_unit_id FK "self reference to the type's base"
+        decimal factor_to_base_unit
+    }
+    foods {
+        bigint id PK
+        varchar code UK
+        varchar display_name
+        varchar nutrition_basis "PER_100G or PER_100ML"
+        bigint food_category_id FK
+        tinyint is_active "retired, never deleted"
+    }
+    food_nutrients {
+        bigint food_id PK, FK
+        bigint nutrient_id PK, FK
+        decimal amount "per the food's nutrition basis"
+        varchar data_quality
+    }
+    food_servings {
+        bigint id PK
+        bigint food_id FK
+        decimal quantity
+        bigint unit_id FK
+        decimal gram_weight "resolves the serving to mass"
+        tinyint is_default "at most one per food"
+    }
+    ingredients {
+        bigint id PK
+        varchar code UK
+        varchar display_name "culinary identity, not a nutrition row"
+        bigint default_food_id FK
+        bigint default_unit_id FK
+        decimal piece_gram_weight
+    }
+    ingredient_foods {
+        bigint ingredient_id PK, FK
+        bigint food_id PK, FK
+        varchar preparation_state PK "RAW, COOKED, DRIED and so on"
+        decimal yield_factor
+        tinyint is_primary "at most one per ingredient"
+    }
+    ingredient_unit_conversions {
+        bigint id PK
+        bigint ingredient_id FK
+        bigint from_unit_id FK
+        bigint to_unit_id FK
+        decimal to_quantity "absent when genuinely unknown"
+    }
+    ingredient_substitutions {
+        bigint id PK
+        bigint original_ingredient_id FK
+        bigint substitute_ingredient_id FK
+        varchar substitution_context PK "directed, context scoped, not transitive"
+        decimal ratio_numerator
+        decimal ratio_denominator
+        tinyint preserves_allergen_profile
+    }
+    recipes {
+        bigint id PK
+        binary public_id UK
+        varchar slug UK
+        smallint servings
+        smallint total_minutes "generated from prep plus cook"
+        varchar status "DRAFT, PUBLISHED, ARCHIVED"
+    }
+    recipe_ingredients {
+        bigint id PK
+        bigint recipe_id FK
+        smallint line_number "unique within the recipe"
+        bigint ingredient_id FK
+        decimal quantity
+        bigint unit_id FK
+        tinyint allow_substitution
+    }
+    recipe_steps {
+        bigint recipe_id PK, FK
+        smallint step_number PK
+        varchar instruction
+        smallint duration_minutes
+    }
+    recipe_nutrition_snapshots {
+        bigint id PK
+        bigint recipe_id FK
+        datetime computed_at "derived value, dated not live"
+        decimal completeness_ratio
+        tinyint is_current "at most one per recipe"
+    }
+    recipe_nutrition_values {
+        bigint snapshot_id PK, FK
+        bigint nutrient_id PK, FK
+        decimal amount_per_serving
+    }
+    meal_slot_types {
+        bigint id PK
+        varchar code UK "BREAKFAST, LUNCH, DINNER, SNACK and more"
+        smallint display_order
+        tinyint is_main_meal
+    }
+    meal_plans {
+        bigint id PK
+        bigint user_id FK
+        date start_date
+        date end_date
+        smallint day_count "generated, 1 to 31 days"
+        varchar status "DRAFT, ACCEPTED, ACTIVE, COMPLETED, ARCHIVED"
+        bigint source_request_id FK
+    }
+    meal_plan_entries {
+        bigint id PK
+        bigint meal_plan_id FK
+        date plan_date "must fall inside the plan window"
+        bigint meal_slot_type_id FK
+        smallint position_in_slot
+        bigint recipe_id FK "exactly one of recipe or food"
+        bigint food_id FK
+        decimal servings
+        varchar provenance "AI_GENERATED, USER_SELECTED, USER_REPLACED"
+        bigint source_result_id FK
+    }
+    pantry_items {
+        bigint id PK
+        bigint user_id FK
+        bigint ingredient_id FK
+        decimal quantity_remaining
+        bigint unit_id FK
+        date acquired_on
+        date expiry_date "null exactly when the kind is UNKNOWN"
+        varchar expiry_kind "USE_BY, BEST_BEFORE, ESTIMATED, UNKNOWN"
+        varchar expiry_confidence
+        varchar status "AVAILABLE, CONSUMED, DISCARDED, EXPIRED"
+    }
+    pantry_item_events {
+        bigint id PK
+        bigint pantry_item_id FK
+        varchar event_type "ADDED, CONSUMED, ADJUSTED, DISCARDED, EXPIRED"
+        decimal quantity_delta
+        decimal quantity_after
+        bigint meal_plan_entry_id FK "links consumption to a planned meal"
+    }
+    recommendation_requests {
+        bigint id PK
+        binary public_id UK
+        bigint user_id FK
+        varchar request_kind
+        char correlation_id "matches the Java to Python call"
+        char constraints_hash "what the user asked for, hashed"
+        varchar algorithm_version
+        varchar model_identifier
+    }
+    recommendation_results {
+        bigint id PK
+        bigint request_id FK
+        smallint rank_position "unique within the request"
+        bigint recipe_id FK "exactly one of recipe or food"
+        bigint food_id FK
+        decimal total_score
+        varchar user_decision "PENDING, ACCEPTED, REJECTED, IGNORED"
+    }
+    recommendation_result_scores {
+        bigint result_id PK, FK
+        bigint score_component_id PK, FK
+        decimal score_value "validated against the component's scale"
+        decimal weight
+    }
+    notifications {
+        bigint id PK
+        bigint user_id FK
+        bigint notification_type_id FK
+        varchar dedup_key UK "one notification per user per event"
+        varchar status "PENDING, SENT, READ, FAILED, CANCELLED"
+        datetime scheduled_for
+    }
+
+    users ||--o| user_profiles : "has one profile"
+    users ||--o{ user_body_measurements : "records"
+    users ||--o{ user_nutrition_targets : "has dated targets"
+    user_nutrition_targets ||--|{ user_nutrition_target_values : "sets per nutrient"
+    nutrients ||--o{ user_nutrition_target_values : "quantifies"
+    measurement_units ||--o{ nutrients : "declares the unit of"
+    measurement_units ||--o{ measurement_units : "base unit of"
+    measurement_units ||--o{ food_servings : "measures"
+    measurement_units ||--o{ recipe_ingredients : "measures"
+    measurement_units ||--o{ pantry_items : "measures"
+    measurement_units ||--o{ ingredient_unit_conversions : "converts from"
+    measurement_units ||--o{ ingredient_unit_conversions : "converts to"
+    foods ||--o{ food_nutrients : "has nutrition facts"
+    nutrients ||--o{ food_nutrients : "quantifies"
+    foods ||--o{ food_servings : "defines servings"
+    foods |o--o{ ingredients : "default nutrition source for"
+    ingredients ||--o{ ingredient_foods : "maps to nutrition rows"
+    foods ||--o{ ingredient_foods : "is mapped by"
+    ingredients ||--o{ ingredient_unit_conversions : "owns conversions"
+    ingredients ||--o{ ingredient_substitutions : "may be replaced"
+    ingredients ||--o{ ingredient_substitutions : "may replace"
+    ingredients ||--o{ recipe_ingredients : "appears in"
+    recipes ||--|{ recipe_ingredients : "requires"
+    recipes ||--o{ recipe_steps : "is prepared by"
+    recipes ||--o{ recipe_nutrition_snapshots : "has computed nutrition"
+    recipe_nutrition_snapshots ||--|{ recipe_nutrition_values : "holds per nutrient"
+    nutrients ||--o{ recipe_nutrition_values : "quantifies"
+    users ||--o{ meal_plans : "owns"
+    meal_plans ||--o{ meal_plan_entries : "schedules"
+    meal_slot_types ||--o{ meal_plan_entries : "slots"
+    recipes |o--o{ meal_plan_entries : "planned as"
+    foods |o--o{ meal_plan_entries : "planned as"
+    users ||--o{ pantry_items : "stocks"
+    ingredients ||--o{ pantry_items : "identifies"
+    pantry_items ||--|{ pantry_item_events : "quantity history"
+    meal_plan_entries |o--o{ pantry_item_events : "consumed for"
+    users ||--o{ recommendation_requests : "asks for"
+    recommendation_requests ||--o{ recommendation_results : "returned shortlist"
+    recommendation_results ||--o{ recommendation_result_scores : "explained by"
+    recipes |o--o{ recommendation_results : "recommended as"
+    recommendation_requests |o--o{ meal_plans : "generated"
+    recommendation_results |o--o{ meal_plan_entries : "provenance of"
+    users ||--o{ notifications : "receives"
+    pantry_items |o--o{ notifications : "triggers"
+    meal_plans |o--o{ notifications : "triggers"
