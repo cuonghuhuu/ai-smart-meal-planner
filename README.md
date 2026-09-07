@@ -11,7 +11,12 @@ service.
 ## Project documentation
 
 - [Phase P1 system architecture](docs/architecture/README.md)
-- [Source-controlled architecture diagrams](docs/diagrams/README.md)
+- [Phase P2 database design](docs/database/README.md)
+- [Source-controlled architecture and database diagrams](docs/diagrams/README.md)
 
 P1 contains architecture and decision records only; application scaffolding is
 intentionally deferred to later phases.
+
+P2 adds the relational design: documentation under `docs/database/`, the
+versioned MySQL schema and reference seed data under `database/`, and the entity
+relationship diagrams. It is likewise design-only.

@@ -1,0 +1,189 @@
+%% Domain ERD 1 of 3 - identity, authentication, profile and nutrition targets.
+%% Source of truth: database/schema/V001__initial_schema.sql, sections 1-3 plus
+%% the user-owned preference and history tables the migration places later for
+%% foreign-key ordering reasons (user_disliked_ingredients, user_recipe_favorites,
+%% user_notification_preferences, user_account_events).
+%% Every table here is owned by exactly one user row and cascades on deletion,
+%% except the reference vocabularies, which are RESTRICT.
+erDiagram
+    roles {
+        bigint id PK
+        varchar code UK "ROLE_USER, ROLE_ADMIN"
+        varchar name
+        varchar description
+    }
+    users {
+        bigint id PK
+        binary public_id UK "UUID, the only identifier the API exposes"
+        varchar email "as the user typed it"
+        varchar email_normalized UK "generated STORED, lower and trimmed"
+        varchar password_hash "encoded hash only, never plaintext"
+        datetime password_updated_at
+        varchar display_name
+        varchar account_status "PENDING_VERIFICATION, ACTIVE, LOCKED, DEACTIVATED, ANONYMIZED"
+        datetime email_verified_at
+        smallint failed_login_count
+        datetime locked_until
+        datetime last_login_at
+        datetime deactivated_at "stage 1 of account closure"
+        datetime anonymized_at "stage 2, irreversible"
+        varchar time_zone "IANA name, interprets this user's dates"
+        varchar locale
+        bigint version "optimistic lock"
+    }
+    user_roles {
+        bigint user_id PK, FK
+        bigint role_id PK, FK
+        datetime granted_at
+        bigint granted_by FK "SET NULL, the grant record outlives the granter"
+    }
+    user_auth_sessions {
+        bigint id PK
+        bigint user_id FK
+        char refresh_token_hash UK "SHA-256 hex, never the token itself"
+        datetime issued_at
+        datetime expires_at
+        datetime last_used_at
+        datetime revoked_at
+        varchar revocation_reason "LOGOUT, ROTATED, EXPIRED, ADMIN, SECURITY"
+        bigint replaced_by_session_id FK "rotation chain, self reference"
+        varchar client_kind "ANDROID, WEB, OTHER"
+        varbinary ip_address "INET6_ATON form"
+    }
+    user_security_tokens {
+        bigint id PK
+        bigint user_id FK
+        varchar token_kind "EMAIL_VERIFICATION, PASSWORD_RESET"
+        char token_hash UK "SHA-256 hex of a single-use token"
+        datetime issued_at
+        datetime expires_at
+        datetime consumed_at "single use is enforced here"
+    }
+    user_account_events {
+        bigint id PK
+        bigint user_id FK
+        varchar event_type "REGISTERED, VERIFIED, PASSWORD_CHANGED, LOCKED, DEACTIVATED and more"
+        varchar detail
+        varbinary ip_address
+        datetime occurred_at
+    }
+    user_profiles {
+        bigint user_id PK, FK "1:1, the profile has no identity of its own"
+        date birth_date "age is derived, never stored"
+        varchar sex "FEMALE, MALE, OTHER, UNSPECIFIED"
+        decimal height_cm
+        bigint activity_level_id FK
+        bigint nutrition_goal_id FK
+        decimal target_weight_kg
+        decimal weekly_change_kg
+        tinyint household_size
+        smallint max_cook_minutes
+        bigint version
+    }
+    user_body_measurements {
+        bigint id PK
+        bigint user_id FK
+        date measured_on "UK with user_id, one row per day"
+        decimal weight_kg "current weight is the latest row, not a column"
+        decimal body_fat_percent
+        decimal waist_cm
+        varchar source "USER_ENTERED, IMPORTED, CORRECTED"
+    }
+    user_nutrition_targets {
+        bigint id PK
+        bigint user_id FK
+        date effective_from "dated version, superseded not overwritten"
+        date effective_to "null means still in force"
+        varchar origin "CALCULATED, USER_OVERRIDE, CLINICAL_ADVICE"
+        bigint activity_level_id FK "inputs recorded with the output"
+        bigint nutrition_goal_id FK
+        varchar calculation_method "MIFFLIN_ST_JEOR, HARRIS_BENEDICT, MANUAL"
+    }
+    user_nutrition_target_values {
+        bigint target_id PK, FK
+        bigint nutrient_id PK, FK
+        decimal target_amount "in the nutrient's declared unit"
+        decimal min_amount
+        decimal max_amount
+        tinyint is_hard_limit "an allergy-style ceiling, not a nudge"
+    }
+    nutrients {
+        bigint id PK
+        varchar code UK
+        bigint unit_id FK
+        varchar nutrient_kind
+        tinyint is_core
+    }
+    activity_levels {
+        bigint id PK
+        varchar code UK "SEDENTARY to EXTRA_ACTIVE"
+        decimal energy_factor "the PAL multiplier"
+        smallint display_order
+    }
+    nutrition_goals {
+        bigint id PK
+        varchar code UK "LOSE_WEIGHT, MAINTAIN, GAIN_MUSCLE and more"
+        smallint display_order
+    }
+    dietary_preferences {
+        bigint id PK
+        varchar code UK "VEGETARIAN, VEGAN, HALAL and more"
+        tinyint is_exclusionary "a filter, not a preference nudge"
+    }
+    allergens {
+        bigint id PK
+        varchar code UK "the 14 declarable allergen groups"
+        smallint display_order
+    }
+    user_dietary_preferences {
+        bigint user_id PK, FK
+        bigint dietary_preference_id PK, FK
+        datetime created_at
+    }
+    user_allergens {
+        bigint user_id PK, FK
+        bigint allergen_id PK, FK
+        varchar reaction_kind "INTOLERANCE, ALLERGY, SEVERE_ALLERGY"
+        varchar note
+    }
+    user_disliked_ingredients {
+        bigint user_id PK, FK
+        bigint ingredient_id PK, FK "to the ingredient catalog"
+        varchar strength "MILD, STRONG, NEVER"
+    }
+    user_recipe_favorites {
+        bigint user_id PK, FK
+        bigint recipe_id PK, FK "to the recipe catalog"
+        datetime created_at
+    }
+    user_notification_preferences {
+        bigint user_id PK, FK
+        bigint notification_type_id PK, FK "to the notification vocabulary"
+        tinyint is_enabled
+        smallint lead_time_days
+        time preferred_time "wall clock in the user's own time zone"
+    }
+
+    users ||--o{ user_roles : "is granted"
+    roles ||--o{ user_roles : "granted to"
+    users |o--o{ user_roles : "granted by (admin)"
+    users ||--o{ user_auth_sessions : "signs in with"
+    user_auth_sessions |o--o| user_auth_sessions : "rotated into"
+    users ||--o{ user_security_tokens : "is issued"
+    users ||--o{ user_account_events : "accumulates"
+    users ||--o| user_profiles : "described by"
+    users ||--o{ user_body_measurements : "measures"
+    users ||--o{ user_nutrition_targets : "targets over time"
+    user_nutrition_targets ||--|{ user_nutrition_target_values : "specifies"
+    nutrients ||--o{ user_nutrition_target_values : "quantifies"
+    activity_levels ||--o{ user_profiles : "classifies"
+    activity_levels ||--o{ user_nutrition_targets : "was assumed by"
+    nutrition_goals ||--o{ user_profiles : "aims at"
+    nutrition_goals ||--o{ user_nutrition_targets : "was assumed by"
+    users ||--o{ user_dietary_preferences : "declares"
+    dietary_preferences ||--o{ user_dietary_preferences : "declared by"
+    users ||--o{ user_allergens : "declares"
+    allergens ||--o{ user_allergens : "declared by"
+    users ||--o{ user_disliked_ingredients : "avoids"
+    users ||--o{ user_recipe_favorites : "saves"
+    users ||--o{ user_notification_preferences : "configures"
