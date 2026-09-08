@@ -50,3 +50,22 @@ jobs:
       # fails this step, and with it the job and the workflow.
       - name: Run pre-commit hooks
         run: python -m pre_commit run --all-files
+
+  backend:
+    name: Java backend and MySQL integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Java
+        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5.5.0
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: Verify Docker availability
+        run: docker info
+      - name: Compile and run unit and MySQL Testcontainers tests
+        run: mvn --batch-mode --no-transfer-progress -f backend/pom.xml clean verify

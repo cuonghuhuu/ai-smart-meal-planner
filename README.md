@@ -12,6 +12,7 @@ service.
 
 - [Phase P1 system architecture](docs/architecture/README.md)
 - [Phase P2 database design](docs/database/README.md)
+- [Phase P3 backend foundation](backend/README.md)
 - [Source-controlled architecture and database diagrams](docs/diagrams/README.md)
 
 P1 contains architecture and decision records only; application scaffolding is
