@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.smartmealplanner.auth.SecurityConfiguration;
 import com.smartmealplanner.auth.application.EmailVerificationService;
+import com.smartmealplanner.auth.application.LoginService;
 import com.smartmealplanner.auth.application.RegistrationService;
 import com.smartmealplanner.mealplanning.PlanEntryDateRequest;
 
@@ -17,7 +18,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
@@ -25,6 +25,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -69,11 +70,14 @@ class ApiFoundationTest {
     @Autowired
     PasswordEncoder encoder;
 
-    @MockBean
+    @MockitoBean
     RegistrationService registrationService;
 
-    @MockBean
+    @MockitoBean
     EmailVerificationService emailVerificationService;
+
+    @MockitoBean
+    LoginService loginService;
 
     @Test
     void protectsRoutesAndReturnsSafe401()
@@ -394,8 +398,8 @@ class ApiFoundationTest {
     }
 
     /*
-     * Test fixtures only:
-     * no probe/error routes ship in the application.
+     * Test fixtures only.
+     * No probe/error routes ship in the application.
      */
     @RestController
     static class ProbeController {
