@@ -3,10 +3,12 @@ package com.smartmealplanner.auth.web;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Duration;
+import java.util.UUID;
 
 import com.smartmealplanner.auth.application.EmailVerificationService;
 import com.smartmealplanner.auth.application.LoginResult;
 import com.smartmealplanner.auth.application.LoginService;
+import com.smartmealplanner.auth.application.LogoutService;
 import com.smartmealplanner.auth.application.RefreshResult;
 import com.smartmealplanner.auth.application.RefreshRotationService;
 import com.smartmealplanner.auth.application.RegistrationResult;
@@ -23,6 +25,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +45,7 @@ public class AuthController {
     private final EmailVerificationService emailVerificationService;
     private final LoginService loginService;
     private final RefreshRotationService refreshRotationService;
+    private final LogoutService logoutService;
     private final Duration refreshTokenTtl;
 
     public AuthController(
@@ -47,6 +53,7 @@ public class AuthController {
             EmailVerificationService emailVerificationService,
             LoginService loginService,
             RefreshRotationService refreshRotationService,
+            LogoutService logoutService,
 
             @Value(
                     "${app.auth.refresh-token-ttl:PT720H}")
@@ -63,6 +70,9 @@ public class AuthController {
 
         this.refreshRotationService =
                 refreshRotationService;
+
+        this.logoutService =
+                logoutService;
 
         this.refreshTokenTtl =
                 Duration.parse(
@@ -209,6 +219,52 @@ public class AuthController {
                 result.refreshToken().expiresAt());
     }
 
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logout(
+            @RequestBody(required = false)
+            RefreshRequest request,
+            HttpServletRequest servletRequest,
+            HttpServletResponse servletResponse) {
+
+        String webRefreshToken =
+                refreshCookieValue(
+                        servletRequest);
+
+        if (webRefreshToken != null) {
+
+            logoutService.logoutCurrentSession(
+                    webRefreshToken);
+
+            clearRefreshCookie(
+                    servletResponse);
+
+            return;
+        }
+
+        rejectBrowserAndroidTransport(
+                servletRequest);
+
+        String androidRefreshToken =
+                request == null
+                        ? null
+                        : request.refreshToken();
+
+        logoutService.logoutCurrentSession(
+                androidRefreshToken);
+    }
+
+    @PostMapping("/logout-all")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logoutAll(
+            @AuthenticationPrincipal
+            Jwt jwt) {
+
+        logoutService.logoutAll(
+                authenticatedPublicId(
+                        jwt));
+    }
+
     private void writeRefreshCookie(
             HttpServletResponse response,
             String refreshToken) {
@@ -229,6 +285,27 @@ public class AuthController {
         response.addHeader(
                 HttpHeaders.SET_COOKIE,
                 refreshCookie.toString());
+    }
+
+    private static void clearRefreshCookie(
+            HttpServletResponse response) {
+
+        ResponseCookie expiredCookie =
+                ResponseCookie
+                        .from(
+                                REFRESH_COOKIE_NAME,
+                                "")
+                        .httpOnly(true)
+                        .secure(true)
+                        .sameSite("Strict")
+                        .path("/")
+                        .maxAge(
+                                Duration.ZERO)
+                        .build();
+
+        response.addHeader(
+                HttpHeaders.SET_COOKIE,
+                expiredCookie.toString());
     }
 
     private static String refreshCookieValue(
@@ -267,6 +344,27 @@ public class AuthController {
 
             throw new AccessDeniedException(
                     "Browser origin is not allowed");
+        }
+    }
+
+    private static UUID authenticatedPublicId(
+            Jwt jwt) {
+
+        if (jwt == null
+                || jwt.getSubject() == null
+                || jwt.getSubject().isBlank()) {
+
+            throw new BadCredentialsException(
+                    "Access token subject is invalid");
+        }
+
+        try {
+            return UUID.fromString(
+                    jwt.getSubject());
+
+        } catch (IllegalArgumentException exception) {
+            throw new BadCredentialsException(
+                    "Access token subject is invalid");
         }
     }
 

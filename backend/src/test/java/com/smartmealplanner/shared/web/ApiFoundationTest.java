@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.smartmealplanner.auth.SecurityConfiguration;
 import com.smartmealplanner.auth.application.EmailVerificationService;
 import com.smartmealplanner.auth.application.LoginService;
+import com.smartmealplanner.auth.application.LogoutService;
 import com.smartmealplanner.auth.application.RefreshRotationService;
 import com.smartmealplanner.auth.application.RegistrationService;
 import com.smartmealplanner.mealplanning.PlanEntryDateRequest;
@@ -82,6 +83,9 @@ class ApiFoundationTest {
 
     @MockitoBean
     RefreshRotationService refreshRotationService;
+
+    @MockitoBean
+    LogoutService logoutService;
 
     @Test
     void protectsRoutesAndReturnsSafe401()

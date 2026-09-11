@@ -6,6 +6,7 @@ import java.util.List;
 import com.smartmealplanner.shared.web.ApiProblems;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,6 +50,12 @@ public class SecurityConfiguration {
     private static final String REFRESH_PATH =
             "/api/v1/auth/refresh";
 
+    private static final String LOGOUT_PATH =
+            "/api/v1/auth/logout";
+
+    private static final String LOGOUT_ALL_PATH =
+            "/api/v1/auth/logout-all";
+
     @Bean
     SecurityFilterChain securityFilterChain(
             HttpSecurity http,
@@ -57,25 +64,52 @@ public class SecurityConfiguration {
             throws Exception {
 
         RequestMatcher androidRefreshMatcher =
+                cookieLessPostMatcher(
+                        REFRESH_PATH);
+
+        RequestMatcher androidLogoutMatcher =
+                cookieLessPostMatcher(
+                        LOGOUT_PATH);
+
+        RequestMatcher bearerLogoutAllMatcher =
                 request ->
-                        HttpMethod.POST.matches(
-                                request.getMethod())
-                                && REFRESH_PATH.equals(
-                                request.getRequestURI())
-                                && !hasRefreshCookie(
-                                request.getCookies());
+                        matchesPostPath(
+                                request,
+                                LOGOUT_ALL_PATH);
 
         http
                 .cors(Customizer.withDefaults())
 
                 .csrf(csrf -> csrf
+                        /*
+                         * Register, verification and login do not rely on
+                         * an existing browser authentication cookie.
+                         */
                         .ignoringRequestMatchers(
                                 REGISTER_PATH,
                                 VERIFY_EMAIL_PATH,
                                 WEB_LOGIN_PATH,
                                 ANDROID_LOGIN_PATH)
+
+                        /*
+                         * Android refresh/logout sends the opaque refresh
+                         * token explicitly in the request body and therefore
+                         * does not authenticate via a browser cookie.
+                         *
+                         * Web refresh/logout carries the refresh cookie, so
+                         * these matchers deliberately do NOT exempt those
+                         * requests from CSRF protection.
+                         */
                         .ignoringRequestMatchers(
-                                androidRefreshMatcher))
+                                androidRefreshMatcher,
+                                androidLogoutMatcher)
+
+                        /*
+                         * logout-all requires a Bearer access JWT and does
+                         * not rely on cookie authentication.
+                         */
+                        .ignoringRequestMatchers(
+                                bearerLogoutAllMatcher))
 
                 .authorizeHttpRequests(routes -> routes
 
@@ -90,9 +124,14 @@ public class SecurityConfiguration {
                                 VERIFY_EMAIL_PATH,
                                 WEB_LOGIN_PATH,
                                 ANDROID_LOGIN_PATH,
-                                REFRESH_PATH)
+                                REFRESH_PATH,
+                                LOGOUT_PATH)
                         .permitAll()
 
+                        /*
+                         * logout-all intentionally falls through to
+                         * anyRequest().authenticated().
+                         */
                         .requestMatchers(
                                 "/api/v1/admin/**")
                         .hasRole("ADMIN")
@@ -225,6 +264,58 @@ public class SecurityConfiguration {
                 authorities);
 
         return converter;
+    }
+
+    private static RequestMatcher cookieLessPostMatcher(
+            String path) {
+
+        return request ->
+                matchesPostPath(
+                        request,
+                        path)
+                        && !hasRefreshCookie(
+                        request.getCookies());
+    }
+
+    private static boolean matchesPostPath(
+            HttpServletRequest request,
+            String path) {
+
+        return HttpMethod.POST.matches(
+                request.getMethod())
+                && path.equals(
+                applicationPath(
+                        request));
+    }
+
+    /*
+     * Use requestURI rather than servletPath.
+     *
+     * In MockMvc and some servlet dispatch configurations, servletPath can
+     * be empty even when requestURI contains the API path. That caused
+     * cookie-less Android logout and Bearer logout-all to miss their CSRF
+     * exemptions and be rejected as 403 before authentication/controller
+     * processing.
+     */
+    private static String applicationPath(
+            HttpServletRequest request) {
+
+        String requestUri =
+                request.getRequestURI();
+
+        String contextPath =
+                request.getContextPath();
+
+        if (contextPath != null
+                && !contextPath.isEmpty()
+                && requestUri.startsWith(
+                contextPath)) {
+
+            return requestUri.substring(
+                    contextPath.length());
+        }
+
+        return requestUri;
     }
 
     private static boolean hasRefreshCookie(
