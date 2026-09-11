@@ -1,13 +1,16 @@
 package com.smartmealplanner.shared.web;
 
 import com.smartmealplanner.auth.application.EmailAlreadyRegisteredException;
+import com.smartmealplanner.auth.application.InvalidEmailVerificationTokenException;
+
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+
+import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -23,15 +26,21 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @RestControllerAdvice
 @Order(-1)
-public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
+public class ApiExceptionHandler
+        extends ResponseEntityExceptionHandler {
 
     private final ApiProblems problems;
 
-    public ApiExceptionHandler(ApiProblems problems) {
+    public ApiExceptionHandler(
+            ApiProblems problems) {
+
         this.problems = problems;
     }
 
-    /** Keep Spring's request-error status and headers while replacing diagnostic details. */
+    /*
+     * Keep Spring's request-error status and headers while replacing
+     * diagnostic details with the API's safe ProblemDetail body.
+     */
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(
             Exception exception,
@@ -40,23 +49,28 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode statusCode,
             WebRequest request) {
 
-        HttpStatus status = HttpStatus.resolve(statusCode.value());
+        HttpStatus status =
+                HttpStatus.resolve(
+                        statusCode.value());
 
         if (status == null) {
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            status =
+                    HttpStatus.INTERNAL_SERVER_ERROR;
         }
 
         return new ResponseEntity<>(
                 problems.create(
                         status,
-                        ((ServletWebRequest) request).getRequest()),
+                        ((ServletWebRequest) request)
+                                .getRequest()),
                 headers,
                 status);
     }
 
     @ExceptionHandler({
             InvalidRequestException.class,
-            ConstraintViolationException.class
+            ConstraintViolationException.class,
+            InvalidEmailVerificationTokenException.class
     })
     ProblemDetail invalid(
             Exception exception,
@@ -117,8 +131,10 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             Exception exception,
             HttpServletRequest request) {
 
-        // Do not log exception messages:
-        // JDBC/provider messages can contain personal data or SQL.
+        /*
+         * Do not expose or log exception messages here.
+         * JDBC/provider messages can contain personal data or SQL.
+         */
         return problems.create(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 request);

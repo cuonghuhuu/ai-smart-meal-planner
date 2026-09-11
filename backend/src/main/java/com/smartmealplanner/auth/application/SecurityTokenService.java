@@ -8,6 +8,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HexFormat;
+import java.util.Locale;
 
 import org.springframework.stereotype.Service;
 
@@ -20,26 +21,39 @@ import com.smartmealplanner.auth.persistence.UserSecurityTokenRepository;
 public class SecurityTokenService {
 
     private static final int TOKEN_BYTES = 32;
+    private static final int TOKEN_HEX_LENGTH = TOKEN_BYTES * 2;
 
     private final UserSecurityTokenRepository tokens;
     private final SecureRandom secureRandom;
     private final Clock clock;
 
-    public SecurityTokenService(UserSecurityTokenRepository tokens) {
+    public SecurityTokenService(
+            UserSecurityTokenRepository tokens) {
+
         this.tokens = tokens;
         this.secureRandom = new SecureRandom();
         this.clock = Clock.systemUTC();
     }
 
-    public String createEmailVerificationToken(UserAccount account) {
-        byte[] randomBytes = new byte[TOKEN_BYTES];
+    public String createEmailVerificationToken(
+            UserAccount account) {
+
+        byte[] randomBytes =
+                new byte[TOKEN_BYTES];
+
         secureRandom.nextBytes(randomBytes);
 
-        String plaintextToken = HexFormat.of().formatHex(randomBytes);
-        String tokenHash = sha256Hex(plaintextToken);
+        String plaintextToken =
+                HexFormat.of()
+                        .formatHex(randomBytes);
+
+        String tokenHash =
+                hashToken(plaintextToken);
 
         LocalDateTime now =
-                LocalDateTime.ofInstant(clock.instant(), ZoneOffset.UTC);
+                LocalDateTime.ofInstant(
+                        clock.instant(),
+                        ZoneOffset.UTC);
 
         UserSecurityToken token =
                 new UserSecurityToken(
@@ -53,13 +67,48 @@ public class SecurityTokenService {
         return plaintextToken;
     }
 
-    private static String sha256Hex(String value) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+    public String hashToken(
+            String plaintextToken) {
 
-            return HexFormat.of().formatHex(
-                    digest.digest(
-                            value.getBytes(StandardCharsets.UTF_8)));
+        if (plaintextToken == null) {
+            throw new IllegalArgumentException(
+                    "token is required");
+        }
+
+        String normalizedToken =
+                plaintextToken
+                        .trim()
+                        .toLowerCase(Locale.ROOT);
+
+        if (normalizedToken.length()
+                != TOKEN_HEX_LENGTH) {
+
+            throw new IllegalArgumentException(
+                    "token length is invalid");
+        }
+
+        return sha256Hex(normalizedToken);
+    }
+
+    public LocalDateTime nowUtc() {
+        return LocalDateTime.ofInstant(
+                clock.instant(),
+                ZoneOffset.UTC);
+    }
+
+    private static String sha256Hex(
+            String value) {
+
+        try {
+            MessageDigest digest =
+                    MessageDigest.getInstance(
+                            "SHA-256");
+
+            return HexFormat.of()
+                    .formatHex(
+                            digest.digest(
+                                    value.getBytes(
+                                            StandardCharsets.UTF_8)));
 
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException(

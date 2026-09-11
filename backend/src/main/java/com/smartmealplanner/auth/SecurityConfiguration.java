@@ -27,6 +27,9 @@ public class SecurityConfiguration {
     private static final String REGISTER_PATH =
             "/api/v1/auth/register";
 
+    private static final String VERIFY_EMAIL_PATH =
+            "/api/v1/auth/verify-email";
+
     @Bean
     SecurityFilterChain securityFilterChain(
             HttpSecurity http,
@@ -37,15 +40,15 @@ public class SecurityConfiguration {
                 .cors(Customizer.withDefaults())
 
                 /*
-                 * Registration is a public endpoint and does not rely on an
-                 * authenticated browser cookie/session, so CSRF is not
-                 * required for this endpoint.
+                 * Registration and email verification do not rely on
+                 * authenticated browser cookies/sessions.
                  *
-                 * CSRF remains enabled everywhere else.
+                 * CSRF remains enabled for the rest of the application.
                  */
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers(
-                                REGISTER_PATH))
+                                REGISTER_PATH,
+                                VERIFY_EMAIL_PATH))
 
                 .authorizeHttpRequests(routes -> routes
 
@@ -56,7 +59,8 @@ public class SecurityConfiguration {
 
                         .requestMatchers(
                                 HttpMethod.POST,
-                                REGISTER_PATH)
+                                REGISTER_PATH,
+                                VERIFY_EMAIL_PATH)
                         .permitAll()
 
                         .requestMatchers(

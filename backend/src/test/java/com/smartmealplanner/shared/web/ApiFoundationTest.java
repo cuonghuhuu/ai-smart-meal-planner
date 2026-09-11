@@ -3,6 +3,7 @@ package com.smartmealplanner.shared.web;
 import java.util.UUID;
 
 import com.smartmealplanner.auth.SecurityConfiguration;
+import com.smartmealplanner.auth.application.EmailVerificationService;
 import com.smartmealplanner.auth.application.RegistrationService;
 import com.smartmealplanner.mealplanning.PlanEntryDateRequest;
 
@@ -25,16 +26,33 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(properties = "app.cors.allowed-origins=https://planner.example")
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@WebMvcTest(
+        properties =
+                "app.cors.allowed-origins=https://planner.example")
 @ActiveProfiles("test")
 @Import({
         SecurityConfiguration.class,
@@ -51,73 +69,104 @@ class ApiFoundationTest {
     @Autowired
     PasswordEncoder encoder;
 
-    /*
-     * AuthController is now part of the MVC application.
-     * This test is about the shared API/security foundation, not registration,
-     * so its application service is mocked for this MVC slice.
-     */
     @MockBean
     RegistrationService registrationService;
 
+    @MockBean
+    EmailVerificationService emailVerificationService;
+
     @Test
-    void protectsRoutesAndReturnsSafe401() throws Exception {
-        mvc.perform(get("/api/v1/probe"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
-                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
-                .andExpect(header().exists("X-Request-ID"));
+    void protectsRoutesAndReturnsSafe401()
+            throws Exception {
+
+        mvc.perform(
+                        get("/api/v1/probe"))
+                .andExpect(
+                        status().isUnauthorized())
+                .andExpect(
+                        content()
+                                .contentTypeCompatibleWith(
+                                        MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(
+                        jsonPath("$.code")
+                                .value("UNAUTHORIZED"))
+                .andExpect(
+                        header()
+                                .exists("X-Request-ID"));
 
         mvc.perform(
                         get("/api/v1/probe")
                                 .with(user("test")))
-                .andExpect(status().isOk());
+                .andExpect(
+                        status().isOk());
     }
 
     @Test
-    void enforcesAdminRoleAndCsrf() throws Exception {
-        mvc.perform(
-                        get("/api/v1/admin/probe")
-                                .with(user("test")))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+    void enforcesAdminRoleAndCsrf()
+            throws Exception {
 
         mvc.perform(
                         get("/api/v1/admin/probe")
-                                .with(user("test").roles("ADMIN")))
-                .andExpect(status().isOk());
+                                .with(user("test")))
+                .andExpect(
+                        status().isForbidden())
+                .andExpect(
+                        jsonPath("$.code")
+                                .value("FORBIDDEN"));
+
+        mvc.perform(
+                        get("/api/v1/admin/probe")
+                                .with(
+                                        user("test")
+                                                .roles("ADMIN")))
+                .andExpect(
+                        status().isOk());
 
         mvc.perform(
                         post("/api/v1/probe")
                                 .with(user("test"))
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(
+                                        MediaType.APPLICATION_JSON)
                                 .content("{}"))
-                .andExpect(status().isForbidden());
+                .andExpect(
+                        status().isForbidden());
     }
 
     @Test
-    void validatesRequestAndMalformedJson() throws Exception {
-        for (String body : new String[]{
-                "{}",
-                "{",
-                "{\"planDate\":\"not-a-date\"}"
-        }) {
+    void validatesRequestAndMalformedJson()
+            throws Exception {
+
+        for (String body :
+                new String[]{
+                        "{}",
+                        "{",
+                        "{\"planDate\":\"not-a-date\"}"
+                }) {
+
             mvc.perform(
                             post("/api/v1/probe")
                                     .with(user("test"))
                                     .with(csrf())
-                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .contentType(
+                                            MediaType.APPLICATION_JSON)
                                     .content(body))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"));
+                    .andExpect(
+                            status().isBadRequest())
+                    .andExpect(
+                            jsonPath("$.code")
+                                    .value("BAD_REQUEST"));
         }
 
         mvc.perform(
                         post("/api/v1/probe")
                                 .with(user("test"))
                                 .with(csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"planDate\":\"2026-09-01\"}"))
-                .andExpect(status().isOk());
+                                .contentType(
+                                        MediaType.APPLICATION_JSON)
+                                .content(
+                                        "{\"planDate\":\"2026-09-01\"}"))
+                .andExpect(
+                        status().isOk());
     }
 
     @ParameterizedTest
@@ -127,40 +176,68 @@ class ApiFoundationTest {
             "/api/v1/probe/parameter?count=0",
             "/api/v1/probe/header"
     })
-    void frameworkRequestValidationIsSafe400(String path) throws Exception {
+    void frameworkRequestValidationIsSafe400(
+            String path)
+            throws Exception {
+
         mvc.perform(
                         get(path)
                                 .with(user("test")))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
-                .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
-                .andExpect(jsonPath("$.detail").value("The request is invalid."))
-                .andExpect(jsonPath("$.requestId").isString());
+                .andExpect(
+                        status().isBadRequest())
+                .andExpect(
+                        content()
+                                .contentTypeCompatibleWith(
+                                        MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(
+                        jsonPath("$.code")
+                                .value("BAD_REQUEST"))
+                .andExpect(
+                        jsonPath("$.detail")
+                                .value(
+                                        "The request is invalid."))
+                .andExpect(
+                        jsonPath("$.requestId")
+                                .isString());
     }
 
     @Test
-    void preservesMethodAndMediaTypeErrors() throws Exception {
+    void preservesMethodAndMediaTypeErrors()
+            throws Exception {
+
         mvc.perform(
                         delete("/api/v1/probe")
                                 .with(user("test"))
                                 .with(csrf()))
-                .andExpect(status().isMethodNotAllowed())
-                .andExpect(header().exists("Allow"))
-                .andExpect(jsonPath("$.code").value("METHOD_NOT_ALLOWED"));
+                .andExpect(
+                        status().isMethodNotAllowed())
+                .andExpect(
+                        header().exists("Allow"))
+                .andExpect(
+                        jsonPath("$.code")
+                                .value("METHOD_NOT_ALLOWED"));
 
         mvc.perform(
                         post("/api/v1/probe")
                                 .with(user("test"))
                                 .with(csrf())
-                                .contentType(MediaType.TEXT_PLAIN)
-                                .content("private diagnostic"))
-                .andExpect(status().isUnsupportedMediaType())
-                .andExpect(jsonPath("$.code").value("UNSUPPORTED_MEDIA_TYPE"))
+                                .contentType(
+                                        MediaType.TEXT_PLAIN)
+                                .content(
+                                        "private diagnostic"))
+                .andExpect(
+                        status()
+                                .isUnsupportedMediaType())
+                .andExpect(
+                        jsonPath("$.code")
+                                .value(
+                                        "UNSUPPORTED_MEDIA_TYPE"))
                 .andExpect(
                         content().string(
                                 org.hamcrest.Matchers.not(
-                                        org.hamcrest.Matchers.containsString(
-                                                "private diagnostic"))));
+                                        org.hamcrest.Matchers
+                                                .containsString(
+                                                        "private diagnostic"))));
     }
 
     @ParameterizedTest
@@ -177,51 +254,82 @@ class ApiFoundationTest {
             String name)
             throws Exception {
 
-        String id = UUID.randomUUID().toString();
+        String id =
+                UUID.randomUUID()
+                        .toString();
 
         mvc.perform(
-                        get("/api/v1/probe/error/" + code)
+                        get(
+                                "/api/v1/probe/error/"
+                                        + code)
                                 .with(user("test"))
-                                .header("X-Request-ID", id))
-                .andExpect(status().is(code))
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
-                .andExpect(jsonPath("$.code").value(name))
-                .andExpect(jsonPath("$.requestId").value(id))
-                .andExpect(header().string("X-Request-ID", id))
+                                .header(
+                                        "X-Request-ID",
+                                        id))
+                .andExpect(
+                        status().is(code))
+                .andExpect(
+                        content()
+                                .contentTypeCompatibleWith(
+                                        MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(
+                        jsonPath("$.code")
+                                .value(name))
+                .andExpect(
+                        jsonPath("$.requestId")
+                                .value(id))
+                .andExpect(
+                        header()
+                                .string(
+                                        "X-Request-ID",
+                                        id))
                 .andExpect(
                         content().string(
                                 org.hamcrest.Matchers.not(
-                                        org.hamcrest.Matchers.containsString(
-                                                "private diagnostic"))));
+                                        org.hamcrest.Matchers
+                                                .containsString(
+                                                        "private diagnostic"))));
     }
 
     @Test
-    void unknownAuthenticatedRouteIs404() throws Exception {
+    void unknownAuthenticatedRouteIs404()
+            throws Exception {
+
         mvc.perform(
                         get("/api/v1/absent")
                                 .with(user("test")))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("NOT_FOUND"));
+                .andExpect(
+                        status().isNotFound())
+                .andExpect(
+                        jsonPath("$.code")
+                                .value("NOT_FOUND"));
     }
 
     @Test
-    void replacesUnsafeCorrelationId() throws Exception {
-        var response = mvc.perform(
-                        get("/api/v1/probe")
-                                .header(
-                                        "X-Request-ID",
-                                        "untrusted value"))
-                .andReturn()
-                .getResponse();
+    void replacesUnsafeCorrelationId()
+            throws Exception {
+
+        var response =
+                mvc.perform(
+                                get("/api/v1/probe")
+                                        .header(
+                                                "X-Request-ID",
+                                                "untrusted value"))
+                        .andReturn()
+                        .getResponse();
 
         assertThatCode(
-                () -> UUID.fromString(
-                        response.getHeader("X-Request-ID")))
+                () ->
+                        UUID.fromString(
+                                response.getHeader(
+                                        "X-Request-ID")))
                 .doesNotThrowAnyException();
     }
 
     @Test
-    void allowsOnlyConfiguredCorsOrigin() throws Exception {
+    void allowsOnlyConfiguredCorsOrigin()
+            throws Exception {
+
         mvc.perform(
                         options("/api/v1/probe")
                                 .header(
@@ -230,7 +338,8 @@ class ApiFoundationTest {
                                 .header(
                                         "Access-Control-Request-Method",
                                         "POST"))
-                .andExpect(status().isOk())
+                .andExpect(
+                        status().isOk())
                 .andExpect(
                         header().string(
                                 "Access-Control-Allow-Origin",
@@ -244,25 +353,31 @@ class ApiFoundationTest {
                                 .header(
                                         "Access-Control-Request-Method",
                                         "POST"))
-                .andExpect(status().isForbidden())
                 .andExpect(
-                        header().doesNotExist(
-                                "Access-Control-Allow-Origin"));
+                        status().isForbidden())
+                .andExpect(
+                        header()
+                                .doesNotExist(
+                                        "Access-Control-Allow-Origin"));
     }
 
     @Test
     void passwordEncodingUsesSaltedStandardEncoder() {
+
         String disposable =
-                UUID.randomUUID().toString();
+                UUID.randomUUID()
+                        .toString();
 
         String first =
-                encoder.encode(disposable);
+                encoder.encode(
+                        disposable);
 
         assertThat(first)
                 .startsWith("{bcrypt}")
                 .isNotEqualTo(disposable)
                 .isNotEqualTo(
-                        encoder.encode(disposable));
+                        encoder.encode(
+                                disposable));
 
         assertThat(
                 encoder.matches(
@@ -272,12 +387,16 @@ class ApiFoundationTest {
 
         assertThat(
                 encoder.matches(
-                        UUID.randomUUID().toString(),
+                        UUID.randomUUID()
+                                .toString(),
                         first))
                 .isFalse();
     }
 
-    /** Test fixtures only: no probe/error routes ship in the application. */
+    /*
+     * Test fixtures only:
+     * no probe/error routes ship in the application.
+     */
     @RestController
     static class ProbeController {
 
@@ -296,25 +415,29 @@ class ApiFoundationTest {
                 PlanEntryDateRequest request) {
         }
 
-        @GetMapping("/api/v1/probe/parameter")
+        @GetMapping(
+                "/api/v1/probe/parameter")
         void parameter(
                 @RequestParam
                 @Min(1)
                 int count) {
         }
 
-        @GetMapping("/api/v1/probe/header")
+        @GetMapping(
+                "/api/v1/probe/header")
         void header(
                 @RequestHeader("X-Probe")
                 String value) {
         }
 
-        @GetMapping("/api/v1/probe/error/{status}")
+        @GetMapping(
+                "/api/v1/probe/error/{status}")
         void error(
                 @PathVariable
                 int status) {
 
             throw switch (status) {
+
                 case 400 ->
                         new InvalidRequestException();
 
