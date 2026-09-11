@@ -3,6 +3,7 @@ package com.smartmealplanner.shared.web;
 import java.util.UUID;
 
 import com.smartmealplanner.auth.SecurityConfiguration;
+import com.smartmealplanner.auth.application.CurrentUserService;
 import com.smartmealplanner.auth.application.EmailVerificationService;
 import com.smartmealplanner.auth.application.LoginService;
 import com.smartmealplanner.auth.application.LogoutService;
@@ -74,6 +75,9 @@ class ApiFoundationTest {
 
     @MockitoBean
     RegistrationService registrationService;
+
+    @MockitoBean
+    CurrentUserService currentUserService;
 
     @MockitoBean
     EmailVerificationService emailVerificationService;

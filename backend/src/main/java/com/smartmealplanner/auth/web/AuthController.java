@@ -5,6 +5,8 @@ import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.UUID;
 
+import com.smartmealplanner.auth.application.CurrentUserResult;
+import com.smartmealplanner.auth.application.CurrentUserService;
 import com.smartmealplanner.auth.application.EmailVerificationService;
 import com.smartmealplanner.auth.application.LoginResult;
 import com.smartmealplanner.auth.application.LoginService;
@@ -28,6 +30,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +45,7 @@ public class AuthController {
             "__Host-smartmeal_refresh";
 
     private final RegistrationService registrationService;
+    private final CurrentUserService currentUserService;
     private final EmailVerificationService emailVerificationService;
     private final LoginService loginService;
     private final RefreshRotationService refreshRotationService;
@@ -50,6 +54,7 @@ public class AuthController {
 
     public AuthController(
             RegistrationService registrationService,
+            CurrentUserService currentUserService,
             EmailVerificationService emailVerificationService,
             LoginService loginService,
             RefreshRotationService refreshRotationService,
@@ -61,6 +66,9 @@ public class AuthController {
 
         this.registrationService =
                 registrationService;
+
+        this.currentUserService =
+                currentUserService;
 
         this.emailVerificationService =
                 emailVerificationService;
@@ -77,6 +85,22 @@ public class AuthController {
         this.refreshTokenTtl =
                 Duration.parse(
                         refreshTokenTtl);
+    }
+
+    @GetMapping("/me")
+    public MeResponse me(
+            @AuthenticationPrincipal
+            Jwt jwt) {
+
+        CurrentUserResult result =
+                currentUserService.getCurrentUser(
+                        authenticatedPublicId(
+                                jwt));
+
+        return new MeResponse(
+                result.publicId(),
+                result.email(),
+                result.roles());
     }
 
     @PostMapping("/register")
