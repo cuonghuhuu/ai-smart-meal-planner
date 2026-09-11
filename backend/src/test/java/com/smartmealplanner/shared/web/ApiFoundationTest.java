@@ -7,8 +7,10 @@ import com.smartmealplanner.auth.application.CurrentUserService;
 import com.smartmealplanner.auth.application.EmailVerificationService;
 import com.smartmealplanner.auth.application.LoginService;
 import com.smartmealplanner.auth.application.LogoutService;
+import com.smartmealplanner.auth.application.PasswordResetService;
 import com.smartmealplanner.auth.application.RefreshRotationService;
 import com.smartmealplanner.auth.application.RegistrationService;
+import com.smartmealplanner.auth.application.VerificationResendService;
 import com.smartmealplanner.mealplanning.PlanEntryDateRequest;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -90,6 +92,12 @@ class ApiFoundationTest {
 
     @MockitoBean
     LogoutService logoutService;
+
+    @MockitoBean
+    VerificationResendService verificationResendService;
+
+    @MockitoBean
+    PasswordResetService passwordResetService;
 
     @Test
     void protectsRoutesAndReturnsSafe401()

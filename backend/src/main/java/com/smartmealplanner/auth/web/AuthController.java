@@ -11,10 +11,12 @@ import com.smartmealplanner.auth.application.EmailVerificationService;
 import com.smartmealplanner.auth.application.LoginResult;
 import com.smartmealplanner.auth.application.LoginService;
 import com.smartmealplanner.auth.application.LogoutService;
+import com.smartmealplanner.auth.application.PasswordResetService;
 import com.smartmealplanner.auth.application.RefreshResult;
 import com.smartmealplanner.auth.application.RefreshRotationService;
 import com.smartmealplanner.auth.application.RegistrationResult;
 import com.smartmealplanner.auth.application.RegistrationService;
+import com.smartmealplanner.auth.application.VerificationResendService;
 import com.smartmealplanner.auth.persistence.ClientKind;
 
 import jakarta.servlet.http.Cookie;
@@ -50,6 +52,8 @@ public class AuthController {
     private final LoginService loginService;
     private final RefreshRotationService refreshRotationService;
     private final LogoutService logoutService;
+    private final VerificationResendService verificationResendService;
+    private final PasswordResetService passwordResetService;
     private final Duration refreshTokenTtl;
 
     public AuthController(
@@ -59,6 +63,8 @@ public class AuthController {
             LoginService loginService,
             RefreshRotationService refreshRotationService,
             LogoutService logoutService,
+            VerificationResendService verificationResendService,
+            PasswordResetService passwordResetService,
 
             @Value(
                     "${app.auth.refresh-token-ttl:PT720H}")
@@ -81,6 +87,12 @@ public class AuthController {
 
         this.logoutService =
                 logoutService;
+
+        this.verificationResendService =
+                verificationResendService;
+
+        this.passwordResetService =
+                passwordResetService;
 
         this.refreshTokenTtl =
                 Duration.parse(
@@ -130,6 +142,45 @@ public class AuthController {
 
         emailVerificationService.verify(
                 request.token());
+    }
+
+    @PostMapping("/resend-verification")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void resendVerification(
+            @Valid
+            @RequestBody
+            EmailRequest request) {
+
+        verificationResendService.resend(
+                request.email());
+    }
+
+    @PostMapping("/forgot-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void forgotPassword(
+            @Valid
+            @RequestBody
+            EmailRequest request) {
+
+        /*
+         * Deliberately ignore whether a matching active account exists.
+         * The HTTP response is always identical for syntactically valid
+         * requests, preventing account enumeration.
+         */
+        passwordResetService.requestReset(
+                request.email());
+    }
+
+    @PostMapping("/reset-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void resetPassword(
+            @Valid
+            @RequestBody
+            ResetPasswordRequest request) {
+
+        passwordResetService.resetPassword(
+                request.token(),
+                request.password());
     }
 
     @PostMapping("/login/web")

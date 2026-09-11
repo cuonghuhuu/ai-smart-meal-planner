@@ -2,6 +2,8 @@ package com.smartmealplanner.shared.web;
 
 import com.smartmealplanner.auth.application.EmailAlreadyRegisteredException;
 import com.smartmealplanner.auth.application.InvalidEmailVerificationTokenException;
+import com.smartmealplanner.auth.application.InvalidPasswordException;
+import com.smartmealplanner.auth.application.InvalidPasswordResetTokenException;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.OptimisticLockException;
@@ -37,10 +39,6 @@ public class ApiExceptionHandler
         this.problems = problems;
     }
 
-    /*
-     * Keep Spring's request-error status and headers while replacing
-     * diagnostic details with the API's safe ProblemDetail body.
-     */
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(
             Exception exception,
@@ -70,7 +68,9 @@ public class ApiExceptionHandler
     @ExceptionHandler({
             InvalidRequestException.class,
             ConstraintViolationException.class,
-            InvalidEmailVerificationTokenException.class
+            InvalidEmailVerificationTokenException.class,
+            InvalidPasswordResetTokenException.class,
+            InvalidPasswordException.class
     })
     ProblemDetail invalid(
             Exception exception,
@@ -131,10 +131,6 @@ public class ApiExceptionHandler
             Exception exception,
             HttpServletRequest request) {
 
-        /*
-         * Do not expose or log exception messages here.
-         * JDBC/provider messages can contain personal data or SQL.
-         */
         return problems.create(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 request);

@@ -1,5 +1,7 @@
 package com.smartmealplanner.auth.persistence;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import jakarta.persistence.LockModeType;
@@ -35,4 +37,32 @@ public interface UserSecurityTokenRepository
 
             @Param("tokenKind")
             SecurityTokenKind tokenKind);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select token
+            from UserSecurityToken token
+            where token.user.id = :userId
+              and token.tokenKind = :tokenKind
+              and token.consumedAt is null
+            order by token.id
+            """)
+    List<UserSecurityToken> findOutstandingByUserIdAndKindForUpdate(
+            @Param("userId")
+            Long userId,
+
+            @Param("tokenKind")
+            SecurityTokenKind tokenKind);
+
+    /*
+     * user_security_tokens.issued_at is populated by MySQL with
+     * CURRENT_TIMESTAMP(6). Expiration must therefore be calculated from
+     * the database clock as well, otherwise a JVM/database timezone
+     * difference can make a short-lived token appear to expire before it
+     * was issued and violate ck_user_security_tokens_expiry.
+     */
+    @Query(
+            value = "select CURRENT_TIMESTAMP(6)",
+            nativeQuery = true)
+    LocalDateTime currentDatabaseTime();
 }

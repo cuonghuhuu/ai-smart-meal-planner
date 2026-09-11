@@ -41,6 +41,15 @@ public class SecurityConfiguration {
     private static final String VERIFY_EMAIL_PATH =
             "/api/v1/auth/verify-email";
 
+    private static final String RESEND_VERIFICATION_PATH =
+            "/api/v1/auth/resend-verification";
+
+    private static final String FORGOT_PASSWORD_PATH =
+            "/api/v1/auth/forgot-password";
+
+    private static final String RESET_PASSWORD_PATH =
+            "/api/v1/auth/reset-password";
+
     private static final String WEB_LOGIN_PATH =
             "/api/v1/auth/login/web";
 
@@ -88,6 +97,9 @@ public class SecurityConfiguration {
                         .ignoringRequestMatchers(
                                 REGISTER_PATH,
                                 VERIFY_EMAIL_PATH,
+                                RESEND_VERIFICATION_PATH,
+                                FORGOT_PASSWORD_PATH,
+                                RESET_PASSWORD_PATH,
                                 WEB_LOGIN_PATH,
                                 ANDROID_LOGIN_PATH)
 
@@ -122,6 +134,9 @@ public class SecurityConfiguration {
                                 HttpMethod.POST,
                                 REGISTER_PATH,
                                 VERIFY_EMAIL_PATH,
+                                RESEND_VERIFICATION_PATH,
+                                FORGOT_PASSWORD_PATH,
+                                RESET_PASSWORD_PATH,
                                 WEB_LOGIN_PATH,
                                 ANDROID_LOGIN_PATH,
                                 REFRESH_PATH,

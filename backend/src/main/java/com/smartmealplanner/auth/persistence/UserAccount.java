@@ -133,10 +133,12 @@ public class UserAccount {
             String displayName) {
 
         this.publicId =
-                uuidToBytes(UUID.randomUUID());
+                uuidToBytes(
+                        UUID.randomUUID());
 
         this.email =
-                normalizeEmail(email);
+                normalizeEmail(
+                        email);
 
         this.passwordHash =
                 requireText(
@@ -165,7 +167,8 @@ public class UserAccount {
 
     public UUID publicId() {
         ByteBuffer bytes =
-                ByteBuffer.wrap(publicId);
+                ByteBuffer.wrap(
+                        publicId);
 
         return new UUID(
                 bytes.getLong(),
@@ -182,6 +185,10 @@ public class UserAccount {
 
     public String passwordHash() {
         return passwordHash;
+    }
+
+    public LocalDateTime passwordUpdatedAt() {
+        return passwordUpdatedAt;
     }
 
     public String displayName() {
@@ -247,6 +254,25 @@ public class UserAccount {
                 AccountStatus.ACTIVE;
     }
 
+    public void changePassword(
+            String newPasswordHash,
+            LocalDateTime changedAt) {
+
+        if (changedAt == null) {
+            throw new IllegalArgumentException(
+                    "changedAt is required");
+        }
+
+        this.passwordHash =
+                requireText(
+                        newPasswordHash,
+                        255,
+                        "passwordHash");
+
+        this.passwordUpdatedAt =
+                changedAt;
+    }
+
     private static String normalizeEmail(
             String value) {
 
@@ -255,7 +281,8 @@ public class UserAccount {
                 320,
                 "email")
                 .trim()
-                .toLowerCase(Locale.ROOT);
+                .toLowerCase(
+                        Locale.ROOT);
     }
 
     private static String requireText(
