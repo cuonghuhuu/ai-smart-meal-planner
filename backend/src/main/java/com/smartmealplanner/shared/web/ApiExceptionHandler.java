@@ -1,5 +1,6 @@
 package com.smartmealplanner.shared.web;
 
+import com.smartmealplanner.auth.application.EmailAlreadyRegisteredException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +24,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestControllerAdvice
 @Order(-1)
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
+
     private final ApiProblems problems;
 
     public ApiExceptionHandler(ApiProblems problems) {
@@ -31,45 +33,94 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     /** Keep Spring's request-error status and headers while replacing diagnostic details. */
     @Override
-    protected ResponseEntity<Object> handleExceptionInternal(Exception exception, Object body,
-            HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
+    protected ResponseEntity<Object> handleExceptionInternal(
+            Exception exception,
+            Object body,
+            HttpHeaders headers,
+            HttpStatusCode statusCode,
+            WebRequest request) {
+
         HttpStatus status = HttpStatus.resolve(statusCode.value());
+
         if (status == null) {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
         }
-        return new ResponseEntity<>(problems.create(status,
-                ((ServletWebRequest) request).getRequest()), headers, status);
+
+        return new ResponseEntity<>(
+                problems.create(
+                        status,
+                        ((ServletWebRequest) request).getRequest()),
+                headers,
+                status);
     }
 
-    @ExceptionHandler({InvalidRequestException.class, ConstraintViolationException.class})
-    ProblemDetail invalid(Exception exception, HttpServletRequest request) {
-        return problems.create(HttpStatus.BAD_REQUEST, request);
+    @ExceptionHandler({
+            InvalidRequestException.class,
+            ConstraintViolationException.class
+    })
+    ProblemDetail invalid(
+            Exception exception,
+            HttpServletRequest request) {
+
+        return problems.create(
+                HttpStatus.BAD_REQUEST,
+                request);
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    ProblemDetail unauthenticated(Exception exception, HttpServletRequest request) {
-        return problems.create(HttpStatus.UNAUTHORIZED, request);
+    ProblemDetail unauthenticated(
+            Exception exception,
+            HttpServletRequest request) {
+
+        return problems.create(
+                HttpStatus.UNAUTHORIZED,
+                request);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    ProblemDetail forbidden(Exception exception, HttpServletRequest request) {
-        return problems.create(HttpStatus.FORBIDDEN, request);
+    ProblemDetail forbidden(
+            Exception exception,
+            HttpServletRequest request) {
+
+        return problems.create(
+                HttpStatus.FORBIDDEN,
+                request);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    ProblemDetail missing(Exception exception, HttpServletRequest request) {
-        return problems.create(HttpStatus.NOT_FOUND, request);
+    ProblemDetail missing(
+            Exception exception,
+            HttpServletRequest request) {
+
+        return problems.create(
+                HttpStatus.NOT_FOUND,
+                request);
     }
 
-    @ExceptionHandler({DataIntegrityViolationException.class, OptimisticLockingFailureException.class,
-            OptimisticLockException.class})
-    ProblemDetail conflict(Exception exception, HttpServletRequest request) {
-        return problems.create(HttpStatus.CONFLICT, request);
+    @ExceptionHandler({
+            EmailAlreadyRegisteredException.class,
+            DataIntegrityViolationException.class,
+            OptimisticLockingFailureException.class,
+            OptimisticLockException.class
+    })
+    ProblemDetail conflict(
+            Exception exception,
+            HttpServletRequest request) {
+
+        return problems.create(
+                HttpStatus.CONFLICT,
+                request);
     }
 
     @ExceptionHandler(Exception.class)
-    ProblemDetail unexpected(Exception exception, HttpServletRequest request) {
-        // Do not log exception messages: JDBC/provider messages can contain personal data or SQL.
-        return problems.create(HttpStatus.INTERNAL_SERVER_ERROR, request);
+    ProblemDetail unexpected(
+            Exception exception,
+            HttpServletRequest request) {
+
+        // Do not log exception messages:
+        // JDBC/provider messages can contain personal data or SQL.
+        return problems.create(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                request);
     }
 }
