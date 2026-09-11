@@ -63,6 +63,21 @@ public class RefreshTokenService {
             byte[] ipAddress,
             String userAgent) {
 
+        return createSession(
+                account,
+                clientKind,
+                ipAddress,
+                userAgent)
+                .refreshToken();
+    }
+
+    @Transactional
+    public CreatedRefreshSession createSession(
+            UserAccount account,
+            ClientKind clientKind,
+            byte[] ipAddress,
+            String userAgent) {
+
         if (account == null) {
             throw new IllegalArgumentException(
                     "account is required");
@@ -73,6 +88,13 @@ public class RefreshTokenService {
 
             throw new IllegalStateException(
                     "Refresh tokens can only be issued to active accounts");
+        }
+
+        if (clientKind == null
+                || clientKind == ClientKind.UNKNOWN) {
+
+            throw new IllegalArgumentException(
+                    "Supported client kind is required");
         }
 
         validateIpAddress(
@@ -115,12 +137,15 @@ public class RefreshTokenService {
                         ipAddress,
                         userAgent);
 
-        sessions.save(
-                session);
+        session =
+                sessions.saveAndFlush(
+                        session);
 
-        return new IssuedRefreshToken(
-                plaintextToken,
-                expiresAt);
+        return new CreatedRefreshSession(
+                session,
+                new IssuedRefreshToken(
+                        plaintextToken,
+                        expiresAt));
     }
 
     public String hashToken(
@@ -135,6 +160,13 @@ public class RefreshTokenService {
 
         return sha256Hex(
                 plaintextToken);
+    }
+
+    public LocalDateTime nowUtc() {
+
+        return LocalDateTime.ofInstant(
+                clock.instant(),
+                ZoneOffset.UTC);
     }
 
     private static String sha256Hex(

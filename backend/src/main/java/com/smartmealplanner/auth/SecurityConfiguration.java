@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.smartmealplanner.shared.web.ApiProblems;
 
+import jakarta.servlet.http.Cookie;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +22,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -27,6 +30,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfiguration {
+
+    private static final String REFRESH_COOKIE_NAME =
+            "__Host-smartmeal_refresh";
 
     private static final String REGISTER_PATH =
             "/api/v1/auth/register";
@@ -40,12 +46,24 @@ public class SecurityConfiguration {
     private static final String ANDROID_LOGIN_PATH =
             "/api/v1/auth/login/android";
 
+    private static final String REFRESH_PATH =
+            "/api/v1/auth/refresh";
+
     @Bean
     SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             ApiProblems problems,
             ObjectProvider<JwtDecoder> jwtDecoderProvider)
             throws Exception {
+
+        RequestMatcher androidRefreshMatcher =
+                request ->
+                        HttpMethod.POST.matches(
+                                request.getMethod())
+                                && REFRESH_PATH.equals(
+                                request.getRequestURI())
+                                && !hasRefreshCookie(
+                                request.getCookies());
 
         http
                 .cors(Customizer.withDefaults())
@@ -55,7 +73,9 @@ public class SecurityConfiguration {
                                 REGISTER_PATH,
                                 VERIFY_EMAIL_PATH,
                                 WEB_LOGIN_PATH,
-                                ANDROID_LOGIN_PATH))
+                                ANDROID_LOGIN_PATH)
+                        .ignoringRequestMatchers(
+                                androidRefreshMatcher))
 
                 .authorizeHttpRequests(routes -> routes
 
@@ -69,7 +89,8 @@ public class SecurityConfiguration {
                                 REGISTER_PATH,
                                 VERIFY_EMAIL_PATH,
                                 WEB_LOGIN_PATH,
-                                ANDROID_LOGIN_PATH)
+                                ANDROID_LOGIN_PATH,
+                                REFRESH_PATH)
                         .permitAll()
 
                         .requestMatchers(
@@ -95,16 +116,6 @@ public class SecurityConfiguration {
                                                 request,
                                                 response)));
 
-        /*
-         * Full application contexts contain JwtDecoder through
-         * JwtConfiguration.
-         *
-         * WebMvc slice tests intentionally do not load that configuration,
-         * so Bearer support is enabled whenever JwtDecoder is available.
-         *
-         * Production startup still fails in JwtConfiguration if signing
-         * keys are not configured.
-         */
         JwtDecoder jwtDecoder =
                 jwtDecoderProvider.getIfAvailable();
 
@@ -201,13 +212,6 @@ public class SecurityConfiguration {
         JwtGrantedAuthoritiesConverter authorities =
                 new JwtGrantedAuthoritiesConverter();
 
-        /*
-         * AccessTokenService stores authorities as:
-         *
-         * roles = ["ROLE_USER", "ROLE_ADMIN"]
-         *
-         * Do not add another prefix here.
-         */
         authorities.setAuthoritiesClaimName(
                 "roles");
 
@@ -221,5 +225,24 @@ public class SecurityConfiguration {
                 authorities);
 
         return converter;
+    }
+
+    private static boolean hasRefreshCookie(
+            Cookie[] cookies) {
+
+        if (cookies == null) {
+            return false;
+        }
+
+        for (Cookie cookie : cookies) {
+
+            if (REFRESH_COOKIE_NAME.equals(
+                    cookie.getName())) {
+
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -7,10 +7,13 @@ import java.time.Duration;
 import com.smartmealplanner.auth.application.EmailVerificationService;
 import com.smartmealplanner.auth.application.LoginResult;
 import com.smartmealplanner.auth.application.LoginService;
+import com.smartmealplanner.auth.application.RefreshResult;
+import com.smartmealplanner.auth.application.RefreshRotationService;
 import com.smartmealplanner.auth.application.RegistrationResult;
 import com.smartmealplanner.auth.application.RegistrationService;
 import com.smartmealplanner.auth.persistence.ClientKind;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -36,12 +39,14 @@ public class AuthController {
     private final RegistrationService registrationService;
     private final EmailVerificationService emailVerificationService;
     private final LoginService loginService;
+    private final RefreshRotationService refreshRotationService;
     private final Duration refreshTokenTtl;
 
     public AuthController(
             RegistrationService registrationService,
             EmailVerificationService emailVerificationService,
             LoginService loginService,
+            RefreshRotationService refreshRotationService,
 
             @Value(
                     "${app.auth.refresh-token-ttl:PT720H}")
@@ -55,6 +60,9 @@ public class AuthController {
 
         this.loginService =
                 loginService;
+
+        this.refreshRotationService =
+                refreshRotationService;
 
         this.refreshTokenTtl =
                 Duration.parse(
@@ -107,32 +115,15 @@ public class AuthController {
                         servletRequest.getHeader(
                                 HttpHeaders.USER_AGENT));
 
-        ResponseCookie refreshCookie =
-                ResponseCookie
-                        .from(
-                                REFRESH_COOKIE_NAME,
-                                result.refreshToken()
-                                        .token())
-                        .httpOnly(true)
-                        .secure(true)
-                        .sameSite("Strict")
-                        .path("/")
-                        .maxAge(
-                                refreshTokenTtl)
-                        .build();
-
-        servletResponse.addHeader(
-                HttpHeaders.SET_COOKIE,
-                refreshCookie.toString());
+        writeRefreshCookie(
+                servletResponse,
+                result.refreshToken().token());
 
         return new WebLoginResponse(
                 "Bearer",
-                result.accessToken()
-                        .token(),
-                result.accessToken()
-                        .expiresAt(),
-                result.refreshToken()
-                        .expiresAt());
+                result.accessToken().token(),
+                result.accessToken().expiresAt(),
+                result.refreshToken().expiresAt());
     }
 
     @PostMapping("/login/android")
@@ -142,18 +133,8 @@ public class AuthController {
             LoginRequest request,
             HttpServletRequest servletRequest) {
 
-        /*
-         * Browser JavaScript must not use the Android transport to obtain
-         * a long-lived refresh token in a readable JSON response.
-         *
-         * Native Android HTTP clients normally do not send Origin.
-         */
-        if (servletRequest.getHeader(
-                HttpHeaders.ORIGIN) != null) {
-
-            throw new AccessDeniedException(
-                    "Browser origin is not allowed");
-        }
+        rejectBrowserAndroidTransport(
+                servletRequest);
 
         LoginResult result =
                 loginService.login(
@@ -166,14 +147,127 @@ public class AuthController {
 
         return new AndroidLoginResponse(
                 "Bearer",
-                result.accessToken()
-                        .token(),
-                result.accessToken()
-                        .expiresAt(),
-                result.refreshToken()
-                        .token(),
-                result.refreshToken()
-                        .expiresAt());
+                result.accessToken().token(),
+                result.accessToken().expiresAt(),
+                result.refreshToken().token(),
+                result.refreshToken().expiresAt());
+    }
+
+    @PostMapping("/refresh")
+    public Object refresh(
+            @RequestBody(required = false)
+            RefreshRequest request,
+            HttpServletRequest servletRequest,
+            HttpServletResponse servletResponse) {
+
+        String webRefreshToken =
+                refreshCookieValue(
+                        servletRequest);
+
+        if (webRefreshToken != null) {
+
+            RefreshResult result =
+                    refreshRotationService.rotate(
+                            webRefreshToken,
+                            ClientKind.WEB,
+                            remoteAddress(servletRequest),
+                            servletRequest.getHeader(
+                                    HttpHeaders.USER_AGENT));
+
+            writeRefreshCookie(
+                    servletResponse,
+                    result.refreshToken().token());
+
+            return new WebRefreshResponse(
+                    "Bearer",
+                    result.accessToken().token(),
+                    result.accessToken().expiresAt(),
+                    result.refreshToken().expiresAt());
+        }
+
+        rejectBrowserAndroidTransport(
+                servletRequest);
+
+        String androidRefreshToken =
+                request == null
+                        ? null
+                        : request.refreshToken();
+
+        RefreshResult result =
+                refreshRotationService.rotate(
+                        androidRefreshToken,
+                        ClientKind.ANDROID,
+                        remoteAddress(servletRequest),
+                        servletRequest.getHeader(
+                                HttpHeaders.USER_AGENT));
+
+        return new AndroidRefreshResponse(
+                "Bearer",
+                result.accessToken().token(),
+                result.accessToken().expiresAt(),
+                result.refreshToken().token(),
+                result.refreshToken().expiresAt());
+    }
+
+    private void writeRefreshCookie(
+            HttpServletResponse response,
+            String refreshToken) {
+
+        ResponseCookie refreshCookie =
+                ResponseCookie
+                        .from(
+                                REFRESH_COOKIE_NAME,
+                                refreshToken)
+                        .httpOnly(true)
+                        .secure(true)
+                        .sameSite("Strict")
+                        .path("/")
+                        .maxAge(
+                                refreshTokenTtl)
+                        .build();
+
+        response.addHeader(
+                HttpHeaders.SET_COOKIE,
+                refreshCookie.toString());
+    }
+
+    private static String refreshCookieValue(
+            HttpServletRequest request) {
+
+        Cookie[] cookies =
+                request.getCookies();
+
+        if (cookies == null) {
+            return null;
+        }
+
+        for (Cookie cookie : cookies) {
+
+            if (REFRESH_COOKIE_NAME.equals(
+                    cookie.getName())) {
+
+                String value =
+                        cookie.getValue();
+
+                return value == null
+                        || value.isBlank()
+                        ? null
+                        : value;
+            }
+        }
+
+        return null;
+    }
+
+    private static void rejectBrowserAndroidTransport(
+            HttpServletRequest request) {
+
+        if (request.getHeader(
+                HttpHeaders.ORIGIN) != null) {
+
+            throw new AccessDeniedException(
+                    "Browser origin is not allowed");
+        }
     }
 
     private static byte[] remoteAddress(
