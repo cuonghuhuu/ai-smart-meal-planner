@@ -48,10 +48,10 @@ public class UserProfile {
     private BigDecimal weeklyChangeKg;
 
     @Column(name = "household_size", nullable = false)
-    private Integer householdSize;
+    private Byte householdSize;
 
     @Column(name = "max_cook_minutes")
-    private Integer maxCookMinutes;
+    private Short maxCookMinutes;
 
     @Column(length = 500)
     private String notes;
@@ -86,7 +86,7 @@ public class UserProfile {
         }
 
         this.userId = userId;
-        this.householdSize = 1;
+        this.householdSize = (byte) 1;
     }
 
     public Long userId() {
@@ -121,11 +121,11 @@ public class UserProfile {
         return weeklyChangeKg;
     }
 
-    public Integer householdSize() {
+    public Byte householdSize() {
         return householdSize;
     }
 
-    public Integer maxCookMinutes() {
+    public Short maxCookMinutes() {
         return maxCookMinutes;
     }
 
@@ -153,8 +153,8 @@ public class UserProfile {
             NutritionGoal nutritionGoal,
             BigDecimal targetWeightKg,
             BigDecimal weeklyChangeKg,
-            Integer householdSize,
-            Integer maxCookMinutes,
+            Byte householdSize,
+            Short maxCookMinutes,
             String notes) {
 
         this.birthDate = birthDate;
@@ -164,7 +164,7 @@ public class UserProfile {
         this.nutritionGoal = nutritionGoal;
         this.targetWeightKg = targetWeightKg;
         this.weeklyChangeKg = weeklyChangeKg;
-        this.householdSize = householdSize == null ? 1 : householdSize;
+        this.householdSize = householdSize == null ? (byte) 1 : householdSize;
         this.maxCookMinutes = maxCookMinutes;
         this.notes = notes;
     }

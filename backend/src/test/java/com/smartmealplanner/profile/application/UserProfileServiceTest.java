@@ -86,8 +86,8 @@ class UserProfileServiceTest {
                 null,
                 BigDecimal.valueOf(55.0),
                 BigDecimal.valueOf(-0.5),
-                2,
-                45,
+                (byte) 2,
+                (short) 45,
                 "Loves veggies");
 
         when(profileRepository.findByUserIdWithReferences(internalId))
@@ -134,11 +134,11 @@ class UserProfileServiceTest {
         when(profileRepository.findById(internalId))
                 .thenReturn(Optional.empty());
 
-        ActivityLevel activity = new ActivityLevel("MODERATE", "Moderate", "Desc", BigDecimal.valueOf(1.55), 30);
+        ActivityLevel activity = new ActivityLevel("MODERATE", "Moderate", "Desc", BigDecimal.valueOf(1.55), (short) 30);
         when(activityLevelRepository.findByCode("MODERATE"))
                 .thenReturn(Optional.of(activity));
 
-        NutritionGoal goal = new NutritionGoal("MAINTAIN", "Maintain", "Desc", 20);
+        NutritionGoal goal = new NutritionGoal("MAINTAIN", "Maintain", "Desc", (short) 20);
         when(nutritionGoalRepository.findByCode("MAINTAIN"))
                 .thenReturn(Optional.of(goal));
 
@@ -318,7 +318,7 @@ class UserProfileServiceTest {
                 .hasMessageContaining("Unknown activity level");
 
         when(activityLevelRepository.findByCode("SEDENTARY"))
-                .thenReturn(Optional.of(new ActivityLevel("SEDENTARY", "Sedentary", null, BigDecimal.valueOf(1.2), 10)));
+                .thenReturn(Optional.of(new ActivityLevel("SEDENTARY", "Sedentary", null, BigDecimal.valueOf(1.2), (short) 10)));
         when(nutritionGoalRepository.findByCode("NON_EXISTENT_GOAL"))
                 .thenReturn(Optional.empty());
 

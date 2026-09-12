@@ -58,7 +58,7 @@ class UserAllergenServiceTest {
         when(currentUserService.getIdentity(publicId))
                 .thenReturn(new CurrentUserIdentity(internalId, publicId));
 
-        Allergen peanut = new Allergen("PEANUT", "Peanuts", "Peanut allergen", 50);
+        Allergen peanut = new Allergen("PEANUT", "Peanuts", "Peanut allergen", (short) 50);
         UserAllergen ua = new UserAllergen(internalId, peanut, ReactionKind.ALLERGY, "Anaphylaxis");
 
         when(userAllergenRepository.findByUserIdWithAllergen(internalId))
@@ -78,8 +78,8 @@ class UserAllergenServiceTest {
         when(currentUserService.getIdentity(publicId))
                 .thenReturn(new CurrentUserIdentity(internalId, publicId));
 
-        Allergen egg = new Allergen("EGG", "Eggs", null, 30);
-        Allergen milk = new Allergen("MILK", "Milk", null, 70);
+        Allergen egg = new Allergen("EGG", "Eggs", null, (short) 30);
+        Allergen milk = new Allergen("MILK", "Milk", null, (short) 70);
 
         when(referenceRepository.findByCode("EGG")).thenReturn(Optional.of(egg));
         when(referenceRepository.findByCode("MILK")).thenReturn(Optional.of(milk));

@@ -27,7 +27,7 @@ public class NutritionGoal {
     private String description;
 
     @Column(name = "display_order", nullable = false)
-    private Integer displayOrder;
+    private Short displayOrder;
 
     @Column(name = "created_at", insertable = false, updatable = false, columnDefinition = "DATETIME(6)")
     private LocalDateTime createdAt;
@@ -42,12 +42,12 @@ public class NutritionGoal {
             String code,
             String displayName,
             String description,
-            Integer displayOrder) {
+            Short displayOrder) {
 
         this.code = code;
         this.displayName = displayName;
         this.description = description;
-        this.displayOrder = displayOrder == null ? 1000 : displayOrder;
+        this.displayOrder = displayOrder == null ? (short) 1000 : displayOrder;
     }
 
     public Long id() {
@@ -66,7 +66,7 @@ public class NutritionGoal {
         return description;
     }
 
-    public Integer displayOrder() {
+    public Short displayOrder() {
         return displayOrder;
     }
 

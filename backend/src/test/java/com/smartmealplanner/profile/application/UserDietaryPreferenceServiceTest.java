@@ -57,7 +57,7 @@ class UserDietaryPreferenceServiceTest {
                 .thenReturn(new CurrentUserIdentity(internalId, publicId));
 
         DietaryPreference pref = new DietaryPreference(
-                "VEGETARIAN", "Vegetarian", "No meat", true, 10);
+                "VEGETARIAN", "Vegetarian", "No meat", true, (short) 10);
         UserDietaryPreference udp = new UserDietaryPreference(internalId, pref);
 
         when(userPreferenceRepository.findByUserIdWithPreference(internalId))
@@ -76,8 +76,8 @@ class UserDietaryPreferenceServiceTest {
         when(currentUserService.getIdentity(publicId))
                 .thenReturn(new CurrentUserIdentity(internalId, publicId));
 
-        DietaryPreference p1 = new DietaryPreference("VEGETARIAN", "Vegetarian", null, true, 10);
-        DietaryPreference p2 = new DietaryPreference("LOW_CARB", "Low Carb", null, false, 80);
+        DietaryPreference p1 = new DietaryPreference("VEGETARIAN", "Vegetarian", null, true, (short) 10);
+        DietaryPreference p2 = new DietaryPreference("LOW_CARB", "Low Carb", null, false, (short) 80);
 
         when(referenceRepository.findByCode("VEGETARIAN")).thenReturn(Optional.of(p1));
         when(referenceRepository.findByCode("LOW_CARB")).thenReturn(Optional.of(p2));

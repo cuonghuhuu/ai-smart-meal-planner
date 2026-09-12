@@ -19,6 +19,7 @@ import com.smartmealplanner.shared.web.InvalidRequestException;
 
 import jakarta.persistence.EntityNotFoundException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +63,7 @@ public class UserProfileService {
     private final CurrentUserService currentUserService;
     private final Clock clock;
 
+    @Autowired
     public UserProfileService(
             UserProfileRepository profileRepository,
             ActivityLevelRepository activityLevelRepository,
@@ -170,10 +172,15 @@ public class UserProfileService {
                 resolveNutritionGoal(
                         request.nutritionGoal());
 
-        int householdSize =
-                request.householdSize() == null
+        byte householdSize =
+                (byte) (request.householdSize() == null
                         ? 1
-                        : request.householdSize();
+                        : request.householdSize());
+
+        Short maxCookMinutes =
+                request.maxCookMinutes() == null
+                        ? null
+                        : request.maxCookMinutes().shortValue();
 
         profile.update(
                 request.birthDate(),
@@ -184,7 +191,7 @@ public class UserProfileService {
                 request.targetWeightKg(),
                 request.weeklyChangeKg(),
                 householdSize,
-                request.maxCookMinutes(),
+                maxCookMinutes,
                 request.notes() == null
                         ? null
                         : request.notes().trim());
@@ -320,8 +327,10 @@ public class UserProfileService {
                 profile.weeklyChangeKg(),
                 profile.householdSize() == null
                         ? 1
-                        : profile.householdSize(),
-                profile.maxCookMinutes(),
+                        : profile.householdSize().intValue(),
+                profile.maxCookMinutes() == null
+                        ? null
+                        : profile.maxCookMinutes().intValue(),
                 profile.notes(),
                 profile.version() == null
                         ? 0L

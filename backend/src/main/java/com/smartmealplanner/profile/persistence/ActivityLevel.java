@@ -31,7 +31,7 @@ public class ActivityLevel {
     private BigDecimal energyFactor;
 
     @Column(name = "display_order", nullable = false)
-    private Integer displayOrder;
+    private Short displayOrder;
 
     @Column(name = "created_at", insertable = false, updatable = false, columnDefinition = "DATETIME(6)")
     private LocalDateTime createdAt;
@@ -47,13 +47,13 @@ public class ActivityLevel {
             String displayName,
             String description,
             BigDecimal energyFactor,
-            Integer displayOrder) {
+            Short displayOrder) {
 
         this.code = code;
         this.displayName = displayName;
         this.description = description;
         this.energyFactor = energyFactor;
-        this.displayOrder = displayOrder == null ? 1000 : displayOrder;
+        this.displayOrder = displayOrder == null ? (short) 1000 : displayOrder;
     }
 
     public Long id() {
@@ -76,7 +76,7 @@ public class ActivityLevel {
         return energyFactor;
     }
 
-    public Integer displayOrder() {
+    public Short displayOrder() {
         return displayOrder;
     }
 
