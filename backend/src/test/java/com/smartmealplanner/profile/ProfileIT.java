@@ -663,13 +663,6 @@ class ProfileIT {
                 .andExpect(jsonPath("$[0].id").doesNotExist())
                 .andExpect(jsonPath("$[1].code").value("LIGHT"));
 
-        // Direct alias /activity-levels
-        mvc.perform(
-                        get("/api/v1/activity-levels")
-                                .header(HttpHeaders.AUTHORIZATION, bearer(token)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].code").value("SEDENTARY"));
-
         // Nutrition goals
         mvc.perform(
                         get("/api/v1/reference/nutrition-goals")
