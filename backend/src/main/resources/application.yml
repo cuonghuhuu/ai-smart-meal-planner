@@ -25,11 +25,26 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    default-encoding: UTF-8
+    test-connection: false
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${MAIL_STARTTLS_ENABLE:false}
+
 server:
   error:
     include-message: never
     include-stacktrace: never
     include-binding-errors: never
+
 management:
   endpoints:
     web:
@@ -38,12 +53,20 @@ management:
   endpoint:
     health:
       show-details: never
+
 app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+  web:
+    base-url: ${APP_WEB_BASE_URL:http://localhost:3000}
+  auth:
+    email:
+      from: ${MAIL_FROM:no-reply@smartmealplanner.local}
+
 logging:
   pattern:
     level: '%5p [requestId=%X{requestId:-}]'
+
 ---
 # Profile documents keep non-secret defaults versioned without a private local file.
 spring:
@@ -53,6 +76,7 @@ spring:
   datasource:
     hikari:
       maximum-pool-size: 5
+
 ---
 spring:
   config:
@@ -62,3 +86,11 @@ spring:
     hikari:
       maximum-pool-size: 2
       minimum-idle: 0
+
+# Integration tests intentionally use the no-op TestAuthEmailDelivery and do
+# not run an SMTP server. Disable only the mail health contributor in this
+# profile so /actuator/health continues to verify application/database health.
+management:
+  health:
+    mail:
+      enabled: false
