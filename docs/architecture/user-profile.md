@@ -65,7 +65,7 @@ The `profile` package (`com.smartmealplanner.profile`) is strictly separated fro
 ```
 
 ### Information Hiding & Zero Surrogate Key Exposure
-- The internal primary keys (`user_profiles.user_id`, `user_body_measurements.id`, `user_allergens.id`) are internal surrogate identifiers.
+- Internal database keys (such as `user_body_measurements.id`, `user_profiles.user_id`, or the composite join keys `(user_id, allergen_id)` on `user_allergens` and `(user_id, dietary_preference_id)` on `user_dietary_preferences`) remain entirely internal to the database layer.
 - REST DTOs (`ProfileResponse`, `MeasurementResponse`, `UserDietaryPreferenceResponse`, `UserAllergenResponse`) **never** expose internal BIGINT database keys.
 - Entities are addressed by natural keys:
   - User identity is addressed by authenticated context.
@@ -123,8 +123,8 @@ Measurements are captured in `user_body_measurements`:
 
 ### Allergens & Safety-First Exclusion
 - Allergens represent critical health constraints.
-- Associations are stored in `user_allergens`, capturing:
-  - `allergen_code` (FK to `allergens`).
+- Associations are stored in `user_allergens` with composite primary key `(user_id, allergen_id)`, capturing:
+  - `allergen_id` (FK to `allergens.id`, resolved via natural `code` in the REST API).
   - `reaction_kind` (`ALLERGY` or `INTOLERANCE`).
   - `notes` (optional specifics, e.g., "Anaphylactic shock risk", "Mild hives").
 - `PUT /api/v1/me/allergens` replaces user allergens atomically.
@@ -134,7 +134,7 @@ Measurements are captured in `user_body_measurements`:
 
 ## 6. Reference Data API Contracts
 
-Reference data endpoints are available under `/api/v1/reference/**` (and aliased under `/api/v1/**` for consumer convenience):
+Reference data endpoints are canonically available under the `/api/v1/reference/**` namespace:
 
 | Method | URI | Description | Order by |
 |---|---|---|---|

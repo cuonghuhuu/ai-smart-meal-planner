@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/reference")
 public class ReferenceDataController {
 
     private final ReferenceDataService referenceDataService;
@@ -21,37 +21,25 @@ public class ReferenceDataController {
                 referenceDataService;
     }
 
-    @GetMapping({
-            "/reference/activity-levels",
-            "/activity-levels"
-    })
+    @GetMapping("/activity-levels")
     public List<ActivityLevelItemResponse> getActivityLevels() {
 
         return referenceDataService.getActivityLevels();
     }
 
-    @GetMapping({
-            "/reference/nutrition-goals",
-            "/nutrition-goals"
-    })
+    @GetMapping("/nutrition-goals")
     public List<NutritionGoalItemResponse> getNutritionGoals() {
 
         return referenceDataService.getNutritionGoals();
     }
 
-    @GetMapping({
-            "/reference/dietary-preferences",
-            "/dietary-preferences"
-    })
+    @GetMapping("/dietary-preferences")
     public List<DietaryPreferenceItemResponse> getDietaryPreferences() {
 
         return referenceDataService.getDietaryPreferences();
     }
 
-    @GetMapping({
-            "/reference/allergens",
-            "/allergens"
-    })
+    @GetMapping("/allergens")
     public List<AllergenItemResponse> getAllergens() {
 
         return referenceDataService.getAllergens();
