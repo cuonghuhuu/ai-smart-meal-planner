@@ -57,6 +57,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(
+        controllers = ApiFoundationTest.ProbeController.class,
         properties =
                 "app.cors.allowed-origins=https://planner.example")
 @ActiveProfiles("test")

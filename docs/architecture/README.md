@@ -34,6 +34,10 @@ call Python directly.
   boundaries, communication, ownership, flows, and non-functional design.
 - [Architecture decisions](architecture-decisions.md) — the major decisions,
   rationales, consequences, and rejected alternatives for P1.
+- [Authentication & authorization](authentication.md) — P4 auth security, JWT/session
+  lifecycle, and role-based access control.
+- [User profile, preferences & measurements](user-profile.md) — P5 profile core,
+  optimistic concurrency, time-series measurements, dietary preferences, and allergen safety.
 
 ## Diagrams
 
