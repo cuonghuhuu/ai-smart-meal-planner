@@ -30,6 +30,41 @@ public class CurrentUserService {
     public CurrentUserResult getCurrentUser(
             UUID publicId) {
 
+        UserAccount account =
+                resolveActiveAccount(
+                        publicId);
+
+        List<String> roles =
+                userRoles.findRoleCodesByUserId(
+                        account.internalId());
+
+        if (roles.isEmpty()) {
+            throw new IllegalStateException(
+                    "Authenticated user has no roles");
+        }
+
+        return new CurrentUserResult(
+                account.publicId(),
+                account.email(),
+                roles);
+    }
+
+    @Transactional(readOnly = true)
+    public CurrentUserIdentity getIdentity(
+            UUID publicId) {
+
+        UserAccount account =
+                resolveActiveAccount(
+                        publicId);
+
+        return new CurrentUserIdentity(
+                account.internalId(),
+                account.publicId());
+    }
+
+    private UserAccount resolveActiveAccount(
+            UUID publicId) {
+
         if (publicId == null) {
             throw new AuthenticationFailedException();
         }
@@ -47,19 +82,7 @@ public class CurrentUserService {
             throw new AuthenticationFailedException();
         }
 
-        List<String> roles =
-                userRoles.findRoleCodesByUserId(
-                        account.internalId());
-
-        if (roles.isEmpty()) {
-            throw new IllegalStateException(
-                    "Authenticated user has no roles");
-        }
-
-        return new CurrentUserResult(
-                account.publicId(),
-                account.email(),
-                roles);
+        return account;
     }
 
     private static byte[] uuidToBytes(
