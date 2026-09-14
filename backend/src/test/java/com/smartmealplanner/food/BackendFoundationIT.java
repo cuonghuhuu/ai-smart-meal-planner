@@ -1,6 +1,8 @@
-package com.smartmealplanner.food;
+    package com.smartmealplanner.food;
 
+import java.math.BigDecimal;
 import java.sql.DriverManager;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -83,7 +85,7 @@ class BackendFoundationIT {
     }
 
     @Test
-    void contextFlywayAndHibernateValidateP2() {
+    void contextFlywayAndHibernateValidateV001() {
         assertThat(MYSQL.isRunning()).isTrue();
         assertThat(jdbc.queryForObject("SELECT VERSION()", String.class)).startsWith("8.4.");
         assertThat(Arrays.stream(flyway.info().applied()).map(info -> info.getScript()).toList())
@@ -126,23 +128,171 @@ class BackendFoundationIT {
     }
 
     @Test
-    void persistsNumericIdentityOpaqueBytesRelationshipAndDatabaseTimestamps() {
+    void persistsCompleteFoodMappingWithUuidCategoryHierarchyAndDatabaseTimestamps() {
         new TransactionTemplate(transactions).executeWithoutResult(status -> {
-            var category = categories.findByCode("VEGETABLES").orElseThrow();
-            Food food = foods.saveAndFlush(new Food("P3 persistence probe", category));
+            FoodCategory category = categories.findByCode("VEG_LEAFY").orElseThrow();
+            assertThat(category.parentCategory().code()).isEqualTo("VEGETABLES");
+            assertThat(category.displayName()).isEqualTo("Leafy greens");
+            assertThat(category.description()).isNotBlank();
+            assertThat(category.createdAt()).isNotNull();
+            assertThat(category.updatedAt()).isNotNull();
+
+            Food food = foods.saveAndFlush(new Food(
+                    "P7-" + UUID.randomUUID(),
+                    "P7 persistence probe",
+                    "P7 brand",
+                    category,
+                    "Mapped V001 scalar fields",
+                    NutritionBasis.PER_100_ML,
+                    new BigDecimal("1.0345"),
+                    FoodSource.IMPORTED,
+                    "USDA FDC test reference"));
             entityManager.refresh(food);
+
             assertThat(food.internalId()).isPositive();
+            assertThat(food.code()).startsWith("P7-");
+            assertThat(food.displayName()).isEqualTo("P7 persistence probe");
+            assertThat(food.brand()).isEqualTo("P7 brand");
+            assertThat(food.description()).isEqualTo("Mapped V001 scalar fields");
+            assertThat(food.nutritionBasis()).isEqualTo(NutritionBasis.PER_100_ML);
+            assertThat(food.densityGPerMl()).isEqualByComparingTo("1.0345");
+            assertThat(food.source()).isEqualTo(FoodSource.IMPORTED);
+            assertThat(food.sourceReference()).isEqualTo("USDA FDC test reference");
+            assertThat(food.revision()).isEqualTo(1);
+            assertThat(food.isActive()).isTrue();
+            assertThat(food.retiredAt()).isNull();
             assertThat(food.createdAt()).isNotNull();
             assertThat(food.updatedAt()).isNotNull();
             assertThat(food.publicIdBytes()).hasSize(16);
             assertThat(foods.findByPublicId(food.publicIdBytes())).contains(food);
-            assertThat(food.category().code()).isEqualTo("VEGETABLES");
-            var row = jdbc.queryForMap("SELECT BIN_TO_UUID(public_id) AS public_uuid, created_at, updated_at FROM foods WHERE id = ?", food.internalId());
+            assertThat(food.category().code()).isEqualTo("VEG_LEAFY");
+
+            var row = jdbc.queryForMap("""
+                    SELECT BIN_TO_UUID(public_id) AS public_uuid, nutrition_basis,
+                           density_g_per_ml, source, revision,
+                           retired_at, created_at, updated_at
+                    FROM foods
+                    WHERE id = ?
+                    """, food.internalId());
             assertThat(row.get("public_uuid")).isEqualTo(food.publicId().toString());
+            assertThat(row.get("nutrition_basis")).isEqualTo("PER_100_ML");
+            assertThat((BigDecimal) row.get("density_g_per_ml"))
+                    .isEqualByComparingTo("1.0345");
+            assertThat(row.get("source")).isEqualTo("IMPORTED");
+            assertThat(((Number) row.get("revision")).longValue()).isEqualTo(1L);            assertThat(jdbc.queryForObject(
+                    "SELECT is_active FROM foods WHERE id = ?",
+                    Boolean.class,
+                    food.internalId())).isTrue();
+            assertThat(row.get("retired_at")).isNull();
             assertThat(row.get("created_at")).isNotNull();
             assertThat(row.get("updated_at")).isNotNull();
             status.setRollbackOnly();
         });
+    }
+
+    @Test
+    void persistsNullableFoodFieldsAndRejectsInvalidDomainState() {
+        new TransactionTemplate(transactions).executeWithoutResult(status -> {
+            Food food = foods.saveAndFlush(new Food(
+                    null,
+                    "P7 nullable fields probe",
+                    null,
+                    null,
+                    null,
+                    NutritionBasis.PER_100_G,
+                    null,
+                    FoodSource.CURATED,
+                    null));
+
+            Long foodId = food.internalId();
+            entityManager.clear();
+            food = foods.findById(foodId).orElseThrow();
+
+            assertThat(food.code()).isNull();
+            assertThat(food.brand()).isNull();
+            assertThat(food.category()).isNull();
+            assertThat(food.description()).isNull();
+            assertThat(food.densityGPerMl()).isNull();
+            assertThat(food.sourceReference()).isNull();
+            status.setRollbackOnly();
+        });
+
+        assertThatThrownBy(() -> new Food(null, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Invalid displayName");
+        assertThatThrownBy(() -> new Food(
+                null,
+                "P7 invalid basis",
+                null,
+                null,
+                null,
+                null,
+                null,
+                FoodSource.CURATED,
+                null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("nutritionBasis is required");
+        assertThatThrownBy(() -> new Food(
+                null,
+                "P7 invalid source",
+                null,
+                null,
+                null,
+                NutritionBasis.PER_100_G,
+                null,
+                null,
+                null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("source is required");
+        assertThatThrownBy(() -> new Food(
+                null,
+                "P7 invalid density",
+                null,
+                null,
+                null,
+                NutritionBasis.PER_100_G,
+                new BigDecimal("25"),
+                FoodSource.CURATED,
+                null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("densityGPerMl must be greater than zero and less than 25");
+    }
+
+    @Test
+    void retirementLifecycleKeepsProvenanceRevisionSeparateFromOptimisticVersion() {
+        new TransactionTemplate(transactions).executeWithoutResult(status -> {
+            Food food = foods.saveAndFlush(new Food("P7 lifecycle probe", null));
+            long initialVersion = food.version();
+            LocalDateTime retiredAt = LocalDateTime.of(2026, 9, 15, 10, 30);
+
+            food.retire(retiredAt);
+            foods.flush();
+            entityManager.refresh(food);
+
+            assertThat(food.isActive()).isFalse();
+            assertThat(food.retiredAt()).isEqualTo(retiredAt);
+            assertThat(food.revision()).isEqualTo(1);
+            assertThat(food.version()).isEqualTo(initialVersion + 1);
+
+            food.reactivate();
+            foods.flush();
+            entityManager.refresh(food);
+
+            assertThat(food.isActive()).isTrue();
+            assertThat(food.retiredAt()).isNull();
+            assertThat(food.revision()).isEqualTo(1);
+            assertThat(food.version()).isEqualTo(initialVersion + 2);
+            status.setRollbackOnly();
+        });
+
+        Food activeFood = new Food("P7 lifecycle validation", null);
+        assertThatThrownBy(() -> activeFood.retire(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("retiredAt is required");
+        activeFood.retire(LocalDateTime.of(2026, 9, 15, 10, 30));
+        assertThatThrownBy(() -> activeFood.retire(LocalDateTime.of(2026, 9, 15, 10, 31)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Food is already retired");
     }
 
     @Test
