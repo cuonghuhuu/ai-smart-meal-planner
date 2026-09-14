@@ -3,8 +3,14 @@ package com.smartmealplanner.food;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import com.smartmealplanner.nutrition.persistence.MeasurementUnit;
+import com.smartmealplanner.nutrition.persistence.Nutrient;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,12 +21,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
 /**
  * Module-private mapping of the V001 nutritional fact carrier.
- * Nutrition rows and serving rows are deliberately mapped in later P7 slices.
+ * Nutrition facts and measured serving facts are owned child rows; their
+ * application/query workflows arrive in later P7 slices.
  */
 @Entity
 @Table(name = "foods")
@@ -83,6 +91,20 @@ class Food {
 
     @Column(name = "retired_at", columnDefinition = "DATETIME(6)")
     private LocalDateTime retiredAt;
+
+    @OneToMany(
+            mappedBy = "food",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<FoodNutrient> nutrientFacts = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "food",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<FoodServing> servings = new ArrayList<>();
 
     @Version
     @Column(nullable = false)
@@ -223,6 +245,14 @@ class Food {
         return retiredAt;
     }
 
+    List<FoodNutrient> nutrientFacts() {
+        return List.copyOf(nutrientFacts);
+    }
+
+    List<FoodServing> servings() {
+        return List.copyOf(servings);
+    }
+
     Long version() {
         return version;
     }
@@ -263,6 +293,99 @@ class Food {
 
         active = true;
         retiredAt = null;
+    }
+
+    FoodNutrient addNutrient(
+            Nutrient nutrient,
+            BigDecimal amount,
+            FoodNutrientDataQuality dataQuality) {
+
+        if (nutrient == null) {
+            throw new IllegalArgumentException("nutrient is required");
+        }
+
+        if (nutrientFacts.stream()
+                .anyMatch(existing -> existing.nutrient().code()
+                        .equals(nutrient.code()))) {
+
+            throw new IllegalArgumentException(
+                    "A food nutrient fact already exists for nutrient "
+                            + nutrient.code());
+        }
+
+        FoodNutrient foodNutrient = new FoodNutrient(
+                this,
+                nutrient,
+                amount,
+                dataQuality);
+        nutrientFacts.add(foodNutrient);
+        return foodNutrient;
+    }
+
+    void correctNutrient(
+            Nutrient nutrient,
+            BigDecimal amount,
+            FoodNutrientDataQuality dataQuality) {
+
+        FoodNutrient foodNutrient = nutrientFacts.stream()
+                .filter(existing -> existing.nutrient().code()
+                        .equals(nutrient == null ? null : nutrient.code()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No food nutrient fact exists for nutrient "
+                                + (nutrient == null ? null : nutrient.code())));
+
+        foodNutrient.correct(amount, dataQuality);
+    }
+
+    FoodServing addServing(
+            String displayName,
+            BigDecimal quantity,
+            MeasurementUnit unit,
+            BigDecimal gramWeight,
+            BigDecimal milliliters,
+            boolean defaultServing) {
+
+        if (servings.stream()
+                .anyMatch(existing -> existing.displayName().equals(displayName))) {
+
+            throw new IllegalArgumentException(
+                    "A food serving already exists with displayName "
+                            + displayName);
+        }
+
+        if (defaultServing
+                && servings.stream().anyMatch(FoodServing::isDefaultServing)) {
+
+            throw new IllegalStateException(
+                    "A food may have only one default serving");
+        }
+
+        FoodServing foodServing = new FoodServing(
+                this,
+                displayName,
+                quantity,
+                unit,
+                gramWeight,
+                milliliters,
+                defaultServing);
+        servings.add(foodServing);
+        return foodServing;
+    }
+
+    /**
+     * Records one complete nutrition-relevant correction after its nutrient,
+     * basis, density, or serving bridge facts have been applied. A future
+     * curation workflow must call this once per correction command, not per
+     * individual field update.
+     */
+    void recordNutritionCorrection() {
+        if (revision == Integer.MAX_VALUE) {
+            throw new IllegalStateException(
+                    "Food nutrition revision cannot be incremented further");
+        }
+
+        revision++;
     }
 
     private static String requireText(

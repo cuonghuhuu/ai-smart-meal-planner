@@ -11,6 +11,13 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.OptimisticLockException;
+import jakarta.persistence.PersistenceException;
+
+import com.smartmealplanner.nutrition.persistence.MeasurementUnit;
+import com.smartmealplanner.nutrition.persistence.MeasurementUnitRepository;
+import com.smartmealplanner.nutrition.persistence.Nutrient;
+import com.smartmealplanner.nutrition.persistence.NutrientRepository;
+
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +68,8 @@ class BackendFoundationIT {
     @Autowired EntityManagerFactory emf;
     @Autowired FoodRepository foods;
     @Autowired FoodCategoryRepository categories;
+    @Autowired NutrientRepository nutrients;
+    @Autowired MeasurementUnitRepository measurementUnits;
     @Autowired PlatformTransactionManager transactions;
     @Autowired MockMvc mvc;
     @PersistenceContext EntityManager entityManager;
@@ -296,6 +305,290 @@ class BackendFoundationIT {
     }
 
     @Test
+    void foodNutrientsPersistWithCompositeIdentityPrecisionAndReferenceCodes() {
+        Long foodId = new TransactionTemplate(transactions).execute(status -> {
+            Nutrient energy = nutrients.findByCode("ENERGY").orElseThrow();
+            Nutrient protein = nutrients.findByCode("PROTEIN").orElseThrow();
+            Nutrient fat = nutrients.findByCode("FAT_TOTAL").orElseThrow();
+
+            Food food = new Food("P7 food nutrient persistence probe", null);
+            food.addNutrient(
+                    energy,
+                    new BigDecimal("123.4567"),
+                    FoodNutrientDataQuality.ANALYTICAL);
+            food.addNutrient(
+                    protein,
+                    new BigDecimal("12.3456"),
+                    FoodNutrientDataQuality.CALCULATED);
+            food.addNutrient(
+                    fat,
+                    new BigDecimal("4.5678"),
+                    FoodNutrientDataQuality.ESTIMATED);
+
+            return foods.saveAndFlush(food).internalId();
+        });
+
+        try {
+            new TransactionTemplate(transactions).executeWithoutResult(status -> {
+                Food food = foods.findById(foodId).orElseThrow();
+                Nutrient energy = nutrients.findByCode("ENERGY").orElseThrow();
+                Nutrient protein = nutrients.findByCode("PROTEIN").orElseThrow();
+                Nutrient fat = nutrients.findByCode("FAT_TOTAL").orElseThrow();
+
+                assertThat(food.nutrientFacts()).hasSize(3);
+                assertThat(food.nutrientFacts())
+                        .extracting(fact -> fact.nutrient().code())
+                        .containsExactlyInAnyOrder("ENERGY", "PROTEIN", "FAT_TOTAL");
+
+                FoodNutrient energyFact = food.nutrientFacts().stream()
+                        .filter(fact -> fact.nutrient().code().equals("ENERGY"))
+                        .findFirst()
+                        .orElseThrow();
+                FoodNutrient proteinFact = food.nutrientFacts().stream()
+                        .filter(fact -> fact.nutrient().code().equals("PROTEIN"))
+                        .findFirst()
+                        .orElseThrow();
+                FoodNutrient fatFact = food.nutrientFacts().stream()
+                        .filter(fact -> fact.nutrient().code().equals("FAT_TOTAL"))
+                        .findFirst()
+                        .orElseThrow();
+
+                assertThat(energyFact.id())
+                        .isEqualTo(new FoodNutrientId(foodId, energy.id()));
+                assertThat(energyFact.food().internalId()).isEqualTo(foodId);
+                assertThat(energyFact.amount()).isEqualByComparingTo("123.4567");
+                assertThat(energyFact.dataQuality())
+                        .isEqualTo(FoodNutrientDataQuality.ANALYTICAL);
+                assertThat(energyFact.createdAt()).isNotNull();
+                assertThat(energyFact.updatedAt()).isNotNull();
+
+                assertThat(proteinFact.amount()).isEqualByComparingTo("12.3456");
+                assertThat(proteinFact.dataQuality())
+                        .isEqualTo(FoodNutrientDataQuality.CALCULATED);
+                assertThat(proteinFact.nutrient().unit().code()).isEqualTo("g");
+
+                assertThat(fatFact.amount()).isEqualByComparingTo("4.5678");
+                assertThat(fatFact.dataQuality())
+                        .isEqualTo(FoodNutrientDataQuality.ESTIMATED);
+            });
+        } finally {
+            foods.deleteById(foodId);
+        }
+    }
+
+    @Test
+    void foodNutrientCompositePrimaryKeyAndNegativeAmountAreRejected() {
+        Long foodId = createFoodWithNutrient("P7 food nutrient uniqueness probe");
+
+        try {
+            assertThatThrownBy(() -> new TransactionTemplate(transactions)
+                    .executeWithoutResult(status -> {
+                        Food food = foods.findById(foodId).orElseThrow();
+                        Nutrient protein = nutrients.findByCode("PROTEIN").orElseThrow();
+                        entityManager.persist(new FoodNutrient(
+                                food,
+                                protein,
+                                BigDecimal.ONE,
+                                FoodNutrientDataQuality.ANALYTICAL));
+                        entityManager.flush();
+                    }))
+                    .isInstanceOf(PersistenceException.class);
+
+            new TransactionTemplate(transactions).executeWithoutResult(status -> {
+                Nutrient protein = nutrients.findByCode("PROTEIN").orElseThrow();
+                Food food = new Food("P7 invalid nutrient amount", null);
+
+                assertThatThrownBy(() -> food.addNutrient(
+                        protein,
+                        new BigDecimal("-0.0001"),
+                        FoodNutrientDataQuality.ANALYTICAL))
+                        .isInstanceOf(IllegalArgumentException.class)
+                        .hasMessage("amount must not be negative");
+                assertThatThrownBy(() -> food.addNutrient(
+                        protein,
+                        BigDecimal.ZERO,
+                        null))
+                        .isInstanceOf(IllegalArgumentException.class)
+                        .hasMessage("dataQuality is required");
+            });
+        } finally {
+            foods.deleteById(foodId);
+        }
+    }
+
+    @Test
+    void foodServingsPersistMeasuredBridgesAndEnforceSingleDefault() {
+        Long foodId = new TransactionTemplate(transactions).execute(status -> {
+            MeasurementUnit grams = measurementUnits.findByCode("g").orElseThrow();
+            MeasurementUnit milliliters = measurementUnits.findByCode("ml").orElseThrow();
+
+            Food food = new Food("P7 food serving persistence probe", null);
+            food.addServing(
+                    "1 medium carrot",
+                    BigDecimal.ONE,
+                    grams,
+                    new BigDecimal("61.0000"),
+                    null,
+                    true);
+            food.addServing(
+                    "1 cup chopped",
+                    BigDecimal.ONE,
+                    milliliters,
+                    null,
+                    new BigDecimal("240.0000"),
+                    false);
+            food.addServing(
+                    "1/2 cup chopped",
+                    new BigDecimal("0.5000"),
+                    milliliters,
+                    null,
+                    new BigDecimal("120.0000"),
+                    false);
+
+            return foods.saveAndFlush(food).internalId();
+        });
+
+        try {
+            new TransactionTemplate(transactions).executeWithoutResult(status -> {
+                Food food = foods.findById(foodId).orElseThrow();
+                assertThat(food.servings()).hasSize(3);
+                assertThat(food.servings().stream()
+                        .filter(FoodServing::isDefaultServing)
+                        .toList())
+                        .singleElement()
+                        .satisfies(serving -> {
+                            assertThat(serving.displayName()).isEqualTo("1 medium carrot");
+                            assertThat(serving.quantity()).isEqualByComparingTo("1.0000");
+                            assertThat(serving.unit().code()).isEqualTo("g");
+                            assertThat(serving.gramWeight()).isEqualByComparingTo("61.0000");
+                            assertThat(serving.milliliters()).isNull();
+                            assertThat(serving.food().internalId()).isEqualTo(foodId);
+                            assertThat(serving.createdAt()).isNotNull();
+                            assertThat(serving.updatedAt()).isNotNull();
+                        });
+                assertThat(food.servings().stream()
+                        .filter(serving -> !serving.isDefaultServing())
+                        .toList())
+                        .hasSize(2)
+                        .allSatisfy(serving -> assertThat(serving.milliliters()).isNotNull());
+
+                MeasurementUnit grams = measurementUnits.findByCode("g").orElseThrow();
+                assertThatThrownBy(() -> food.addServing(
+                        "another default",
+                        BigDecimal.ONE,
+                        grams,
+                        BigDecimal.ONE,
+                        null,
+                        true))
+                        .isInstanceOf(IllegalStateException.class)
+                        .hasMessage("A food may have only one default serving");
+            });
+
+            assertThatThrownBy(() -> new TransactionTemplate(transactions)
+                    .executeWithoutResult(status -> {
+                        Food food = foods.findById(foodId).orElseThrow();
+                        MeasurementUnit grams = measurementUnits.findByCode("g").orElseThrow();
+                        entityManager.persist(new FoodServing(
+                                food,
+                                "database duplicate default",
+                                BigDecimal.ONE,
+                                grams,
+                                BigDecimal.ONE,
+                                null,
+                                true));
+                        entityManager.flush();
+                    }))
+                    .isInstanceOf(PersistenceException.class);
+        } finally {
+            foods.deleteById(foodId);
+        }
+    }
+
+    @Test
+    void foodServingValidationRejectsUnknownMeasuredBridge() {
+        new TransactionTemplate(transactions).executeWithoutResult(status -> {
+            MeasurementUnit grams = measurementUnits.findByCode("g").orElseThrow();
+            Food food = new Food("P7 invalid serving", null);
+
+            assertThatThrownBy(() -> food.addServing(
+                    "zero quantity",
+                    BigDecimal.ZERO,
+                    grams,
+                    BigDecimal.ONE,
+                    null,
+                    false))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("quantity must be positive");
+            assertThatThrownBy(() -> food.addServing(
+                    "zero grams",
+                    BigDecimal.ONE,
+                    grams,
+                    BigDecimal.ZERO,
+                    null,
+                    false))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("gramWeight must be positive");
+            assertThatThrownBy(() -> food.addServing(
+                    "zero milliliters",
+                    BigDecimal.ONE,
+                    grams,
+                    null,
+                    BigDecimal.ZERO,
+                    false))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("milliliters must be positive");
+            assertThatThrownBy(() -> food.addServing(
+                    "missing bridge",
+                    BigDecimal.ONE,
+                    grams,
+                    null,
+                    null,
+                    false))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("gramWeight or milliliters is required");
+        });
+    }
+
+    @Test
+    void nutritionCorrectionAdvancesRevisionOnceWithoutChangingRevisionForCosmeticUpdates() {
+        Long foodId = createFoodWithNutrient("P7 food revision probe");
+
+        try {
+            new TransactionTemplate(transactions).executeWithoutResult(status -> {
+                Food food = foods.findById(foodId).orElseThrow();
+                Nutrient protein = nutrients.findByCode("PROTEIN").orElseThrow();
+                long initialVersion = food.version();
+
+                food.correctNutrient(
+                        protein,
+                        new BigDecimal("99.9999"),
+                        FoodNutrientDataQuality.ESTIMATED);
+                food.recordNutritionCorrection();
+                foods.flush();
+                entityManager.refresh(food);
+
+                assertThat(food.revision()).isEqualTo(2);
+                assertThat(food.version()).isEqualTo(initialVersion + 1);
+                assertThat(food.nutrientFacts()).singleElement()
+                        .satisfies(fact -> {
+                            assertThat(fact.amount()).isEqualByComparingTo("99.9999");
+                            assertThat(fact.dataQuality())
+                                    .isEqualTo(FoodNutrientDataQuality.ESTIMATED);
+                        });
+
+                food.rename("P7 food revision cosmetic rename");
+                foods.flush();
+                entityManager.refresh(food);
+
+                assertThat(food.revision()).isEqualTo(2);
+                assertThat(food.version()).isEqualTo(initialVersion + 2);
+            });
+        } finally {
+            foods.deleteById(foodId);
+        }
+    }
+
+    @Test
     void staleConcurrentViewCannotOverwriteCommittedUpdate() {
         Food saved = new TransactionTemplate(transactions).execute(status ->
                 foods.saveAndFlush(new Food("P3 locking probe", null)));
@@ -334,6 +627,18 @@ class BackendFoundationIT {
         if (entityManager.isOpen() && entityManager.getTransaction().isActive()) {
             entityManager.getTransaction().rollback();
         }
+    }
+
+    private Long createFoodWithNutrient(String displayName) {
+        return new TransactionTemplate(transactions).execute(status -> {
+            Nutrient protein = nutrients.findByCode("PROTEIN").orElseThrow();
+            Food food = new Food(displayName, null);
+            food.addNutrient(
+                    protein,
+                    new BigDecimal("10.0000"),
+                    FoodNutrientDataQuality.ANALYTICAL);
+            return foods.saveAndFlush(food).internalId();
+        });
     }
 
     @Test
