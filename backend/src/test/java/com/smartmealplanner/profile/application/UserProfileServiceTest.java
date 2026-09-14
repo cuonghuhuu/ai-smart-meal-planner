@@ -75,7 +75,7 @@ class UserProfileServiceTest {
     @Test
     void getProfileReturnsProfileWhenPresent() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         UserProfile profile = new UserProfile(internalId);
         profile.update(
@@ -107,7 +107,7 @@ class UserProfileServiceTest {
     @Test
     void getProfileThrowsEntityNotFoundWhenProfileAbsent() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         when(profileRepository.findByUserIdWithReferences(internalId))
                 .thenReturn(Optional.empty());
@@ -129,7 +129,7 @@ class UserProfileServiceTest {
     @Test
     void updateProfileCreatesProfileWhenNoneExists() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         when(profileRepository.findById(internalId))
                 .thenReturn(Optional.empty());
@@ -170,7 +170,7 @@ class UserProfileServiceTest {
     @Test
     void updateProfileRejectsVersionMismatchOnExistingProfile() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         UserProfile existing = new UserProfile(internalId);
         // emulate loaded version 2
@@ -199,7 +199,7 @@ class UserProfileServiceTest {
     @Test
     void updateProfileRejectsNonZeroVersionOnNewProfile() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         when(profileRepository.findById(internalId))
                 .thenReturn(Optional.empty());
@@ -224,7 +224,7 @@ class UserProfileServiceTest {
     @Test
     void updateProfileValidatesStructuralConstraints() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
         when(profileRepository.findById(internalId))
                 .thenReturn(Optional.empty());
 
@@ -304,7 +304,7 @@ class UserProfileServiceTest {
     @Test
     void updateProfileRejectsUnknownActivityLevelAndNutritionGoal() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
         when(profileRepository.findById(internalId))
                 .thenReturn(Optional.empty());
 

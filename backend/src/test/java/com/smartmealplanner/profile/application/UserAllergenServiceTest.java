@@ -56,7 +56,7 @@ class UserAllergenServiceTest {
     @Test
     void getAllergensReturnsMappedResponses() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         Allergen peanut = new Allergen("PEANUT", "Peanuts", "Peanut allergen", (short) 50);
         UserAllergen ua = new UserAllergen(internalId, peanut, ReactionKind.ALLERGY, "Anaphylaxis");
@@ -76,7 +76,7 @@ class UserAllergenServiceTest {
     @Test
     void replaceAllergensAtomicallyReplacesEntries() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         Allergen egg = new Allergen("EGG", "Eggs", null, (short) 30);
         Allergen milk = new Allergen("MILK", "Milk", null, (short) 70);
@@ -109,7 +109,7 @@ class UserAllergenServiceTest {
     @Test
     void replaceAllergensRejectsDuplicatesInRequest() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         ReplaceAllergensRequest request = new ReplaceAllergensRequest(
                 List.of(
@@ -124,7 +124,7 @@ class UserAllergenServiceTest {
     @Test
     void replaceAllergensRejectsUnknownAllergen() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         when(referenceRepository.findByCode("UNKNOWN")).thenReturn(Optional.empty());
 
@@ -139,7 +139,7 @@ class UserAllergenServiceTest {
     @Test
     void replaceAllergensRejectsNoteExceedingMaxLength() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         ReplaceAllergensRequest request = new ReplaceAllergensRequest(
                 List.of(new UserAllergenItemRequest("PEANUT", null, "x".repeat(256))));

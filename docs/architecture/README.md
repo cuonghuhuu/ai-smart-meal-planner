@@ -38,6 +38,9 @@ call Python directly.
   lifecycle, and role-based access control.
 - [User profile, preferences & measurements](user-profile.md) — P5 profile core,
   optimistic concurrency, time-series measurements, dietary preferences, and allergen safety.
+- [Nutrition targets & deterministic calculation](nutrition-targets.md) — P6 nutrition
+  target lifecycle, Mifflin-St Jeor baseline calculation, adult macro ranges, API
+  boundaries, and implementation order.
 
 ## Diagrams
 

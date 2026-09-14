@@ -4,7 +4,8 @@ import java.util.UUID;
 
 public record CurrentUserIdentity(
         Long internalId,
-        UUID publicId) {
+        UUID publicId,
+        String timeZone) {
 
     public CurrentUserIdentity {
 
@@ -16,6 +17,13 @@ public record CurrentUserIdentity(
         if (publicId == null) {
             throw new IllegalArgumentException(
                     "publicId is required");
+        }
+
+        if (timeZone == null
+                || timeZone.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "timeZone is required");
         }
     }
 }

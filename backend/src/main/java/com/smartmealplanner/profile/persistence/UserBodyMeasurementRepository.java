@@ -17,6 +17,11 @@ public interface UserBodyMeasurementRepository
     Optional<UserBodyMeasurement> findFirstByUserIdOrderByMeasuredOnDescIdDesc(
             Long userId);
 
+    Optional<UserBodyMeasurement>
+            findFirstByUserIdAndMeasuredOnLessThanEqualOrderByMeasuredOnDescIdDesc(
+                    Long userId,
+                    LocalDate effectiveFrom);
+
     List<UserBodyMeasurement> findByUserIdOrderByMeasuredOnDesc(
             Long userId,
             Pageable pageable);
