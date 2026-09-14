@@ -19,6 +19,14 @@ public class ApiProblems {
     }
 
     public ProblemDetail create(HttpStatus status, HttpServletRequest request) {
+        return create(status, request, status.name());
+    }
+
+    public ProblemDetail create(
+            HttpStatus status,
+            HttpServletRequest request,
+            String code) {
+
         String detail = switch (status) {
             case BAD_REQUEST -> "The request is invalid.";
             case UNAUTHORIZED -> "Authentication is required.";
@@ -28,7 +36,7 @@ public class ApiProblems {
             default -> "The request could not be completed.";
         };
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
-        problem.setProperty("code", status.name());
+        problem.setProperty("code", code);
         problem.setProperty("requestId", request.getAttribute(RequestIdFilter.ATTRIBUTE));
         return problem;
     }
