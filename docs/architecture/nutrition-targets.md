@@ -26,9 +26,10 @@ P2 schema/reference data
         +-- user_nutrition_targets
         +-- user_nutrition_target_values
         |
-P4 authenticated identity
+P4 authenticated identity/account context
         |
         +-- CurrentUserService -> CurrentUserIdentity
+        +-- user time-zone through a stable auth application contract
         |
 P5 profile + measurements
         |
@@ -51,7 +52,9 @@ P6 Nutrition
 
 P6 must not query authentication persistence directly. The authenticated public
 UUID is resolved through the existing auth application boundary, as P5 already
-does.
+does. If P6 needs the user's IANA time-zone to resolve today's local calendar
+date, the auth module exposes that value through a focused application contract;
+the nutrition module must not import `UserAccountRepository`.
 
 P6 also does not depend on the current representative `food` mappings left from
 P3. Food composition and food-nutrient catalog ownership belong to a later
@@ -71,6 +74,10 @@ A target set records:
 - `origin`: `CALCULATED`, `USER_DEFINED`, or `ADJUSTED`;
 - the activity-level and nutrition-goal references used at creation time;
 - a versioned `calculation_method` when the target is calculated.
+
+`effective_from` and `effective_to` are calendar dates, not UTC instants. Their
+meaning is evaluated in the user's configured IANA time-zone when an operation
+needs to resolve "today".
 
 The unique key `(user_id, effective_from)` prevents two target sets starting on
 the same date. The database ensures `effective_to >= effective_from`, but MySQL
@@ -310,6 +317,7 @@ Request:
 }
 ```
 
+`effectiveFrom` is an explicit calendar date. It is not converted through UTC.
 The response is read-only and includes the calculation method, selected profile
 inputs, selected measurement date/weight, age, RMR, maintenance energy,
 calculated target values when the goal is supported, and warnings/unsupported
@@ -342,8 +350,9 @@ server resolves nutrient codes and applies the same dated-target lifecycle.
 GET /api/v1/me/nutrition-targets/current
 ```
 
-Returns the target whose period contains the current UTC date. If no target
-applies, return `404 NOT_FOUND` rather than inventing one.
+Returns the target whose period contains the authenticated user's current local
+calendar date, resolved from `Clock` plus the user's configured IANA time-zone.
+If no target applies, return `404 NOT_FOUND` rather than inventing one.
 
 ### History
 
@@ -370,6 +379,7 @@ Expected domain failures include:
 - duplicate nutrient code in a request;
 - invalid target/min/max relationship;
 - overlapping effective period;
+- invalid or unavailable user time-zone context;
 - no current target;
 - authenticated user/account no longer active.
 
@@ -430,7 +440,8 @@ Use a fixed `Clock`/date and cover:
 
 Cover:
 
-- current target selection;
+- current target selection in at least two different user time-zones around a
+  UTC date boundary;
 - target history ordering/pagination;
 - closing a previous open target;
 - rejecting overlapping periods;
@@ -460,8 +471,9 @@ P6 acceptance still requires the entire existing suite to remain green.
 
 ## 13. Dependency decision
 
-P6 requires no new Maven dependency. Java `BigDecimal`, `LocalDate`, existing
-Spring/JPA/Validation, and the current MySQL/Testcontainers stack are sufficient.
+P6 requires no new Maven dependency. Java `BigDecimal`, `LocalDate`, `ZoneId`,
+existing Spring/JPA/Validation, and the current MySQL/Testcontainers stack are
+sufficient.
 
 The Python AI service is intentionally not introduced. Deterministic nutrition
 calculation belongs in Java; Python remains reserved for recommendation,
@@ -497,13 +509,15 @@ application a clinical nutrition or medical device.
 
 Implementation starts only after this contract is accepted.
 
-1. Map nutrition reference and target persistence entities against existing P2
+1. Expose the authenticated user's time-zone through a stable auth application
+   contract without leaking auth persistence into Nutrition.
+2. Map nutrition reference and target persistence entities against existing P2
    tables; add repository integration coverage.
-2. Implement deterministic `MIFFLIN_ST_JEOR_V1` calculator with pure unit tests.
-3. Implement target-period lifecycle and current/history queries.
-4. Add nutrient-reference and target REST DTOs/controllers.
-5. Add authenticated MySQL integration tests and cross-user isolation tests.
-6. Run the complete Maven verify suite, pre-commit/detect-secrets, and
+3. Implement deterministic `MIFFLIN_ST_JEOR_V1` calculator with pure unit tests.
+4. Implement target-period lifecycle and current/history queries.
+5. Add nutrient-reference and target REST DTOs/controllers.
+6. Add authenticated MySQL integration tests and cross-user isolation tests.
+7. Run the complete Maven verify suite, pre-commit/detect-secrets, and
    `git diff --check` before PR.
 
 No schema migration, Python service, Food/Recipe/Pantry implementation, or
