@@ -41,6 +41,9 @@ call Python directly.
 - [Nutrition targets & deterministic calculation](nutrition-targets.md) — P6 nutrition
   target lifecycle, Mifflin-St Jeor baseline calculation, adult macro ranges, API
   boundaries, and implementation order.
+- [Food & ingredient catalog core](food-ingredient-catalog.md) - P7 catalog
+  ownership, normalized Food nutrition/servings, canonical Ingredients, search,
+  authorization, and the implementation sequence.
 
 ## Diagrams
 

@@ -13,11 +13,20 @@ service.
 - [Phase P1 system architecture](docs/architecture/README.md)
 - [Phase P2 database design](docs/database/README.md)
 - [Phase P3 backend foundation](backend/README.md)
+- [Phase P7 food & ingredient catalog contract](docs/architecture/food-ingredient-catalog.md)
 - [Source-controlled architecture and database diagrams](docs/diagrams/README.md)
 
-P1 contains architecture and decision records only; application scaffolding is
-intentionally deferred to later phases.
+## Phase status
+
+- P1 system architecture - complete
+- P2 database design - complete
+- P3 backend foundation - complete
+- P4 authentication and authorization - complete
+- P5 user profile, preferences, and measurements - complete
+- P6 deterministic nutrition targets - complete
+- P7 food and ingredient catalog - current / in progress
 
 P2 adds the relational design: documentation under `docs/database/`, the
 versioned MySQL schema and reference seed data under `database/`, and the entity
-relationship diagrams. It is likewise design-only.
+relationship diagrams. The applied V001 schema remains the source of truth for
+the current catalog work.
