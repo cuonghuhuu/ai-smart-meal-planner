@@ -94,7 +94,7 @@ class NutritionPersistenceIT {
         new TransactionTemplate(transactions)
                 .executeWithoutResult(status -> {
                     assertThat(nutrients
-                            .findAllByOrderByDisplayOrderAscCodeAsc())
+                            .findAllWithUnitOrderByDisplayOrderAscCodeAsc())
                             .hasSize(16)
                             .extracting(Nutrient::code)
                             .startsWith("ENERGY", "PROTEIN")
