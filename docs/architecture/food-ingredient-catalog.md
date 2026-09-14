@@ -1,8 +1,8 @@
 # P7 - Food & Ingredient Catalog Core
 
 - **Phase:** P7
-- **P7.0 status:** Architecture and API contract accepted for implementation.
-  P7 persistence and REST implementation are not yet complete.
+- **P7 status:** Implementation complete through P7.8; final P7.9 verification is
+  required before the phase is accepted as complete.
 - **Scope:** Java/MySQL catalog foundations for foods, ingredients, catalog facts,
   and authenticated catalog reads.
 
@@ -28,19 +28,19 @@ Controllers remain thin and do not query JPA repositories, calculate nutrition,
 or infer conversions. Repositories and JPA entities remain private to the Food
 module.
 
-The existing P3 com.smartmealplanner.food classes are representative mappings,
-not a completed catalog implementation. P7.1 will replace or refine them only
-as needed to map the V001 catalog contract accurately.
+The Food module maps the V001 catalog contract directly. Its persistence
+entities remain module-private; public application and HTTP projections expose
+UUIDs and stable codes rather than JPA entities or surrogate identifiers.
 
 Cross-module rules are deliberately narrow:
 
 - Nutrition owns the nutrient and measurement-unit reference vocabulary. Food
-  composition consumes stable nutrient/unit codes through a focused reference
-  contract; Food application code must not use Nutrition persistence repositories
-  as a shortcut.
-- The profile module consumes the allergen vocabulary for user allergy records.
-  Ingredient allergen facts use the same stable allergen codes through a focused
-  reference contract, not Profile persistence entities or repositories.
+  composition uses narrow lazy persistence references only; Food application
+  code does not use Nutrition repositories as a shortcut.
+- The profile module owns the allergen vocabulary used for user allergy records.
+  Ingredient allergen facts store only the V001 scalar reference and resolve it
+  through a focused Profile application query contract; Food has no Profile
+  persistence dependency.
 - CurrentUserService and CurrentUserIdentity are the allowed Auth application
   boundary for user-disliked-ingredient workflows. Food must not import Auth
   persistence merely to resolve a user.
@@ -343,10 +343,11 @@ All catalog curation is confined to these role-protected route families:
     /api/v1/admin/foods/**
     /api/v1/admin/ingredients/**
 
-P7.1-P7.6 will define the minimum create/update/retire commands, aggregate
-validation, optimistic-concurrency behavior, and public-safe responses. Admin
-requests use public UUIDs and reference codes, not surrogate IDs. They preserve
-Food provenance/revision and retirement semantics.
+P7 implements public-safe catalog reads and the private current-user avoidance
+workflow. Catalog curation/admin mutation remains a documented boundary for a
+later phase; no P7 controller writes shared Food or Ingredient catalog facts.
+Any future admin request uses public UUIDs and reference codes, not surrogate
+IDs, and must preserve Food provenance/revision and retirement semantics.
 
 ## 19. Error and validation semantics
 
@@ -412,27 +413,20 @@ implement their workflows.
 
 The intended order is:
 
-1. **P7.0 - architecture/API contract** (this document).
-2. **P7.1 - Food persistence foundation.**
-3. **P7.2 - Food nutrients and servings.**
-4. **P7.3 - Food query/search REST API.**
-5. **P7.4 - Ingredient persistence foundation.**
-6. **P7.5 - Aliases and ingredient-Food mappings.**
-7. **P7.6 - Allergens and ingredient-specific unit conversions.**
-8. **P7.7 - Ingredient query/search REST API.**
-9. **P7.8 - User disliked/avoided ingredients.**
-10. **P7.9 - integration coverage, documentation, and full verification.**
-
-Only P7.0 is covered by this document. The later slices are planned work and
-must not be reported as implemented until their code and tests exist.
+1. **P7.0 - architecture/API contract** — complete.
+2. **P7.1 - Food persistence foundation** — complete.
+3. **P7.2 - Food nutrients and servings** — complete.
+4. **P7.3 - Food query/search REST API** — implemented; final verification pending.
+5. **P7.4 - Ingredient persistence foundation** — implemented; final verification pending.
+6. **P7.5 - Aliases and ingredient-Food mappings** — implemented; final verification pending.
+7. **P7.6 - Allergens and ingredient-specific unit conversions** — implemented; final verification pending.
+8. **P7.7 - Ingredient query/search REST API** — implemented; final verification pending.
+9. **P7.8 - User disliked/avoided ingredients** — implemented; final verification pending.
+10. **P7.9 - integration coverage, documentation, and full verification** — in progress.
 
 ## 23. Testing strategy
 
-P7.0 is documentation-only. Its verification is document consistency,
-final-diff review, git diff --check, and worktree inspection; it does not require
-a Maven build solely for this change.
-
-Later P7 slices should add:
+P7 retains focused unit tests and MySQL 8.4 Testcontainers coverage for:
 
 - pure unit tests for catalog validation, stable mapping, alias resolution, and
   refusal of unknown ingredient-specific conversions;
@@ -440,8 +434,8 @@ Later P7 slices should add:
   seed resources for JPA mappings, nutrition/serving aggregates, retirement,
   optimistic concurrency, and atomic rollback;
 - authenticated MockMvc coverage for public UUID-only contracts, pagination,
-  FULLTEXT/alias paths, active-vs-retired visibility, ROLE_ADMIN curation
-  protection, and /me cross-user isolation;
+  FULLTEXT/alias paths, active-vs-retired visibility, and /me cross-user
+  isolation;
 - response assertions that no BIGINT identifiers, JPA entities, source secrets,
   or unsafe exception details appear.
 

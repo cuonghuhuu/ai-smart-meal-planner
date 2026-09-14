@@ -24,7 +24,7 @@ service.
 - P4 authentication and authorization - complete
 - P5 user profile, preferences, and measurements - complete
 - P6 deterministic nutrition targets - complete
-- P7 food and ingredient catalog - current / in progress
+- P7 food and ingredient catalog - current / in final verification
 
 P2 adds the relational design: documentation under `docs/database/`, the
 versioned MySQL schema and reference seed data under `database/`, and the entity
