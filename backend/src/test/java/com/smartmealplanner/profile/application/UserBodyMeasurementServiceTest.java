@@ -66,7 +66,7 @@ class UserBodyMeasurementServiceTest {
     @Test
     void getLatestReturnsLatestMeasurement() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         UserBodyMeasurement measurement = new UserBodyMeasurement(
                 internalId,
@@ -93,7 +93,7 @@ class UserBodyMeasurementServiceTest {
     @Test
     void getLatestThrowsEntityNotFoundWhenNoneExist() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         when(measurementRepository.findFirstByUserIdOrderByMeasuredOnDescIdDesc(internalId))
                 .thenReturn(Optional.empty());
@@ -125,7 +125,7 @@ class UserBodyMeasurementServiceTest {
     @Test
     void getHistoryReturnsPagedMeasurements() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         UserBodyMeasurement m1 = new UserBodyMeasurement(
                 internalId,
@@ -148,7 +148,7 @@ class UserBodyMeasurementServiceTest {
     @Test
     void recordMeasurementCreatesNewMeasurementWhenNoneOnDate() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         LocalDate date = LocalDate.of(2026, 9, 11);
         when(measurementRepository.findByUserIdAndMeasuredOn(internalId, date))
@@ -179,7 +179,7 @@ class UserBodyMeasurementServiceTest {
     @Test
     void recordMeasurementCorrectsExistingMeasurementOnSameDate() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         LocalDate date = LocalDate.of(2026, 9, 11);
         UserBodyMeasurement existing = new UserBodyMeasurement(
@@ -215,7 +215,7 @@ class UserBodyMeasurementServiceTest {
     @Test
     void correctMeasurementUpdatesOrCreatesWithCorrectedSource() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         LocalDate date = LocalDate.of(2026, 9, 10);
         when(measurementRepository.findByUserIdAndMeasuredOn(internalId, date))

@@ -52,7 +52,8 @@ The `profile` package (`com.smartmealplanner.profile`) is strictly separated fro
 +-----------------------------------------------------------------+
 |                       CurrentUserService                        |
 |  Bridges public UUID (from JWT subject) to internal surrogate   |
-|  ID via CurrentUserIdentity(Long internalId, UUID publicId)     |
+|  ID and time zone via CurrentUserIdentity(Long internalId, UUID  |
+|  publicId, String timeZone)                                    |
 +-----------------------------------------------------------------+
                                                    |
                     +------------------------------+------------------------------+

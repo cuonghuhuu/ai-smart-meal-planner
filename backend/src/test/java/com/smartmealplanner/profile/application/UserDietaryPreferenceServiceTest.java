@@ -54,7 +54,7 @@ class UserDietaryPreferenceServiceTest {
     @Test
     void getPreferencesReturnsMappedResponses() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         DietaryPreference pref = new DietaryPreference(
                 "VEGETARIAN", "Vegetarian", "No meat", true, (short) 10);
@@ -74,7 +74,7 @@ class UserDietaryPreferenceServiceTest {
     @Test
     void replacePreferencesReplacesAndDeduplicatesCodes() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         DietaryPreference p1 = new DietaryPreference("VEGETARIAN", "Vegetarian", null, true, (short) 10);
         DietaryPreference p2 = new DietaryPreference("LOW_CARB", "Low Carb", null, false, (short) 80);
@@ -99,7 +99,7 @@ class UserDietaryPreferenceServiceTest {
     @Test
     void replacePreferencesRejectsUnknownCode() {
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         when(referenceRepository.findByCode("UNKNOWN")).thenReturn(Optional.empty());
 
@@ -119,7 +119,7 @@ class UserDietaryPreferenceServiceTest {
 
         // blank code in request
         when(currentUserService.getIdentity(publicId))
-                .thenReturn(new CurrentUserIdentity(internalId, publicId));
+                .thenReturn(new CurrentUserIdentity(internalId, publicId, "UTC"));
 
         ReplaceDietaryPreferencesRequest blankCode = new ReplaceDietaryPreferencesRequest(
                 List.of("   "));

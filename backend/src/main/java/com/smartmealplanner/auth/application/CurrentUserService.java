@@ -59,7 +59,8 @@ public class CurrentUserService {
 
         return new CurrentUserIdentity(
                 account.internalId(),
-                account.publicId());
+                account.publicId(),
+                account.timeZone());
     }
 
     private UserAccount resolveActiveAccount(
