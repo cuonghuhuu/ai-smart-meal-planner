@@ -349,6 +349,19 @@ later phase; no P7 controller writes shared Food or Ingredient catalog facts.
 Any future admin request uses public UUIDs and reference codes, not surrogate
 IDs, and must preserve Food provenance/revision and retirement semantics.
 
+### P7 scope amendment — deferred shared catalog curation
+
+This is a post-P7.0 implementation-scope amendment, not a rewrite of the
+accepted P7.0 boundary. P7 implements the shared catalog persistence model,
+authenticated catalog reads, and private user avoidance state, but deliberately
+does **not** implement shared Food or Ingredient admin mutation endpoints.
+
+The mutation capability is deferred to a later, explicitly scoped catalog
+curation phase. When implemented, every shared-catalog mutation must remain
+under `/api/v1/admin/foods/**` or `/api/v1/admin/ingredients/**`, protected by
+the existing `ROLE_ADMIN` security boundary. This amendment does not relax that
+authorization requirement and does not add Recipe, Pantry, Flutter, or AI work.
+
 ## 19. Error and validation semantics
 
 P7 uses the existing safe application/problem+json infrastructure, including its

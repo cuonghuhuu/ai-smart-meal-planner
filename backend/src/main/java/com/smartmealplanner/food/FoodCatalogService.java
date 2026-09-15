@@ -34,6 +34,7 @@ public class FoodCatalogService {
         validatePage(page, size);
         String normalizedQuery = normalizeOptional(query);
         String normalizedCategory = normalizeOptional(categoryCode);
+        requireKnownCategory(normalizedCategory);
         Page<Food> result = normalizedQuery == null
                 ? foods.findActiveByCategory(normalizedCategory,
                         PageRequest.of(page, size, Sort.by("displayName").ascending().and(Sort.by("publicId").ascending())))
@@ -90,5 +91,11 @@ public class FoodCatalogService {
         if (value == null || value.isBlank()) return null;
         if (value.trim().length() > 200) throw new FoodCatalogException(FoodCatalogFailure.INVALID_REQUEST);
         return value.trim();
+    }
+
+    private void requireKnownCategory(String categoryCode) {
+        if (categoryCode != null && !categories.existsByCode(categoryCode)) {
+            throw new FoodCatalogException(FoodCatalogFailure.INVALID_REQUEST);
+        }
     }
 }

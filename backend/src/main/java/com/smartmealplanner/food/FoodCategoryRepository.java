@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 interface FoodCategoryRepository extends JpaRepository<FoodCategory, Long> {
     Optional<FoodCategory> findByCode(String code);
 
+    boolean existsByCode(String code);
+
     @Query("""
             select category from FoodCategory category
             left join fetch category.parentCategory

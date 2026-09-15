@@ -12,11 +12,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import org.hibernate.annotations.BatchSize;
+
 /**
  * Module-private food-category reference mapping. Vocabulary lookup uses code,
  * never hard-coded surrogate IDs.
  */
 @Entity
+@BatchSize(size = 100)
 @Table(name = "food_categories")
 class FoodCategory {
 
