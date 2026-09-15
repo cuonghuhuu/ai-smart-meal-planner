@@ -53,6 +53,9 @@ public class SecurityConfiguration {
     private static final String WEB_LOGIN_PATH =
             "/api/v1/auth/login/web";
 
+    private static final String CSRF_PATH =
+            "/api/v1/auth/csrf";
+
     private static final String ANDROID_LOGIN_PATH =
             "/api/v1/auth/login/android";
 
@@ -127,7 +130,8 @@ public class SecurityConfiguration {
 
                         .requestMatchers(
                                 HttpMethod.GET,
-                                "/actuator/health")
+                                "/actuator/health",
+                                CSRF_PATH)
                         .permitAll()
 
                         .requestMatchers(

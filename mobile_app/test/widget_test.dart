@@ -1,95 +1,126 @@
 import 'dart:async';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_meal_planner/app/app.dart';
 import 'package:smart_meal_planner/core/api/api_exception.dart';
-import 'package:smart_meal_planner/features/foundation/data/backend_health_service.dart';
+import 'package:smart_meal_planner/features/auth/application/session_controller.dart';
+import 'package:smart_meal_planner/features/auth/data/auth_repository.dart';
+import 'package:smart_meal_planner/features/auth/data/refresh_token_store.dart';
+import 'package:smart_meal_planner/features/auth/domain/auth_models.dart';
 
 void main() {
-  testWidgets(
-    'renders the connected foundation screen without network access',
-    (tester) async {
-      await tester.pumpWidget(
-        SmartMealPlannerApp(
-          backendHealthChecker: _QueuedHealthChecker([
-            () async => const BackendHealth(status: 'UP'),
-          ]),
-        ),
-      );
-      await tester.pump();
-
-      expect(find.text('AI Smart Meal Planner'), findsWidgets);
-      expect(find.text('Flutter Web foundation is ready.'), findsOneWidget);
-      expect(find.text('Environment'), findsOneWidget);
-      expect(find.text('API URL'), findsOneWidget);
-      expect(find.text('Connected / UP'), findsOneWidget);
-    },
-  );
-
-  testWidgets('shows checking while a health request is pending', (
+  testWidgets('shows bootstrap UI before deciding the session state', (
     tester,
   ) async {
-    final completer = Completer<BackendHealth>();
-
-    await tester.pumpWidget(
-      SmartMealPlannerApp(
-        backendHealthChecker: _QueuedHealthChecker([() => completer.future]),
-      ),
+    final refresh = Completer<AccessSession>();
+    final session = SessionController(
+      authRepository: _AppAuthRepository(refreshResult: refresh.future),
+      refreshTokenStore: NoRefreshTokenStore(),
+      isWeb: true,
     );
 
-    expect(find.text('Checking...'), findsOneWidget);
+    await tester.pumpWidget(SmartMealPlannerApp(sessionController: session));
 
-    completer.complete(const BackendHealth(status: 'UP'));
-    await tester.pump();
+    expect(find.bySemanticsLabel('Restoring session'), findsOneWidget);
 
-    expect(find.text('Connected / UP'), findsOneWidget);
+    refresh.complete(_webSession());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Signed in as person@example.test'), findsOneWidget);
   });
 
-  testWidgets('retries after a health check error', (tester) async {
-    final firstHealthCheck = Completer<BackendHealth>();
-    final secondHealthCheck = Completer<BackendHealth>();
-    final healthChecker = _QueuedHealthChecker([
-      () => firstHealthCheck.future,
-      () => secondHealthCheck.future,
-    ]);
-
-    await tester.pumpWidget(
-      SmartMealPlannerApp(backendHealthChecker: healthChecker),
+  testWidgets('shows anonymous UI after normal restore failure', (
+    tester,
+  ) async {
+    final session = SessionController(
+      authRepository: _AppAuthRepository(refreshError: true),
+      refreshTokenStore: NoRefreshTokenStore(),
+      isWeb: true,
     );
 
-    expect(find.text('Checking...'), findsOneWidget);
+    await tester.pumpWidget(SmartMealPlannerApp(sessionController: session));
+    await tester.pumpAndSettle();
 
-    firstHealthCheck.completeError(
-      const ApiTransportException(ApiTransportFailureKind.network),
+    expect(find.text('Sign in is available in the next step.'), findsOneWidget);
+  });
+
+  testWidgets('sign out clears the authenticated app state', (tester) async {
+    final session = SessionController(
+      authRepository: _AppAuthRepository(),
+      refreshTokenStore: NoRefreshTokenStore(),
+      isWeb: true,
     );
-    await tester.pump();
 
-    expect(find.text('Backend unavailable/error'), findsOneWidget);
-    expect(find.text('Retry'), findsOneWidget);
+    await tester.pumpWidget(SmartMealPlannerApp(sessionController: session));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sign out'));
+    await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('retry-backend-health')));
-    await tester.pump();
-
-    expect(healthChecker.callCount, 2);
-    expect(find.text('Checking...'), findsOneWidget);
-
-    secondHealthCheck.complete(const BackendHealth(status: 'UP'));
-    await tester.pump();
-
-    expect(find.text('Connected / UP'), findsOneWidget);
+    expect(find.text('Sign in is available in the next step.'), findsOneWidget);
   });
 }
 
-class _QueuedHealthChecker implements BackendHealthChecker {
-  _QueuedHealthChecker(this._responses);
+AccessSession _webSession() => AccessSession(
+  accessToken: 'access',
+  accessTokenExpiresAt: DateTime.utc(2030),
+  refreshTokenExpiresAt: DateTime.utc(2030, 1, 2),
+);
 
-  final List<Future<BackendHealth> Function()> _responses;
-  int callCount = 0;
+class _AppAuthRepository implements AuthRepository {
+  _AppAuthRepository({this.refreshResult, this.refreshError = false});
+
+  final Future<AccessSession>? refreshResult;
+  final bool refreshError;
 
   @override
-  Future<BackendHealth> checkHealth() {
-    callCount++;
-    return _responses.removeAt(0)();
+  Future<CsrfToken> fetchCsrf() async =>
+      const CsrfToken(headerName: 'X-CSRF-TOKEN', value: 'csrf');
+
+  @override
+  Future<AccessSession> refreshWeb(CsrfToken csrfToken) async {
+    if (refreshError) {
+      throw const ApiHttpException(401);
+    }
+    return refreshResult ?? _webSession();
   }
+
+  @override
+  Future<AuthIdentity> me() async => const AuthIdentity(
+    publicId: 'a0a5b5ef-82bf-4d9f-9fe4-f07ad9bfec14',
+    email: 'person@example.test',
+    roles: ['ROLE_USER'],
+  );
+
+  @override
+  Future<void> logoutWeb(CsrfToken csrfToken) async {}
+  @override
+  Future<void> forgotPassword(String email) async {}
+  @override
+  Future<AccessSession> loginAndroid(String email, String password) =>
+      Future.value(_webSession());
+  @override
+  Future<AccessSession> loginWeb(String email, String password) =>
+      Future.value(_webSession());
+  @override
+  Future<void> logoutAll() async {}
+  @override
+  Future<void> logoutAndroid(String refreshToken) async {}
+  @override
+  Future<AccessSession> refreshAndroid(String refreshToken) =>
+      Future.value(_webSession());
+  @override
+  Future<void> register({
+    required String email,
+    required String password,
+    required String displayName,
+  }) async {}
+  @override
+  Future<void> resendVerification(String email) async {}
+  @override
+  Future<void> resetPassword({
+    required String token,
+    required String password,
+  }) async {}
+  @override
+  Future<void> verifyEmail(String token) async {}
 }
