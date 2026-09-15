@@ -256,6 +256,9 @@ public class SecurityConfiguration {
         source.registerCorsConfiguration(
                 "/api/**",
                 configuration);
+        source.registerCorsConfiguration(
+                "/actuator/health",
+                configuration);
 
         return source;
     }
