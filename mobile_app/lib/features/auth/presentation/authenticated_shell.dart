@@ -3,27 +3,41 @@ import 'package:go_router/go_router.dart';
 import 'package:smart_meal_planner/features/auth/application/session_controller.dart';
 
 class AuthenticatedShell extends StatelessWidget {
-  const AuthenticatedShell({super.key, required this.sessionController});
+  const AuthenticatedShell({
+    super.key,
+    required this.sessionController,
+    this.content,
+    this.selectedIndex = 0,
+  });
   final SessionController sessionController;
+  final Widget? content;
+  final int selectedIndex;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
       final wide = constraints.maxWidth >= 800;
-      final content = const _FoodsPlaceholder();
+      final pageContent = content ?? const _FoodsPlaceholder();
       if (!wide) {
         return Scaffold(
           appBar: AppBar(title: const Text('AI Smart Meal Planner')),
-          drawer: _NavigationDrawer(sessionController: sessionController),
-          body: content,
+          drawer: _NavigationDrawer(
+            sessionController: sessionController,
+            selectedIndex: selectedIndex,
+          ),
+          body: pageContent,
         );
       }
       return Scaffold(
         body: Row(
           children: [
             NavigationRail(
-              selectedIndex: 0,
+              selectedIndex: selectedIndex,
               labelType: NavigationRailLabelType.all,
+              onDestinationSelected: (index) {
+                if (index == 0) context.go('/catalog/foods');
+                if (index == 2) context.go('/profile');
+              },
               leading: IconButton(
                 tooltip: 'Sign out',
                 onPressed: sessionController.logout,
@@ -45,7 +59,7 @@ class AuthenticatedShell extends StatelessWidget {
               ],
             ),
             const VerticalDivider(width: 1),
-            const Expanded(child: _FoodsPlaceholder()),
+            Expanded(child: pageContent),
           ],
         ),
       );
@@ -54,15 +68,19 @@ class AuthenticatedShell extends StatelessWidget {
 }
 
 class _NavigationDrawer extends StatelessWidget {
-  const _NavigationDrawer({required this.sessionController});
+  const _NavigationDrawer({
+    required this.sessionController,
+    required this.selectedIndex,
+  });
   final SessionController sessionController;
+  final int selectedIndex;
   @override
   Widget build(BuildContext context) => Drawer(
     child: ListView(
       children: [
         const DrawerHeader(child: Text('Smart Meal Planner')),
         ListTile(
-          selected: true,
+          selected: selectedIndex == 0,
           leading: const Icon(Icons.restaurant),
           title: const Text('Foods'),
           onTap: () => context.go('/catalog/foods'),
@@ -71,9 +89,11 @@ class _NavigationDrawer extends StatelessWidget {
           leading: Icon(Icons.kitchen),
           title: Text('Ingredients (coming soon)'),
         ),
-        const ListTile(
-          leading: Icon(Icons.person),
-          title: Text('Profile (coming soon)'),
+        ListTile(
+          selected: selectedIndex == 2,
+          leading: const Icon(Icons.person),
+          title: const Text('Profile'),
+          onTap: () => context.go('/profile'),
         ),
         const Divider(),
         ListTile(
