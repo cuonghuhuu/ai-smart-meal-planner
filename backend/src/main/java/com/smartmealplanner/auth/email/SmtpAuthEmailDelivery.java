@@ -46,16 +46,9 @@ public class SmtpAuthEmailDelivery
             String plaintextToken) {
 
         String verificationUrl =
-                UriComponentsBuilder.fromUriString(
-                                webBaseUrl)
-                        .path(
-                                "/verify-email")
-                        .queryParam(
-                                "token",
-                                plaintextToken)
-                        .build()
-                        .encode()
-                        .toUriString();
+                authWebUrl(
+                        "/auth/verify-email",
+                        plaintextToken);
 
         send(
                 recipientEmail,
@@ -77,16 +70,9 @@ public class SmtpAuthEmailDelivery
             String plaintextToken) {
 
         String resetUrl =
-                UriComponentsBuilder.fromUriString(
-                                webBaseUrl)
-                        .path(
-                                "/reset-password")
-                        .queryParam(
-                                "token",
-                                plaintextToken)
-                        .build()
-                        .encode()
-                        .toUriString();
+                authWebUrl(
+                        "/auth/reset-password",
+                        plaintextToken);
 
         send(
                 recipientEmail,
@@ -158,5 +144,25 @@ public class SmtpAuthEmailDelivery
         }
 
         return value;
+    }
+
+    /**
+     * Builds a URL for the Flutter web application's hash route. The token is
+     * intentionally kept in the fragment query component so the browser does
+     * not send it to the web server in a request path or query string.
+     */
+    private String authWebUrl(
+            String route,
+            String plaintextToken) {
+
+        return UriComponentsBuilder.fromUriString(
+                                webBaseUrl)
+                .path(
+                        "/")
+                .fragment(
+                        route + "?token=" + plaintextToken)
+                .build()
+                .encode()
+                .toUriString();
     }
 }

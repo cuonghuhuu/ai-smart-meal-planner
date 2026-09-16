@@ -22,6 +22,14 @@ final class ApiResponseFormatException extends ApiException {
   const ApiResponseFormatException();
 }
 
+/// Indicates that the credential endpoint succeeded but the authenticated
+/// identity could not be loaded. This is distinct from bad credentials.
+final class SessionInitializationException extends ApiException {
+  const SessionInitializationException(this.cause);
+
+  final ApiException cause;
+}
+
 /// Safe subset of the backend's RFC 9457 problem response.
 final class ApiProblem {
   const ApiProblem({

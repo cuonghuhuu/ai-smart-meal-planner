@@ -68,9 +68,7 @@ public class ApiExceptionHandler
     @ExceptionHandler({
             InvalidRequestException.class,
             ConstraintViolationException.class,
-            InvalidEmailVerificationTokenException.class,
-            InvalidPasswordResetTokenException.class,
-            InvalidPasswordException.class
+            InvalidEmailVerificationTokenException.class
     })
     ProblemDetail invalid(
             Exception exception,
@@ -79,6 +77,34 @@ public class ApiExceptionHandler
         return problems.create(
                 HttpStatus.BAD_REQUEST,
                 request);
+    }
+
+    @ExceptionHandler(InvalidPasswordResetTokenException.class)
+    ProblemDetail invalidPasswordResetToken(
+            InvalidPasswordResetTokenException exception,
+            HttpServletRequest request) {
+
+        return problems.create(
+                HttpStatus.BAD_REQUEST,
+                request,
+                "INVALID_PASSWORD_RESET_TOKEN");
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    ProblemDetail invalidPassword(
+            InvalidPasswordException exception,
+            HttpServletRequest request) {
+
+        String code =
+                "/api/v1/auth/reset-password".equals(
+                        request.getRequestURI())
+                        ? "INVALID_PASSWORD"
+                        : "BAD_REQUEST";
+
+        return problems.create(
+                HttpStatus.BAD_REQUEST,
+                request,
+                code);
     }
 
     @ExceptionHandler(AuthenticationException.class)

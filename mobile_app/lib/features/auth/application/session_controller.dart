@@ -49,7 +49,11 @@ class SessionController extends ChangeNotifier {
           ? await authRepository.loginWeb(email, password)
           : await authRepository.loginAndroid(email, password);
       await _acceptSession(session);
-      _identity = await authRepository.me();
+      try {
+        _identity = await authRepository.me();
+      } on ApiException catch (error) {
+        throw SessionInitializationException(error);
+      }
       _status = SessionStatus.authenticated;
       notifyListeners();
     } on Object {
@@ -58,6 +62,29 @@ class SessionController extends ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<void> register({
+    required String email,
+    required String password,
+    required String displayName,
+  }) => authRepository.register(
+    email: email,
+    password: password,
+    displayName: displayName,
+  );
+
+  Future<void> verifyEmail(String token) => authRepository.verifyEmail(token);
+
+  Future<void> resendVerification(String email) =>
+      authRepository.resendVerification(email);
+
+  Future<void> forgotPassword(String email) =>
+      authRepository.forgotPassword(email);
+
+  Future<void> resetPassword({
+    required String token,
+    required String password,
+  }) => authRepository.resetPassword(token: token, password: password);
 
   /// Returns a single shared refresh result for all concurrent 401 responses.
   Future<bool> refresh() {
