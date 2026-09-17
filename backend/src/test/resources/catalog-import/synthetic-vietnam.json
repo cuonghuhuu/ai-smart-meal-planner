@@ -1,0 +1,60 @@
+{
+  "dataset": "Synthetic fixture only - SMILING Vietnam import boundary",
+  "datasetVersion": "test",
+  "foods": [
+    {
+      "sourceIdentifier": "SYNTHETIC-001",
+      "catalogCode": "TEST_SMILING_VN_001",
+      "displayName": "Synthetic rau muong",
+      "sourceName": "Synthetic water spinach",
+      "categoryCode": "VEG_LEAFY",
+      "description": "Synthetic test row; not upstream nutrition data.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "TEST_FIXTURE_ONLY#sheet=synthetic#row=1",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 25.1000,
+          "unitCode": "kcal",
+          "dataQuality": "ANALYTICAL"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 2.3000,
+          "unitCode": "g",
+          "dataQuality": "CALCULATED"
+        },
+        {
+          "sourceCode": "zinc",
+          "canonicalCode": null,
+          "amount": 0.1000,
+          "unitCode": "mg",
+          "dataQuality": "ANALYTICAL"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "test_synthetic_rau_muong",
+        "displayName": "Synthetic rau muong",
+        "categoryCode": "VEG_LEAFY",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1.0000,
+        "primary": true,
+        "aliases": [
+          {
+            "alias": "synthetic water spinach",
+            "locale": "en"
+          },
+          {
+            "alias": "synthetic rau muong",
+            "locale": "vi"
+          }
+        ]
+      }
+    }
+  ]
+}

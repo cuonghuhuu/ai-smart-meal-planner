@@ -68,6 +68,19 @@ logging:
     level: '%5p [requestId=%X{requestId:-}]'
 
 ---
+# Catalog import is an offline operator command, never a normal startup task.
+spring:
+  config:
+    activate:
+      on-profile: catalog-import
+
+app:
+  catalog:
+    import:
+      enabled: ${CATALOG_IMPORT_ENABLED:false}
+      source-file: ${CATALOG_IMPORT_SOURCE_FILE:}
+
+---
 # Profile documents keep non-secret defaults versioned without a private local file.
 spring:
   config:

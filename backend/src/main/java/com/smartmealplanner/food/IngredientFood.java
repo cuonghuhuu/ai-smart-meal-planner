@@ -44,4 +44,10 @@ class IngredientFood {
     BigDecimal yieldFactor() { return yieldFactor; }
     boolean isPrimary() { return primary; }
     LocalDateTime createdAt() { return createdAt; }
+
+    boolean matches(IngredientPreparationState state, BigDecimal yield, boolean primaryValue) {
+        return preparationState == state
+                && yieldFactor.compareTo(yield) == 0
+                && primary == primaryValue;
+    }
 }

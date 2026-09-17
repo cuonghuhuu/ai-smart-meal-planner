@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 import com.smartmealplanner.nutrition.persistence.MeasurementUnit;
@@ -336,6 +338,41 @@ class Food {
                                 + (nutrient == null ? null : nutrient.code())));
 
         foodNutrient.correct(amount, dataQuality);
+    }
+
+    /** Applies the fields an imported catalog document is allowed to own. */
+    boolean applyImportedMetadata(
+            String displayName,
+            FoodCategory category,
+            String description,
+            NutritionBasis nutritionBasis,
+            BigDecimal densityGPerMl,
+            String sourceReference) {
+
+        boolean nutritionChanged = !sameAmount(this.densityGPerMl, densityGPerMl)
+                || this.nutritionBasis != nutritionBasis;
+        this.displayName = requireText(displayName, 200, "displayName");
+        this.category = category;
+        this.description = optionalText(description, 500, "description");
+        this.nutritionBasis = Objects.requireNonNull(nutritionBasis, "nutritionBasis");
+        this.densityGPerMl = requireValidDensity(densityGPerMl);
+        this.sourceReference = optionalText(sourceReference, 255, "sourceReference");
+        return nutritionChanged;
+    }
+
+    /**
+     * Removes old imported facts when the source no longer reports them. An
+     * absent fact therefore remains unknown instead of retaining stale data.
+     */
+    boolean removeNutrientsNotIn(Set<String> nutrientCodes) {
+        return nutrientFacts.removeIf(fact -> !nutrientCodes.contains(fact.nutrient().code()));
+    }
+
+    private static boolean sameAmount(BigDecimal first, BigDecimal second) {
+        if (first == null || second == null) {
+            return first == second;
+        }
+        return first.compareTo(second) == 0;
     }
 
     FoodServing addServing(

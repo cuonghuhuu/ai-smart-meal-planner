@@ -11,6 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 interface IngredientRepository extends JpaRepository<Ingredient, Long> {
+    Optional<Ingredient> findByCode(String code);
+
     Optional<Ingredient> findByPublicId(byte[] publicId);
 
     @Query("""
