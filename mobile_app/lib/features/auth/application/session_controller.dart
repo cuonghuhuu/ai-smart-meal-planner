@@ -98,18 +98,25 @@ class SessionController extends ChangeNotifier {
   }
 
   Future<bool> _refresh() async {
+    final wasAuthenticated = isAuthenticated;
     try {
       final session = isWeb
           ? await authRepository.refreshWeb(await _csrf())
           : await _refreshAndroid();
       if (session == null) {
         await _clearSession();
+        if (wasAuthenticated) {
+          notifyListeners();
+        }
         return false;
       }
       await _acceptSession(session);
       return true;
     } on Object {
       await _clearSession();
+      if (wasAuthenticated) {
+        notifyListeners();
+      }
       return false;
     }
   }

@@ -193,6 +193,27 @@ void main() {
     },
   );
 
+  test(
+    'authenticated refresh failure notifies the session transition',
+    () async {
+      final repository = _FakeAuthRepository();
+      final session = SessionController(
+        authRepository: repository,
+        refreshTokenStore: NoRefreshTokenStore(),
+        isWeb: true,
+      );
+      await session.login('person@example.test', 'not-logged');
+
+      var notifications = 0;
+      session.addListener(() => notifications++);
+      repository.refreshError = true;
+
+      expect(await session.refresh(), isFalse);
+      expect(notifications, 1);
+      expect(session.status, SessionStatus.anonymous);
+    },
+  );
+
   test('Web login never persists a token in the refresh-token store', () async {
     final store = _MemoryRefreshTokenStore();
     final session = SessionController(

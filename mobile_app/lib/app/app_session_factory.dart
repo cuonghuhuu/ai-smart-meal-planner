@@ -8,17 +8,21 @@ import 'package:smart_meal_planner/features/profile/data/profile_repository.dart
 import 'package:smart_meal_planner/features/profile/data/reference_data_repository.dart';
 import 'package:smart_meal_planner/features/preferences/application/preferences_controller.dart';
 import 'package:smart_meal_planner/features/preferences/data/preferences_repository.dart';
+import 'package:smart_meal_planner/features/measurements/application/measurements_controller.dart';
+import 'package:smart_meal_planner/features/measurements/data/measurements_repository.dart';
 
 final class AppSessionDependencies {
   const AppSessionDependencies({
     required this.sessionController,
     required this.profileController,
     required this.preferencesController,
+    required this.measurementsController,
   });
 
   final SessionController sessionController;
   final ProfileController profileController;
   final PreferencesController preferencesController;
+  final MeasurementsController measurementsController;
 }
 
 final class AppSessionFactory {
@@ -45,6 +49,9 @@ final class AppSessionFactory {
       ),
       preferencesController: PreferencesController(
         repository: HttpPreferencesRepository(apiClient),
+      ),
+      measurementsController: MeasurementsController(
+        repository: HttpMeasurementsRepository(apiClient),
       ),
     );
   }

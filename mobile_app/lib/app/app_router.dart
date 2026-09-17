@@ -8,6 +8,8 @@ import 'package:smart_meal_planner/features/auth/presentation/authenticated_shel
 import 'package:smart_meal_planner/features/auth/presentation/session_gate.dart';
 import 'package:smart_meal_planner/features/preferences/application/preferences_controller.dart';
 import 'package:smart_meal_planner/features/preferences/presentation/preferences_page.dart';
+import 'package:smart_meal_planner/features/measurements/application/measurements_controller.dart';
+import 'package:smart_meal_planner/features/measurements/presentation/measurements_page.dart';
 import 'package:smart_meal_planner/features/profile/application/profile_controller.dart';
 import 'package:smart_meal_planner/features/profile/presentation/profile_page.dart';
 
@@ -16,6 +18,7 @@ final class AppRouter {
     SessionController sessionController, {
     ProfileController? profileController,
     PreferencesController? preferencesController,
+    MeasurementsController? measurementsController,
   }) : router = GoRouter(
          initialLocation: '/catalog/foods',
          refreshListenable: sessionController,
@@ -98,6 +101,18 @@ final class AppRouter {
                      ),
              ),
            ),
+           GoRoute(
+             path: '/measurements',
+             builder: (context, state) => SessionRouteGate(
+               sessionController: sessionController,
+               child: measurementsController == null
+                   ? const _MeasurementsUnavailablePage()
+                   : MeasurementsPage(
+                       sessionController: sessionController,
+                       measurementsController: measurementsController,
+                     ),
+             ),
+           ),
          ],
          errorBuilder: (context, state) => const _NotFoundPage(),
        );
@@ -113,7 +128,8 @@ final class AppRouter {
     final isProtectedRoute =
         path == '/catalog/foods' ||
         path == '/profile' ||
-        path == '/preferences';
+        path == '/preferences' ||
+        path == '/measurements';
 
     if (session.status == SessionStatus.anonymous && isProtectedRoute) {
       return '/auth/login?from=${Uri.encodeComponent(state.uri.toString())}';
@@ -137,7 +153,8 @@ final class AppRouter {
             uri.userInfo.isEmpty &&
             (uri.path == '/catalog/foods' ||
                 uri.path == '/profile' ||
-                uri.path == '/preferences')
+                uri.path == '/preferences' ||
+                uri.path == '/measurements')
         ? uri.toString()
         : '/catalog/foods';
   }
@@ -157,6 +174,15 @@ class _PreferencesUnavailablePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Scaffold(
     body: Center(child: Text(AppStrings.preferencesUnavailable)),
+  );
+}
+
+class _MeasurementsUnavailablePage extends StatelessWidget {
+  const _MeasurementsUnavailablePage();
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(
+    body: Center(child: Text(AppStrings.measurementsUnavailable)),
   );
 }
 

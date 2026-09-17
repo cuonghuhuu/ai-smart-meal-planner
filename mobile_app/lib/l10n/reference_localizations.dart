@@ -30,6 +30,9 @@ final class ReferenceLocalizations {
   static String reactionKindName(String wireValue, String fallback) =>
       _reactionKindNames[wireValue] ?? fallback;
 
+  static String measurementSourceName(String wireValue, String fallback) =>
+      _measurementSourceNames[wireValue] ?? fallback;
+
   static const Map<String, String> _activityNames = {
     'SEDENTARY': 'Ít vận động',
     'LIGHT': 'Hoạt động nhẹ',
@@ -115,6 +118,12 @@ final class ReferenceLocalizations {
     'ALLERGY': 'Dị ứng',
     'INTOLERANCE': 'Không dung nạp',
     'UNSPECIFIED': 'Chưa xác định',
+  };
+
+  static const Map<String, String> _measurementSourceNames = {
+    'USER_ENTERED': 'Người dùng nhập',
+    'IMPORTED': 'Đã nhập từ nguồn khác',
+    'CORRECTED': 'Đã hiệu chỉnh',
   };
 
   static const Map<String, String> _allergenDescriptions = {

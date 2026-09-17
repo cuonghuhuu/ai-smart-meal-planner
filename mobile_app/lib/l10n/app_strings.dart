@@ -115,6 +115,46 @@ final class AppStrings {
   static const saveAllergens = 'Lưu thông tin dị ứng';
   static const allergensSaved = 'Đã lưu thông tin dị ứng.';
 
+  // Body measurements.
+  static const measurements = 'Số đo cơ thể';
+  static const measurementsSubtitle =
+      'Theo dõi cân nặng và các chỉ số cơ thể theo thời gian.';
+  static const latestMeasurement = 'Số đo mới nhất';
+  static const measurementHistory = 'Lịch sử số đo';
+  static const noMeasurements = 'Bạn chưa có số đo nào.';
+  static const addMeasurement = 'Thêm số đo';
+  static const editMeasurement = 'Chỉnh sửa';
+  static const saveMeasurement = 'Lưu số đo';
+  static const updateMeasurement = 'Cập nhật số đo';
+  static const measurementSaved = 'Đã lưu số đo.';
+  static const measurementUpdated = 'Đã cập nhật số đo.';
+  static const measurementLoading = 'Đang tải số đo…';
+  static const measurementSaving = 'Đang lưu…';
+  static const measuredDate = 'Ngày đo';
+  static const weightKg = 'Cân nặng (kg)';
+  static const bodyFatPercent = 'Tỷ lệ mỡ cơ thể (%)';
+  static const waistCm = 'Vòng eo (cm)';
+  static const source = 'Nguồn dữ liệu';
+  static const userEntered = 'Người dùng nhập';
+  static const imported = 'Đã nhập từ nguồn khác';
+  static const corrected = 'Đã hiệu chỉnh';
+  static const measurementUpsertHelper =
+      'Nếu ngày này đã có số đo, dữ liệu hiện có sẽ được cập nhật.';
+  static const measuredDateImmutable =
+      'Ngày đo không thể thay đổi khi chỉnh sửa.';
+  static const fromDate = 'Từ ngày';
+  static const toDate = 'Đến ngày';
+  static const applyFilter = 'Áp dụng';
+  static const clearFilter = 'Xóa bộ lọc';
+  static const loadMore = 'Xem thêm';
+  static const measurementDateRangeRequired =
+      'Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.';
+  static const measurementDateRangeInvalid =
+      'Ngày bắt đầu không được sau ngày kết thúc.';
+  static const measurementLoadFailed = 'Không thể tải số đo. Vui lòng thử lại.';
+  static const measurementSaveFailed = 'Không thể lưu số đo. Vui lòng thử lại.';
+  static const measurementsUnavailable = 'Số đo cơ thể hiện không khả dụng.';
+
   // Foundation and routing fallback pages.
   static const foundationReady = 'Nền tảng Flutter Web đã sẵn sàng.';
   static const runtimeConfiguration = 'Cấu hình khi chạy';
@@ -163,6 +203,21 @@ final class AppStrings {
   static const dietaryDuplicate = 'Không được chọn trùng sở thích ăn uống.';
   static const allergenCodeBlank = 'Mã chất gây dị ứng không được để trống.';
   static const allergenDuplicate = 'Không được chọn trùng chất gây dị ứng.';
+  static const measuredDateRequired = 'Vui lòng chọn ngày đo.';
+  static const measuredDateInFuture = 'Ngày đo không được ở tương lai.';
+  static const weightRequired = 'Vui lòng nhập cân nặng.';
+  static const weightInvalid = 'Cân nặng phải lớn hơn 2 kg và nhỏ hơn 700 kg.';
+  static const weightPrecision =
+      'Cân nặng chỉ được có tối đa 2 chữ số thập phân.';
+  static const bodyFatInvalid = 'Tỷ lệ mỡ cơ thể phải từ 0% đến 100%.';
+  static const bodyFatPrecision =
+      'Tỷ lệ mỡ cơ thể chỉ được có tối đa 1 chữ số thập phân.';
+  static const waistInvalid = 'Vòng eo phải lớn hơn 10 cm và nhỏ hơn 400 cm.';
+  static const waistPrecision =
+      'Vòng eo chỉ được có tối đa 1 chữ số thập phân.';
+  static const measurementNoteTooLong =
+      'Ghi chú không được vượt quá 255 ký tự.';
+  static const measurementInvalidNumber = 'Vui lòng nhập một số hợp lệ.';
 
   // Safe, user-facing error copy. Backend problem details are intentionally
   // not returned directly to the UI.

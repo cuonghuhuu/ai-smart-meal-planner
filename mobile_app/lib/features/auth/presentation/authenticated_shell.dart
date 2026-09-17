@@ -39,6 +39,7 @@ class AuthenticatedShell extends StatelessWidget {
                 if (index == 0) context.go('/catalog/foods');
                 if (index == 2) context.go('/profile');
                 if (index == 3) context.go('/preferences');
+                if (index == 4) context.go('/measurements');
               },
               leading: IconButton(
                 tooltip: AppStrings.signOut,
@@ -61,6 +62,10 @@ class AuthenticatedShell extends StatelessWidget {
                 NavigationRailDestination(
                   icon: Icon(Icons.tune),
                   label: Text(AppStrings.preferences),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.monitor_weight),
+                  label: Text(AppStrings.measurements),
                 ),
               ],
             ),
@@ -106,6 +111,12 @@ class _NavigationDrawer extends StatelessWidget {
           leading: const Icon(Icons.tune),
           title: const Text(AppStrings.preferences),
           onTap: () => context.go('/preferences'),
+        ),
+        ListTile(
+          selected: selectedIndex == 4,
+          leading: const Icon(Icons.monitor_weight),
+          title: const Text(AppStrings.measurements),
+          onTap: () => context.go('/measurements'),
         ),
         const Divider(),
         ListTile(
