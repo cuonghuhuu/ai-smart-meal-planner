@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_meal_planner/core/api/api_exception.dart';
 import 'package:smart_meal_planner/features/auth/application/session_controller.dart';
+import 'package:smart_meal_planner/l10n/app_strings.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({
@@ -56,8 +57,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) => AuthPageShell(
-    title: 'Welcome back',
-    subtitle: 'Sign in to continue planning meals.',
+    title: AppStrings.welcomeBack,
+    subtitle: AppStrings.signInSubtitle,
     child: Form(
       key: _formKey,
       child: Column(
@@ -65,15 +66,13 @@ class _LoginPageState extends State<LoginPage> {
         children: [
           if (_error != null) ProblemBanner(message: _error!),
           if (widget.showResetSuccess)
-            const _SuccessBanner(
-              message: 'Password reset. You can now sign in.',
-            ),
+            const _SuccessBanner(message: AppStrings.passwordResetSuccess),
           TextFormField(
             controller: _email,
             autofillHints: const [AutofillHints.username, AutofillHints.email],
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(labelText: 'Email'),
+            decoration: const InputDecoration(labelText: AppStrings.email),
             validator: _emailValidator,
           ),
           const SizedBox(height: 16),
@@ -81,22 +80,22 @@ class _LoginPageState extends State<LoginPage> {
             controller: _password,
             onSubmitted: _submit,
             validator: _loginPasswordValidator,
-            helperText: 'Enter your password',
+            helperText: AppStrings.enterPassword,
           ),
           const SizedBox(height: 24),
           SubmitButton(
-            label: 'Sign in',
+            label: AppStrings.signIn,
             submitting: _submitting,
             onPressed: _submit,
           ),
           const SizedBox(height: 12),
           TextButton(
             onPressed: () => context.go('/auth/forgot-password'),
-            child: const Text('Forgot password?'),
+            child: const Text(AppStrings.forgotPassword),
           ),
           TextButton(
             onPressed: () => context.go('/auth/register'),
-            child: const Text('Create an account'),
+            child: const Text(AppStrings.createAccountLink),
           ),
         ],
       ),
@@ -160,8 +159,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   @override
   Widget build(BuildContext context) => AuthPageShell(
-    title: 'Create your account',
-    subtitle: 'We will ask you to verify your email before you sign in.',
+    title: AppStrings.createYourAccount,
+    subtitle: AppStrings.registrationSubtitle,
     child: Form(
       key: _formKey,
       child: Column(
@@ -172,14 +171,16 @@ class _RegistrationPageState extends State<RegistrationPage> {
             controller: _displayName,
             textInputAction: TextInputAction.next,
             autofillHints: const [AutofillHints.name],
-            decoration: const InputDecoration(labelText: 'Display name'),
+            decoration: const InputDecoration(
+              labelText: AppStrings.displayName,
+            ),
             validator: (value) {
               final trimmed = value?.trim() ?? '';
               if (trimmed.isEmpty) {
-                return 'Enter a display name.';
+                return AppStrings.displayNameRequired;
               }
               if (trimmed.length > 100) {
-                return 'Display name must be 100 characters or fewer.';
+                return AppStrings.displayNameTooLong;
               }
               return null;
             },
@@ -190,20 +191,20 @@ class _RegistrationPageState extends State<RegistrationPage> {
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
             autofillHints: const [AutofillHints.username, AutofillHints.email],
-            decoration: const InputDecoration(labelText: 'Email'),
+            decoration: const InputDecoration(labelText: AppStrings.email),
             validator: _emailValidator,
           ),
           const SizedBox(height: 16),
           PasswordField(controller: _password, onSubmitted: _submit),
           const SizedBox(height: 24),
           SubmitButton(
-            label: 'Create account',
+            label: AppStrings.createAccount,
             submitting: _submitting,
             onPressed: _submit,
           ),
           TextButton(
             onPressed: () => context.go('/auth/login'),
-            child: const Text('Already have an account? Sign in'),
+            child: const Text(AppStrings.alreadyHaveAccount),
           ),
         ],
       ),
@@ -247,9 +248,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   Future<void> _verify() async {
     final token = widget.token;
     if (_submitting || token == null || !_isVerificationToken(token)) {
-      setState(
-        () => _error = 'The verification link is invalid or incomplete.',
-      );
+      setState(() => _error = AppStrings.invalidVerificationLink);
       return;
     }
     setState(() {
@@ -259,7 +258,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
     try {
       await widget.sessionController.verifyEmail(token);
       if (mounted) {
-        setState(() => _success = 'Email verified. You can now sign in.');
+        setState(() => _success = AppStrings.emailVerified);
       }
     } on Object catch (error) {
       if (mounted) {
@@ -285,10 +284,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
     try {
       await widget.sessionController.resendVerification(_email.text.trim());
       if (mounted) {
-        setState(
-          () => _success =
-              'If the account needs verification, a new email has been sent.',
-        );
+        setState(() => _success = AppStrings.verificationEmailSent);
       }
     } on Object catch (error) {
       if (mounted) {
@@ -303,9 +299,8 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
 
   @override
   Widget build(BuildContext context) => AuthPageShell(
-    title: 'Verify your email',
-    subtitle:
-        'Open the verification link from your email, or request another one.',
+    title: AppStrings.verifyYourEmail,
+    subtitle: AppStrings.verifyEmailSubtitle,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -313,7 +308,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
         if (_success != null) _SuccessBanner(message: _success!),
         if (widget.token != null) ...[
           SubmitButton(
-            label: 'Verify email',
+            label: AppStrings.verifyYourEmail,
             submitting: _submitting,
             onPressed: _verify,
           ),
@@ -322,16 +317,18 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
         TextField(
           controller: _email,
           keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(labelText: 'Email for a new link'),
+          decoration: const InputDecoration(
+            labelText: AppStrings.emailForNewLink,
+          ),
         ),
         const SizedBox(height: 16),
         OutlinedButton(
           onPressed: _submitting ? null : _resend,
-          child: const Text('Resend verification email'),
+          child: const Text(AppStrings.resendVerificationEmail),
         ),
         TextButton(
           onPressed: () => context.go('/auth/login'),
-          child: const Text('Back to sign in'),
+          child: const Text(AppStrings.backToSignIn),
         ),
       ],
     ),
@@ -385,8 +382,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) => AuthPageShell(
-    title: 'Reset your password',
-    subtitle: 'Enter your email and we will send instructions if an account is eligible.',
+    title: AppStrings.resetYourPassword,
+    subtitle: AppStrings.resetPasswordSubtitle,
     child: Form(
       key: _formKey,
       child: Column(
@@ -394,24 +391,22 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         children: [
           if (_error != null) ProblemBanner(message: _error!),
           if (_submitted)
-            const _SuccessBanner(
-              message: 'If an account matches this email, reset instructions have been sent.',
-            ),
+            const _SuccessBanner(message: AppStrings.resetInstructionsSent),
           TextFormField(
             controller: _email,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(labelText: 'Email'),
+            decoration: const InputDecoration(labelText: AppStrings.email),
             validator: _emailValidator,
           ),
           const SizedBox(height: 24),
           SubmitButton(
-            label: 'Send reset instructions',
+            label: AppStrings.sendResetInstructions,
             submitting: _submitting,
             onPressed: _submit,
           ),
           TextButton(
             onPressed: () => context.go('/auth/login'),
-            child: const Text('Back to sign in'),
+            child: const Text(AppStrings.backToSignIn),
           ),
         ],
       ),
@@ -447,9 +442,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   Future<void> _submit() async {
     final token = widget.token;
     if (_submitting || token == null || token.isEmpty) {
-      setState(
-        () => _error = 'The password reset link is invalid or incomplete.',
-      );
+      setState(() => _error = AppStrings.invalidResetLink);
       return;
     }
     if (!_formKey.currentState!.validate()) {
@@ -480,8 +473,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
   @override
   Widget build(BuildContext context) => AuthPageShell(
-    title: 'Choose a new password',
-    subtitle: 'Use at least 12 characters and no more than 72 UTF-8 bytes.',
+    title: AppStrings.chooseNewPassword,
+    subtitle: AppStrings.passwordRequirements,
     child: Form(
       key: _formKey,
       child: Column(
@@ -491,7 +484,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           PasswordField(controller: _password, onSubmitted: _submit),
           const SizedBox(height: 24),
           SubmitButton(
-            label: 'Reset password',
+            label: AppStrings.resetPassword,
             submitting: _submitting,
             onPressed: _submit,
           ),
@@ -551,7 +544,7 @@ class PasswordField extends StatefulWidget {
     required this.controller,
     required this.onSubmitted,
     this.validator,
-    this.helperText = '12-72 UTF-8 bytes',
+    this.helperText = AppStrings.passwordHelper,
   });
   final TextEditingController controller;
   final VoidCallback onSubmitted;
@@ -574,10 +567,10 @@ class _PasswordFieldState extends State<PasswordField> {
     textInputAction: TextInputAction.done,
     onFieldSubmitted: (_) => widget.onSubmitted(),
     decoration: InputDecoration(
-      labelText: 'Password',
+      labelText: AppStrings.password,
       helperText: widget.helperText,
       suffixIcon: IconButton(
-        tooltip: _obscure ? 'Show password' : 'Hide password',
+        tooltip: _obscure ? AppStrings.showPassword : AppStrings.hidePassword,
         onPressed: () => setState(() => _obscure = !_obscure),
         icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
       ),
@@ -642,11 +635,11 @@ class _SuccessBanner extends StatelessWidget {
 String? _emailValidator(String? value) {
   final email = value?.trim() ?? '';
   if (email.isEmpty) {
-    return 'Enter your email.';
+    return AppStrings.enterEmail;
   }
   if (email.length > 320 ||
       !RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)) {
-    return 'Enter a valid email.';
+    return AppStrings.validEmail;
   }
   return null;
 }
@@ -654,20 +647,20 @@ String? _emailValidator(String? value) {
 String? _passwordValidator(String? value) {
   final password = value ?? '';
   if (password.trim().isEmpty) {
-    return 'Enter a password.';
+    return AppStrings.enterPasswordError;
   }
   if (password.length < 12) {
-    return 'Password must contain at least 12 characters.';
+    return AppStrings.passwordTooShort;
   }
   if (utf8.encode(password).length > 72) {
-    return 'Password must be 72 UTF-8 bytes or fewer.';
+    return AppStrings.passwordTooLong;
   }
   return null;
 }
 
 String? _loginPasswordValidator(String? value) {
   if ((value ?? '').trim().isEmpty) {
-    return 'Enter a password.';
+    return AppStrings.enterPasswordError;
   }
   return null;
 }
@@ -681,33 +674,31 @@ String _safeError(
   bool resetPassword = false,
 }) {
   if (error case SessionInitializationException()) {
-    return 'Signed in, but your account could not be loaded. Please try again.';
+    return AppStrings.sessionUserUnavailable;
   }
   if (error case ApiHttpException(statusCode: 401) when login) {
-    return 'Email or password is incorrect.';
+    return AppStrings.incorrectCredentials;
   }
   if (resetPassword && error is ApiHttpException) {
     final problem = error.problem;
     if (problem != null) {
       return switch (problem.code) {
-        'INVALID_PASSWORD_RESET_TOKEN' =>
-          'This password reset link is invalid or expired.',
-        'INVALID_PASSWORD' => 'Choose a password with at least 12 characters and no more than 72 UTF-8 bytes.',
-        _ when problem.detail != null => problem.detail!,
-        _ => 'The password reset request could not be completed.',
+        'INVALID_PASSWORD_RESET_TOKEN' => AppStrings.invalidResetLink,
+        'INVALID_PASSWORD' => AppStrings.invalidPassword,
+        _ => AppStrings.requestFailed,
       };
     }
-    return 'The password reset request could not be completed.';
+    return AppStrings.requestFailed;
   }
   if (error case ApiHttpException(statusCode: 409)) {
-    return 'This email address is already registered.';
+    return AppStrings.emailAlreadyRegistered;
   }
-  if (error case ApiHttpException(problem: final problem?)
-      when problem.detail != null) {
-    return problem.detail!;
+  if (error case ApiHttpException(statusCode: final statusCode)
+      when statusCode >= 500) {
+    return AppStrings.serviceUnavailable;
   }
   if (error is ApiTransportException) {
-    return 'Unable to reach the service. Please try again.';
+    return AppStrings.unableToReachService;
   }
-  return 'Something went wrong. Please try again.';
+  return AppStrings.genericError;
 }

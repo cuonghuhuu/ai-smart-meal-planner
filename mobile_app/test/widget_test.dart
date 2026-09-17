@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_meal_planner/app/app.dart';
 import 'package:smart_meal_planner/core/api/api_exception.dart';
@@ -10,6 +11,21 @@ import 'package:smart_meal_planner/features/auth/domain/auth_models.dart';
 import 'support/fake_auth_repository.dart';
 
 void main() {
+  testWidgets('configures Vietnamese Material localization', (tester) async {
+    final session = SessionController(
+      authRepository: FakeAuthRepository(
+        refreshError: const ApiHttpException(401),
+      ),
+      refreshTokenStore: NoRefreshTokenStore(),
+      isWeb: true,
+    );
+
+    await tester.pumpWidget(SmartMealPlannerApp(sessionController: session));
+
+    final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
+    expect(app.locale, const Locale('vi', 'VN'));
+  });
+
   testWidgets('keeps the protected route in startup state while restoring', (
     tester,
   ) async {
@@ -23,13 +39,19 @@ void main() {
 
     await tester.pumpWidget(SmartMealPlannerApp(sessionController: session));
 
-    expect(find.bySemanticsLabel('Restoring session'), findsOneWidget);
-    expect(find.text('Welcome back'), findsNothing);
+    expect(
+      find.bySemanticsLabel('Đang khôi phục phiên đăng nhập'),
+      findsOneWidget,
+    );
+    expect(find.text('Chào mừng bạn quay lại'), findsNothing);
 
     refresh.complete();
     await tester.pumpAndSettle();
 
-    expect(find.text('Food Catalog is coming in P8.7.'), findsOneWidget);
+    expect(
+      find.text('Danh mục thực phẩm đang được hoàn thiện.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('anonymous protected startup redirects to login', (tester) async {
@@ -44,7 +66,7 @@ void main() {
     await tester.pumpWidget(SmartMealPlannerApp(sessionController: session));
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome back'), findsOneWidget);
+    expect(find.text('Chào mừng bạn quay lại'), findsOneWidget);
   });
 
   testWidgets('sign out clears authenticated state and returns to login', (
@@ -58,10 +80,10 @@ void main() {
 
     await tester.pumpWidget(SmartMealPlannerApp(sessionController: session));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Sign out').first);
+    await tester.tap(find.byTooltip('Đăng xuất').first);
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome back'), findsOneWidget);
+    expect(find.text('Chào mừng bạn quay lại'), findsOneWidget);
   });
 }
 

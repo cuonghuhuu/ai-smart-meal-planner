@@ -4,6 +4,8 @@ import 'package:smart_meal_planner/features/auth/presentation/authenticated_shel
 import 'package:smart_meal_planner/features/profile/application/profile_controller.dart';
 import 'package:smart_meal_planner/features/profile/application/profile_validation.dart';
 import 'package:smart_meal_planner/features/profile/data/profile_models.dart';
+import 'package:smart_meal_planner/l10n/app_strings.dart';
+import 'package:smart_meal_planner/l10n/reference_localizations.dart';
 
 const _sexOptions = <String>['FEMALE', 'MALE', 'OTHER', 'PREFER_NOT_TO_SAY'];
 
@@ -141,7 +143,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
     if (state.status == ProfileStatus.error && !state.hasEditableProfile) {
       return _LoadError(
-        message: state.errorMessage ?? 'The profile could not be loaded.',
+        message: state.errorMessage ?? AppStrings.profileLoadSaveFailed,
         onRetry: _controller.reload,
       );
     }
@@ -159,14 +161,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Profile',
+                    AppStrings.profile,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     state.isNewProfile
-                        ? 'Complete your profile to personalize your meal plans.'
-                        : 'Keep your profile details up to date.',
+                        ? AppStrings.completeProfileSubtitle
+                        : AppStrings.updateProfileSubtitle,
                   ),
                   const SizedBox(height: 20),
                   if (state.saveMessage != null)
@@ -177,7 +179,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       action: state.status == ProfileStatus.conflict
                           ? TextButton(
                               onPressed: _controller.reload,
-                              child: const Text('Reload'),
+                              child: const Text(AppStrings.reload),
                             )
                           : null,
                     ),
@@ -192,32 +194,32 @@ class _ProfilePageState extends State<ProfilePage> {
                         _nutritionGoalField(state),
                         _numberField(
                           controller: _height,
-                          label: 'Height (cm)',
+                          label: AppStrings.heightCm,
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
                           validator: (value) => _numberError(
                             value,
                             (number) => number > 30 && number < 300,
-                            'Height must be greater than 30 and less than 300 cm.',
+                            AppStrings.heightInvalid,
                           ),
                         ),
                         _numberField(
                           controller: _targetWeight,
-                          label: 'Target weight (kg)',
+                          label: AppStrings.targetWeightKg,
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
                           validator: (value) => _numberError(
                             value,
                             (number) => number > 2 && number < 700,
-                            'Target weight must be greater than 2 and less than 700 kg.',
+                            AppStrings.targetWeightInvalid,
                           ),
                         ),
                         _numberField(
                           controller: _weeklyChange,
-                          label: 'Weekly weight change goal (kg/week)',
-                          helperText: 'Leave blank if you do not have a weekly weight-change goal.',
+                          label: AppStrings.weeklyChangeKg,
+                          helperText: AppStrings.weeklyChangeHelper,
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                             signed: true,
@@ -226,19 +228,19 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         _numberField(
                           controller: _householdSize,
-                          label: 'Household size',
+                          label: AppStrings.householdSize,
                           keyboardType: TextInputType.number,
                           required: true,
                           validator: (value) {
                             final number = int.tryParse(value?.trim() ?? '');
                             return number != null && number >= 1
                                 ? null
-                                : 'Household size must be at least 1.';
+                                : AppStrings.householdSizeInvalid;
                           },
                         ),
                         _numberField(
                           controller: _maxCookMinutes,
-                          label: 'Max cooking time (minutes)',
+                          label: AppStrings.maxCookingTime,
                           keyboardType: TextInputType.number,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
@@ -249,7 +251,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     number >= 1 &&
                                     number <= 1440
                                 ? null
-                                : 'Cooking time must be between 1 and 1440 minutes.';
+                                : AppStrings.maxCookingTimeInvalid;
                           },
                         ),
                       ];
@@ -282,12 +284,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     maxLines: 6,
                     maxLength: 500,
                     decoration: const InputDecoration(
-                      labelText: 'Notes',
+                      labelText: AppStrings.notes,
                       alignLabelWithHint: true,
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) => value != null && value.length > 500
-                        ? 'Notes must be 500 characters or fewer.'
+                        ? AppStrings.notesTooLong
                         : null,
                   ),
                   const SizedBox(height: 8),
@@ -301,7 +303,9 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.save),
-                      label: Text(saving ? 'Saving…' : 'Save profile'),
+                      label: Text(
+                        saving ? AppStrings.saving : AppStrings.saveProfile,
+                      ),
                     ),
                   ),
                 ],
@@ -318,13 +322,13 @@ class _ProfilePageState extends State<ProfilePage> {
     readOnly: true,
     onTap: _chooseBirthDate,
     decoration: const InputDecoration(
-      labelText: 'Birth date',
+      labelText: AppStrings.birthDate,
       suffixIcon: Icon(Icons.calendar_today),
     ),
     validator: (value) {
       if (value == null || value.trim().isEmpty) return null;
       final date = _parseDate(value);
-      if (date == null) return 'Enter a valid date.';
+      if (date == null) return AppStrings.invalidDate;
       final errors = ProfileValidation.validate(
         _controller.state.draft.copyWith(birthDate: date),
       );
@@ -335,7 +339,11 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _sexField() => DropdownButtonFormField<String>(
     key: ValueKey('sex-$_sex'),
     initialValue: _sex,
-    decoration: const InputDecoration(labelText: 'Sex'),
+    decoration: const InputDecoration(labelText: AppStrings.sex),
+    isExpanded: true,
+    selectedItemBuilder: (context) => [
+      for (final value in _sexOptions) _selectedDropdownText(_sexLabel(value)),
+    ],
     items: [
       for (final value in _sexOptions)
         DropdownMenuItem(value: value, child: Text(_sexLabel(value))),
@@ -346,10 +354,22 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _activityField(ProfileState state) => DropdownButtonFormField<String>(
     key: ValueKey('activity-$_activityLevel'),
     initialValue: _activityLevel,
-    decoration: const InputDecoration(labelText: 'Activity level'),
+    decoration: const InputDecoration(labelText: AppStrings.activityLevel),
+    isExpanded: true,
+    selectedItemBuilder: (context) => [
+      for (final item in state.activityLevels)
+        _selectedDropdownText(
+          ReferenceLocalizations.activityName(item.code, item.displayName),
+        ),
+    ],
     items: [
       for (final item in state.activityLevels)
-        DropdownMenuItem(value: item.code, child: Text(item.displayName)),
+        DropdownMenuItem(
+          value: item.code,
+          child: Text(
+            ReferenceLocalizations.activityName(item.code, item.displayName),
+          ),
+        ),
     ],
     onChanged: (value) => setState(() => _activityLevel = value),
   );
@@ -358,13 +378,34 @@ class _ProfilePageState extends State<ProfilePage> {
       DropdownButtonFormField<String>(
         key: ValueKey('goal-$_nutritionGoal'),
         initialValue: _nutritionGoal,
-        decoration: const InputDecoration(labelText: 'Nutrition goal'),
+        decoration: const InputDecoration(labelText: AppStrings.nutritionGoal),
+        isExpanded: true,
+        selectedItemBuilder: (context) => [
+          for (final item in state.nutritionGoals)
+            _selectedDropdownText(
+              ReferenceLocalizations.nutritionGoalName(
+                item.code,
+                item.displayName,
+              ),
+            ),
+        ],
         items: [
           for (final item in state.nutritionGoals)
-            DropdownMenuItem(value: item.code, child: Text(item.displayName)),
+            DropdownMenuItem(
+              value: item.code,
+              child: Text(
+                ReferenceLocalizations.nutritionGoalName(
+                  item.code,
+                  item.displayName,
+                ),
+              ),
+            ),
         ],
         onChanged: (value) => setState(() => _nutritionGoal = value),
       );
+
+  Widget _selectedDropdownText(String text) =>
+      Text(text, maxLines: 1, overflow: TextOverflow.ellipsis);
 
   Widget _numberField({
     required TextEditingController controller,
@@ -380,7 +421,7 @@ class _ProfilePageState extends State<ProfilePage> {
     validator: (value) {
       final text = value?.trim() ?? '';
       if (text.isEmpty) {
-        return required ? '$label is required.' : null;
+        return required ? AppStrings.householdSizeRequired : null;
       }
       return validator(text);
     },
@@ -416,7 +457,7 @@ class _LoadError extends StatelessWidget {
         children: [
           Text(message, textAlign: TextAlign.center),
           const SizedBox(height: 12),
-          FilledButton(onPressed: onRetry, child: const Text('Retry')),
+          FilledButton(onPressed: onRetry, child: const Text(AppStrings.retry)),
         ],
       ),
     ),
@@ -451,24 +492,29 @@ class _MessageBanner extends StatelessWidget {
 }
 
 String _sexLabel(String value) => switch (value) {
-  'FEMALE' => 'Female',
-  'MALE' => 'Male',
-  'OTHER' => 'Other',
-  'PREFER_NOT_TO_SAY' => 'Prefer not to say',
+  'FEMALE' => AppStrings.female,
+  'MALE' => AppStrings.male,
+  'OTHER' => AppStrings.other,
+  'PREFER_NOT_TO_SAY' => AppStrings.preferNotToSay,
   _ => value,
 };
 
 DateTime? _parseDate(String value) {
-  final match = RegExp(r'^([0-9]{4})-([0-9]{2})-([0-9]{2})$')
+  final match = RegExp(r'^([0-9]{2})/([0-9]{2})/([0-9]{4})$')
       .firstMatch(value.trim());
   if (match == null) return null;
-  final date = DateTime.tryParse(value.trim());
-  return date == null || _formatDate(date) != value.trim() ? null : date;
+  final day = int.parse(match.group(1)!);
+  final month = int.parse(match.group(2)!);
+  final year = int.parse(match.group(3)!);
+  final date = DateTime(year, month, day);
+  return date.day == day && date.month == month && date.year == year
+      ? date
+      : null;
 }
 
 String _formatDate(DateTime? value) => value == null
     ? ''
-    : '${value.year.toString().padLeft(4, '0')}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}';
+    : '${value.day.toString().padLeft(2, '0')}/${value.month.toString().padLeft(2, '0')}/${value.year.toString().padLeft(4, '0')}';
 
 String _formatNumber(double? value) {
   if (value == null) return '';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_meal_planner/features/auth/application/session_controller.dart';
 import 'package:smart_meal_planner/features/auth/domain/auth_models.dart';
+import 'package:smart_meal_planner/l10n/app_strings.dart';
 
 class SessionRouteGate extends StatelessWidget {
   const SessionRouteGate({
@@ -29,7 +30,7 @@ class _BootstrapPage extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
     body: Center(
       child: Semantics(
-        label: 'Restoring session',
+        label: AppStrings.restoringSession,
         child: CircularProgressIndicator(),
       ),
     ),

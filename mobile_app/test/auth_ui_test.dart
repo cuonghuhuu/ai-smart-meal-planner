@@ -15,11 +15,14 @@ void main() {
     final session = _session(FakeAuthRepository());
     await tester.pumpWidget(_page(LoginPage(sessionController: session)));
 
-    await tester.tap(find.text('Sign in'));
+    expect(find.text('Chào mừng bạn quay lại'), findsOneWidget);
+    expect(_fieldWithLabel('Email'), findsOneWidget);
+    expect(_fieldWithLabel('Mật khẩu'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Đăng nhập'));
     await tester.pump();
 
-    expect(find.text('Enter your email.'), findsOneWidget);
-    expect(find.text('Enter a password.'), findsOneWidget);
+    expect(find.text('Vui lòng nhập email.'), findsOneWidget);
+    expect(find.text('Vui lòng nhập mật khẩu.'), findsOneWidget);
   });
 
   testWidgets('failed login preserves entered credentials for correction', (
@@ -30,20 +33,21 @@ void main() {
     );
     final session = _session(repository);
     await tester.pumpWidget(_page(LoginPage(sessionController: session)));
-    final fields = find.byType(TextFormField);
-    await tester.enterText(fields.at(0), 'person@example.test');
-    await tester.enterText(fields.at(1), 'a password');
+    final emailField = _fieldWithLabel('Email');
+    final passwordField = _fieldWithLabel('Mật khẩu');
+    await tester.enterText(emailField, 'person@example.test');
+    await tester.enterText(passwordField, 'a password');
 
-    await tester.tap(find.text('Sign in'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Đăng nhập'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Email or password is incorrect.'), findsOneWidget);
+    expect(find.text('Email hoặc mật khẩu không chính xác.'), findsOneWidget);
     expect(
-      tester.widget<TextFormField>(fields.at(0)).controller!.text,
+      tester.widget<TextFormField>(emailField).controller!.text,
       'person@example.test',
     );
     expect(
-      tester.widget<TextFormField>(fields.at(1)).controller!.text,
+      tester.widget<TextFormField>(passwordField).controller!.text,
       'a password',
     );
   });
@@ -52,11 +56,12 @@ void main() {
     final repository = FakeAuthRepository();
     final session = _session(repository);
     await tester.pumpWidget(_page(LoginPage(sessionController: session)));
-    final fields = find.byType(TextFormField);
-    await tester.enterText(fields.at(0), 'person@example.test');
-    await tester.enterText(fields.at(1), 'a password');
+    final emailField = _fieldWithLabel('Email');
+    final passwordField = _fieldWithLabel('Mật khẩu');
+    await tester.enterText(emailField, 'person@example.test');
+    await tester.enterText(passwordField, 'a password');
 
-    await tester.tap(find.text('Sign in'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Đăng nhập'));
     await tester.pumpAndSettle();
 
     expect(session.isAuthenticated, isTrue);
@@ -68,31 +73,26 @@ void main() {
   ) async {
     final session = _session(FakeAuthRepository());
     await tester.pumpWidget(_registrationApp(session));
-    final fields = find.byType(TextFormField);
-    await tester.enterText(fields.at(0), 'Planner');
-    await tester.enterText(fields.at(1), 'person@example.test');
-    await tester.enterText(fields.at(2), '12345678901');
+    final displayNameField = _fieldWithLabel('Tên hiển thị');
+    final emailField = _fieldWithLabel('Email');
+    final passwordField = _fieldWithLabel('Mật khẩu');
+    await tester.enterText(displayNameField, 'Planner');
+    await tester.enterText(emailField, 'person@example.test');
+    await tester.enterText(passwordField, '12345678901');
 
-    await tester.tap(find.text('Create account'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Tạo tài khoản'));
     await tester.pump();
-    expect(
-      find.text('Password must contain at least 12 characters.'),
-      findsOneWidget,
-    );
+    expect(find.text('Mật khẩu phải có ít nhất 12 ký tự.'), findsOneWidget);
 
-    await tester.enterText(
-      fields.at(2),
-      '😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀',
-    );
     final oversizedEmojiPassword = List<String>.filled(
       19,
       String.fromCharCode(0x1f600),
     ).join();
-    await tester.enterText(fields.at(2), oversizedEmojiPassword);
-    await tester.tap(find.text('Create account'));
+    await tester.enterText(passwordField, oversizedEmojiPassword);
+    await tester.tap(find.widgetWithText(FilledButton, 'Tạo tài khoản'));
     await tester.pump();
     expect(
-      find.text('Password must be 72 UTF-8 bytes or fewer.'),
+      find.text('Mật khẩu không được vượt quá 72 byte UTF-8.'),
       findsOneWidget,
     );
   });
@@ -103,21 +103,22 @@ void main() {
     final repository = FakeAuthRepository();
     final session = _session(repository);
     await tester.pumpWidget(_registrationApp(session));
-    final fields = find.byType(TextFormField);
-    await tester.enterText(fields.at(0), 'Planner');
-    await tester.enterText(fields.at(1), 'person@example.test');
-    await tester.enterText(fields.at(2), '😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀');
+    final displayNameField = _fieldWithLabel('Tên hiển thị');
+    final emailField = _fieldWithLabel('Email');
+    final passwordField = _fieldWithLabel('Mật khẩu');
+    await tester.enterText(displayNameField, 'Planner');
+    await tester.enterText(emailField, 'person@example.test');
 
     final validEmojiPassword = List<String>.filled(
       17,
       String.fromCharCode(0x1f600),
     ).join();
-    await tester.enterText(fields.at(2), validEmojiPassword);
-    await tester.tap(find.text('Create account'));
+    await tester.enterText(passwordField, validEmojiPassword);
+    await tester.tap(find.widgetWithText(FilledButton, 'Tạo tài khoản'));
     await tester.pumpAndSettle();
 
     expect(repository.registerCalls, 1);
-    expect(find.text('Verification destination'), findsOneWidget);
+    expect(find.text('Đích xác minh'), findsOneWidget);
   });
 
   testWidgets('verification uses deep-link token and resend email', (
@@ -142,12 +143,17 @@ void main() {
     );
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
-    await tester.tap(find.text('Verify email'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Xác minh email'));
     await tester.pumpAndSettle();
     expect(repository.lastToken, token);
-    expect(find.text('Email verified. You can now sign in.'), findsOneWidget);
+    expect(
+      find.text('Email đã được xác minh. Bạn có thể đăng nhập ngay.'),
+      findsOneWidget,
+    );
 
-    await tester.tap(find.text('Resend verification email'));
+    await tester.tap(
+      find.widgetWithText(OutlinedButton, 'Gửi lại email xác minh'),
+    );
     await tester.pumpAndSettle();
     expect(repository.resendCalls, 1);
   });
@@ -159,15 +165,17 @@ void main() {
     await tester.pumpWidget(
       _page(ForgotPasswordPage(sessionController: _session(repository))),
     );
-    await tester.enterText(find.byType(TextFormField), 'person@example.test');
+    await tester.enterText(_fieldWithLabel('Email'), 'person@example.test');
 
-    await tester.tap(find.text('Send reset instructions'));
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'Gửi hướng dẫn đặt lại'),
+    );
     await tester.pumpAndSettle();
 
     expect(repository.forgotCalls, 1);
     expect(
       find.text(
-        'If an account matches this email, reset instructions have been sent.',
+        'Nếu email khớp với một tài khoản, hướng dẫn đặt lại mật khẩu đã được gửi.',
       ),
       findsOneWidget,
     );
@@ -191,27 +199,22 @@ void main() {
         ),
         GoRoute(
           path: '/auth/login',
-          builder: (_, _) => const Scaffold(body: Text('Login destination')),
+          builder: (_, _) => const Scaffold(body: Text('Đích đăng nhập')),
         ),
       ],
     );
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-    await tester.enterText(
-      find.byType(TextFormField),
-      '😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀',
-    );
-
     final validEmojiPassword = List<String>.filled(
       17,
       String.fromCharCode(0x1f600),
     ).join();
-    await tester.enterText(find.byType(TextFormField), validEmojiPassword);
-    await tester.tap(find.text('Reset password'));
+    await tester.enterText(_fieldWithLabel('Mật khẩu'), validEmojiPassword);
+    await tester.tap(find.widgetWithText(FilledButton, 'Đặt lại mật khẩu'));
     await tester.pumpAndSettle();
 
     expect(repository.resetCalls, 1);
     expect(repository.lastToken, token);
-    expect(find.text('Login destination'), findsOneWidget);
+    expect(find.text('Đích đăng nhập'), findsOneWidget);
   });
 
   testWidgets('anonymous intended route is restored after login', (
@@ -223,13 +226,17 @@ void main() {
     await tester.pumpWidget(SmartMealPlannerApp(sessionController: session));
     await tester.pumpAndSettle();
 
-    final fields = find.byType(TextFormField);
-    await tester.enterText(fields.at(0), 'person@example.test');
-    await tester.enterText(fields.at(1), 'a password');
-    await tester.tap(find.text('Sign in'));
+    final emailField = _fieldWithLabel('Email');
+    final passwordField = _fieldWithLabel('Mật khẩu');
+    await tester.enterText(emailField, 'person@example.test');
+    await tester.enterText(passwordField, 'a password');
+    await tester.tap(find.widgetWithText(FilledButton, 'Đăng nhập'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Food Catalog is coming in P8.7.'), findsOneWidget);
+    expect(
+      find.text('Danh mục thực phẩm đang được hoàn thiện.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('accepts a relative catalog intended route', (tester) async {
@@ -289,7 +296,7 @@ void main() {
     router.go('/not-a-route');
     await tester.pumpAndSettle();
 
-    expect(find.text('Page not found'), findsOneWidget);
+    expect(find.text('Không tìm thấy trang'), findsOneWidget);
   });
 }
 
@@ -317,10 +324,12 @@ Widget _registrationApp(SessionController session) {
       ),
       GoRoute(
         path: '/auth/verify-email',
-        builder: (_, _) =>
-            const Scaffold(body: Text('Verification destination')),
+        builder: (_, _) => const Scaffold(body: Text('Đích xác minh')),
       ),
     ],
   );
   return MaterialApp.router(routerConfig: router);
 }
+
+Finder _fieldWithLabel(String label) =>
+    find.ancestor(of: find.text(label), matching: find.byType(TextFormField));

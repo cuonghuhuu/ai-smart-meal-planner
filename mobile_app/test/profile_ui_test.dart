@@ -23,7 +23,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Complete your profile to personalize your meal plans.'),
+      find.text('Hoàn tất hồ sơ để cá nhân hóa kế hoạch bữa ăn.'),
       findsOneWidget,
     );
   });
@@ -35,7 +35,7 @@ void main() {
     router.go('/profile');
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome back'), findsOneWidget);
+    expect(find.text('Chào mừng bạn quay lại'), findsOneWidget);
   });
 
   testWidgets('intended /profile is restored after login', (tester) async {
@@ -51,16 +51,16 @@ void main() {
     router.go('/profile');
     await tester.pumpAndSettle();
     final emailField = _fieldWithLabel('Email');
-    final passwordField = _fieldWithLabel('Password');
+    final passwordField = _fieldWithLabel('Mật khẩu');
     expect(emailField, findsOneWidget);
     expect(passwordField, findsOneWidget);
     await tester.enterText(emailField, 'user@example.test');
     await tester.enterText(passwordField, 'Password123!');
-    await tester.tap(find.text('Sign in'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Đăng nhập'));
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Complete your profile to personalize your meal plans.'),
+      find.text('Hoàn tất hồ sơ để cá nhân hóa kế hoạch bữa ăn.'),
       findsOneWidget,
     );
   });
@@ -77,7 +77,10 @@ void main() {
     ]) {
       router.go('/auth/login?from=${Uri.encodeComponent(target)}');
       await tester.pumpAndSettle();
-      expect(find.text('Food Catalog is coming in P8.7.'), findsOneWidget);
+      expect(
+        find.text('Danh mục thực phẩm đang được hoàn thiện.'),
+        findsOneWidget,
+      );
     }
   });
 
@@ -86,11 +89,11 @@ void main() {
     final router = AppRouter(session, profileController: _controller()).router;
     await tester.pumpWidget(_routerApp(router));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Profile'));
+    await tester.tap(find.text('Hồ sơ cá nhân'));
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Complete your profile to personalize your meal plans.'),
+      find.text('Hoàn tất hồ sơ để cá nhân hóa kế hoạch bữa ăn.'),
       findsOneWidget,
     );
   });
@@ -101,8 +104,22 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('172'), findsOneWidget);
-    expect(find.text('Moderately Active'), findsOneWidget);
-    expect(find.text('Maintain Weight'), findsOneWidget);
+    expect(find.text('Hoạt động vừa phải'), findsOneWidget);
+    expect(find.text('Duy trì cân nặng'), findsOneWidget);
+    expect(find.text('03/02/1995'), findsOneWidget);
+    expect(find.text('Ngày sinh'), findsOneWidget);
+    expect(find.text('Giới tính'), findsOneWidget);
+    expect(find.text('Chiều cao (cm)'), findsOneWidget);
+    expect(find.text('Mức độ hoạt động'), findsOneWidget);
+    expect(find.text('Mục tiêu dinh dưỡng'), findsOneWidget);
+    expect(find.text('Cân nặng mục tiêu (kg)'), findsOneWidget);
+    expect(
+      find.text('Mục tiêu thay đổi cân nặng mỗi tuần (kg/tuần)'),
+      findsOneWidget,
+    );
+    expect(find.text('Số người trong hộ gia đình'), findsOneWidget);
+    expect(find.text('Thời gian nấu tối đa (phút)'), findsOneWidget);
+    expect(find.text('Ghi chú'), findsOneWidget);
     expect(find.text('Existing notes'), findsOneWidget);
   });
 
@@ -112,11 +129,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Complete your profile to personalize your meal plans.'),
+      find.text('Hoàn tất hồ sơ để cá nhân hóa kế hoạch bữa ăn.'),
       findsOneWidget,
     );
     expect(find.text('1'), findsOneWidget);
-    expect(find.text('Save profile'), findsOneWidget);
+    expect(find.text('Lưu hồ sơ'), findsOneWidget);
   });
 
   testWidgets('blank weekly change can be saved as null', (tester) async {
@@ -127,12 +144,14 @@ void main() {
     await tester.pumpWidget(_pageApp(controller));
     await tester.pumpAndSettle();
 
-    final weeklyField = _fieldWithLabel('Weekly weight change goal (kg/week)');
+    final weeklyField = _fieldWithLabel(
+      'Mục tiêu thay đổi cân nặng mỗi tuần (kg/tuần)',
+    );
     expect(weeklyField, findsOneWidget);
     expect(tester.widget<TextFormField>(weeklyField).controller!.text, isEmpty);
     await _tapAfterScroll(
       tester,
-      find.widgetWithText(FilledButton, 'Save profile'),
+      find.widgetWithText(FilledButton, 'Lưu hồ sơ'),
     );
     await tester.pumpAndSettle();
 
@@ -147,18 +166,18 @@ void main() {
     final controller = _controller(repository: repository);
     await tester.pumpWidget(_pageApp(controller));
     await tester.pumpAndSettle();
-    final heightField = _fieldWithLabel('Height (cm)');
+    final heightField = _fieldWithLabel('Chiều cao (cm)');
     expect(heightField, findsOneWidget);
     await tester.enterText(heightField, '30');
     expect(tester.widget<TextFormField>(heightField).controller!.text, '30');
-    final saveFinder = find.widgetWithText(FilledButton, 'Save profile');
+    final saveFinder = find.widgetWithText(FilledButton, 'Lưu hồ sơ');
     expect(saveFinder, findsOneWidget);
     final saveButton = tester.widget<FilledButton>(saveFinder);
     expect(saveButton.onPressed, isNotNull);
     saveButton.onPressed!();
     await tester.pump();
     expect(repository.updateCalls, 0);
-    expect(find.textContaining('greater than 30'), findsOneWidget);
+    expect(find.textContaining('lớn hơn 30'), findsOneWidget);
 
     await tester.enterText(heightField, '175');
     expect(tester.widget<TextFormField>(heightField).controller!.text, '175');
@@ -181,20 +200,20 @@ void main() {
     await tester.pumpAndSettle();
     await _tapAfterScroll(
       tester,
-      find.widgetWithText(FilledButton, 'Save profile'),
+      find.widgetWithText(FilledButton, 'Lưu hồ sơ'),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Reload'), findsOneWidget);
+    expect(find.text('Tải lại'), findsOneWidget);
     repository.updateError = null;
     repository.profile = _profile(heightCm: 180);
-    await _tapAfterScroll(tester, find.widgetWithText(TextButton, 'Reload'));
+    await _tapAfterScroll(tester, find.widgetWithText(TextButton, 'Tải lại'));
     await tester.pumpAndSettle();
     expect(find.text('180'), findsOneWidget);
     expect(find.text('172'), findsNothing);
     expect(
       find.text(
-        'Your profile was changed elsewhere. Reload the latest version before saving.',
+        'Dữ liệu hồ sơ đã được thay đổi ở nơi khác. Vui lòng tải lại trước khi lưu.',
       ),
       findsNothing,
     );
@@ -207,12 +226,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(Scrollable), findsWidgets);
-    await tester.ensureVisible(
-      find.widgetWithText(FilledButton, 'Save profile'),
-    );
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Lưu hồ sơ'));
     await tester.pump();
     expect(tester.takeException(), isNull);
-    expect(find.text('Save profile'), findsOneWidget);
+    expect(find.text('Lưu hồ sơ'), findsOneWidget);
   });
 }
 

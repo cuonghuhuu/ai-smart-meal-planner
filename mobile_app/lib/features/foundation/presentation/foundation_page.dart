@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_meal_planner/app/config/app_config.dart';
 import 'package:smart_meal_planner/core/ui/responsive_content.dart';
 import 'package:smart_meal_planner/features/foundation/data/backend_health_service.dart';
+import 'package:smart_meal_planner/l10n/app_strings.dart';
 
 class FoundationPage extends StatefulWidget {
   const FoundationPage({super.key, this.backendHealthChecker});
@@ -36,19 +37,16 @@ class _FoundationPageState extends State<FoundationPage> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('AI Smart Meal Planner')),
+      appBar: AppBar(title: const Text(AppStrings.productName)),
       body: ResponsiveContent(
         child: Align(
           alignment: Alignment.topLeft,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('AI Smart Meal Planner', style: textTheme.headlineMedium),
+              Text(AppStrings.productName, style: textTheme.headlineMedium),
               const SizedBox(height: 12),
-              Text(
-                'Flutter Web foundation is ready.',
-                style: textTheme.titleMedium,
-              ),
+              Text(AppStrings.foundationReady, style: textTheme.titleMedium),
               const SizedBox(height: 32),
               Card(
                 child: Padding(
@@ -57,23 +55,26 @@ class _FoundationPageState extends State<FoundationPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Runtime configuration',
+                        AppStrings.runtimeConfiguration,
                         style: textTheme.titleLarge,
                       ),
                       const SizedBox(height: 16),
                       _ConfigurationValue(
-                        label: 'Environment',
+                        label: AppStrings.environment,
                         value: AppConfig.environment,
                         valueColor: colorScheme.primary,
                       ),
                       const SizedBox(height: 12),
                       _ConfigurationValue(
-                        label: 'API URL',
+                        label: AppStrings.apiUrl,
                         value: AppConfig.apiBaseUrl,
                         valueColor: colorScheme.primary,
                       ),
                       const SizedBox(height: 24),
-                      Text('Backend connection', style: textTheme.titleLarge),
+                      Text(
+                        AppStrings.backendConnection,
+                        style: textTheme.titleLarge,
+                      ),
                       const SizedBox(height: 12),
                       FutureBuilder<BackendHealth>(
                         future: _healthCheck,
@@ -120,7 +121,7 @@ class _CheckingConnection extends StatelessWidget {
           child: CircularProgressIndicator(strokeWidth: 2),
         ),
         SizedBox(width: 12),
-        Text('Checking...'),
+        Text(AppStrings.checking),
       ],
     );
   }
@@ -131,7 +132,7 @@ class _ConnectedConnection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Text('Connected / UP');
+    return const Text(AppStrings.connectedUp);
   }
 }
 
@@ -144,11 +145,11 @@ class _UnavailableConnection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Expanded(child: Text('Backend unavailable/error')),
+        const Expanded(child: Text(AppStrings.backendUnavailable)),
         TextButton(
           key: const Key('retry-backend-health'),
           onPressed: onRetry,
-          child: const Text('Retry'),
+          child: const Text(AppStrings.retry),
         ),
       ],
     );

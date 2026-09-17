@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:smart_meal_planner/l10n/app_strings.dart';
 import 'package:smart_meal_planner/features/auth/application/session_controller.dart';
 import 'package:smart_meal_planner/features/auth/domain/auth_models.dart';
 import 'package:smart_meal_planner/features/auth/presentation/auth_pages.dart';
 import 'package:smart_meal_planner/features/auth/presentation/authenticated_shell.dart';
 import 'package:smart_meal_planner/features/auth/presentation/session_gate.dart';
+import 'package:smart_meal_planner/features/preferences/application/preferences_controller.dart';
+import 'package:smart_meal_planner/features/preferences/presentation/preferences_page.dart';
 import 'package:smart_meal_planner/features/profile/application/profile_controller.dart';
 import 'package:smart_meal_planner/features/profile/presentation/profile_page.dart';
 
@@ -12,6 +15,7 @@ final class AppRouter {
   AppRouter(
     SessionController sessionController, {
     ProfileController? profileController,
+    PreferencesController? preferencesController,
   }) : router = GoRouter(
          initialLocation: '/catalog/foods',
          refreshListenable: sessionController,
@@ -82,6 +86,18 @@ final class AppRouter {
                      ),
              ),
            ),
+           GoRoute(
+             path: '/preferences',
+             builder: (context, state) => SessionRouteGate(
+               sessionController: sessionController,
+               child: preferencesController == null
+                   ? const _PreferencesUnavailablePage()
+                   : PreferencesPage(
+                       sessionController: sessionController,
+                       preferencesController: preferencesController,
+                     ),
+             ),
+           ),
          ],
          errorBuilder: (context, state) => const _NotFoundPage(),
        );
@@ -94,7 +110,10 @@ final class AppRouter {
     }
     final path = state.uri.path;
     final isAuthRoute = path.startsWith('/auth/');
-    final isProtectedRoute = path == '/catalog/foods' || path == '/profile';
+    final isProtectedRoute =
+        path == '/catalog/foods' ||
+        path == '/profile' ||
+        path == '/preferences';
 
     if (session.status == SessionStatus.anonymous && isProtectedRoute) {
       return '/auth/login?from=${Uri.encodeComponent(state.uri.toString())}';
@@ -116,7 +135,9 @@ final class AppRouter {
             uri.scheme.isEmpty &&
             uri.host.isEmpty &&
             uri.userInfo.isEmpty &&
-            (uri.path == '/catalog/foods' || uri.path == '/profile')
+            (uri.path == '/catalog/foods' ||
+                uri.path == '/profile' ||
+                uri.path == '/preferences')
         ? uri.toString()
         : '/catalog/foods';
   }
@@ -127,7 +148,16 @@ class _ProfileUnavailablePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: Text('Profile is unavailable.')));
+      const Scaffold(body: Center(child: Text(AppStrings.profileUnavailable)));
+}
+
+class _PreferencesUnavailablePage extends StatelessWidget {
+  const _PreferencesUnavailablePage();
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(
+    body: Center(child: Text(AppStrings.preferencesUnavailable)),
+  );
 }
 
 class _NotFoundPage extends StatelessWidget {
@@ -140,13 +170,13 @@ class _NotFoundPage extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Page not found',
+            AppStrings.pageNotFound,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 12),
           FilledButton(
             onPressed: () => context.go('/catalog/foods'),
-            child: const Text('Go to foods'),
+            child: const Text(AppStrings.goToFoods),
           ),
         ],
       ),

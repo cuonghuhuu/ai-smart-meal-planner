@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_meal_planner/features/profile/application/profile_validation.dart';
 import 'package:smart_meal_planner/features/profile/data/profile_models.dart';
+import 'package:smart_meal_planner/l10n/app_strings.dart';
 
 Map<String, String> _validationErrors({
   DateTime? birthDate,
@@ -44,6 +45,10 @@ void main() {
 
   test('height uses exclusive bounds', () {
     expect(_validationErrors(heightCm: 30), contains('heightCm'));
+    expect(
+      _validationErrors(heightCm: 30)['heightCm'],
+      AppStrings.heightInvalid,
+    );
     expect(_validationErrors(heightCm: 30.1), isEmpty);
     expect(_validationErrors(heightCm: 300), contains('heightCm'));
   });
@@ -64,6 +69,10 @@ void main() {
     expect(ProfileValidation.validateWeeklyChangeText('-4.9'), isNull);
     expect(ProfileValidation.validateWeeklyChangeText('4.9'), isNull);
     expect(ProfileValidation.validateWeeklyChangeText('-5'), isNotNull);
+    expect(
+      ProfileValidation.validateWeeklyChangeText('-5'),
+      AppStrings.weeklyChangeInvalidWithUnit,
+    );
     expect(ProfileValidation.validateWeeklyChangeText('5'), isNotNull);
     expect(ProfileValidation.validateWeeklyChangeText('abc'), isNotNull);
     expect(_validationErrors(weeklyChangeKg: -5), contains('weeklyChangeKg'));

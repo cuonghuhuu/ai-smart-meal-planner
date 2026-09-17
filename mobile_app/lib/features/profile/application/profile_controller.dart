@@ -4,6 +4,7 @@ import 'package:smart_meal_planner/features/profile/application/profile_validati
 import 'package:smart_meal_planner/features/profile/data/profile_models.dart';
 import 'package:smart_meal_planner/features/profile/data/profile_repository.dart';
 import 'package:smart_meal_planner/features/profile/data/reference_data_repository.dart';
+import 'package:smart_meal_planner/l10n/app_strings.dart';
 
 enum ProfileStatus {
   initial,
@@ -128,7 +129,7 @@ final class ProfileController extends ChangeNotifier {
         activityLevels: _state.activityLevels,
         nutritionGoals: _state.nutritionGoals,
         profile: _state.profile,
-        errorMessage: 'Please correct the highlighted profile fields.',
+        errorMessage: AppStrings.profileValidationSummary,
         revision: _state.revision,
       );
       notifyListeners();
@@ -154,7 +155,7 @@ final class ProfileController extends ChangeNotifier {
         activityLevels: _state.activityLevels,
         nutritionGoals: _state.nutritionGoals,
         profile: updated,
-        saveMessage: 'Profile saved successfully.',
+        saveMessage: AppStrings.profileSaved,
         revision: _revision,
       );
     } on ApiHttpException catch (error) {
@@ -194,18 +195,18 @@ final class ProfileController extends ChangeNotifier {
 
 String profileErrorMessage(Object error) {
   if (error is ApiTransportException) {
-    return 'Unable to reach the service. Please try again.';
+    return AppStrings.unableToReachService;
   }
   if (error is ApiHttpException) {
     if (error.statusCode == 409) {
-      return 'Your profile was changed elsewhere. Reload the latest version before saving.';
+      return AppStrings.profileConflict;
     }
     if (error.statusCode >= 500) {
-      return 'The service could not complete this request. Please try again.';
+      return AppStrings.serviceUnavailable;
     }
-    if (error.problem?.detail != null && error.statusCode == 400) {
-      return error.problem!.detail!;
+    if (error.statusCode == 400) {
+      return AppStrings.requestFailed;
     }
   }
-  return 'The profile could not be loaded or saved. Please try again.';
+  return AppStrings.profileLoadSaveFailed;
 }
