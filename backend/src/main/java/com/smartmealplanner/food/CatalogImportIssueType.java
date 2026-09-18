@@ -2,6 +2,12 @@ package com.smartmealplanner.food;
 
 /** A visible validation or reporting outcome from an offline catalog import. */
 public enum CatalogImportIssueType {
+    UNKNOWN_SHEET,
+    INVALID_WORKBOOK,
+    MISSING_REQUIRED_HEADER,
+    DUPLICATE_HEADER,
+    INVALID_CELL_VALUE,
+    DUPLICATE_SOURCE_CODE,
     INVALID_SOURCE,
     UNKNOWN_CATEGORY,
     UNKNOWN_UNIT,
