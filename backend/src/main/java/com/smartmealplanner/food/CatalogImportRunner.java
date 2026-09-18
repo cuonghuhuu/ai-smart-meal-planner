@@ -155,19 +155,23 @@ final class CatalogImportRunner implements ApplicationRunner {
                         .count();
         LOG.info(
                 "SMILING catalog {}: rowsParsed={}, foodsImported={}, rowsSkipped={}, "
-                        + "foodGroups={}, foodSubgroups={}, "
+                        + "ingredientMappings={}, foodGroups={}, foodSubgroups={}, "
                         + "foodsByCategory={}, foodsWithNutrients={}, unmappedGroups={}, "
-                        + "unmappedSubgroups={}, warnings={}, warningsByType={}, errors={}",
+                        + "unmappedSubgroups={}, ingredientsCreated={}, "
+                        + "ingredientsUpdated={}, warnings={}, warningsByType={}, errors={}",
                 dryRun ? "dry run completed" : "import completed",
                 workbookReport.rowsParsed(),
                 foodsImported,
                 workbookReport.rowsSkipped(),
+                workbookReport.ingredientMappings(),
                 workbookReport.foodGroups(),
                 workbookReport.foodSubgroups(),
                 workbookReport.foodsByCategory(),
                 workbookReport.foodsWithNutrient(),
                 workbookReport.unmappedGroups(),
                 workbookReport.unmappedSubgroups(),
+                importReport == null ? 0 : importReport.ingredientsCreated(),
+                importReport == null ? 0 : importReport.ingredientsUpdated(),
                 parserWarnings + importWarnings,
                 workbookReport.warningCounts(),
                 0);

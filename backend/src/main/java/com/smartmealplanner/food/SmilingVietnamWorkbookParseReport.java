@@ -41,6 +41,12 @@ public record SmilingVietnamWorkbookParseReport(
         return document.foods().size();
     }
 
+    public int ingredientMappings() {
+        return (int) document.foods().stream()
+                .filter(food -> food.ingredientMapping() != null)
+                .count();
+    }
+
     public int distinctFoodGroupCount() {
         return foodGroups.size();
     }

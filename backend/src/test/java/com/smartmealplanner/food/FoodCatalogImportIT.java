@@ -153,6 +153,9 @@ class FoodCatalogImportIT {
         UUID ingredientPublicId = ingredients.findByCode("test_synthetic_rau_muong")
                 .orElseThrow()
                 .publicId();
+        int foodRevision = foods.findByCode("TEST_SMILING_VN_001")
+                .orElseThrow()
+                .revision();
         int foodCount = count("foods", "code", "TEST_SMILING_VN_001");
         int nutrientCount = jdbc.queryForObject(
                 "SELECT COUNT(*) FROM food_nutrients fn "
@@ -186,6 +189,8 @@ class FoodCatalogImportIT {
                 .isEqualTo(publicId);
         assertThat(ingredients.findByCode("test_synthetic_rau_muong").orElseThrow().publicId())
                 .isEqualTo(ingredientPublicId);
+        assertThat(foods.findByCode("TEST_SMILING_VN_001").orElseThrow().revision())
+                .isEqualTo(foodRevision);
     }
 
     @Test

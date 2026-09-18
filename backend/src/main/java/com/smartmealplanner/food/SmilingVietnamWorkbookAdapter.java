@@ -252,6 +252,11 @@ public final class SmilingVietnamWorkbookAdapter {
             }
 
             try {
+                CatalogImportIngredientMapping ingredientMapping =
+                        SmilingVietnamIngredientMapper.map(
+                                sourceCode,
+                                displayName,
+                                category.categoryCode());
                 foods.add(new CatalogImportFood(
                         "SMILING_VN:" + sourceCode,
                         catalogCode,
@@ -264,7 +269,7 @@ public final class SmilingVietnamWorkbookAdapter {
                         FoodSource.IMPORTED,
                         DATASET + "; code=" + sourceCode,
                         nutrientFacts,
-                        null));
+                        ingredientMapping));
             } catch (IllegalArgumentException exception) {
                 errors.add(issue(
                         CatalogImportIssueType.INVALID_CELL_VALUE,

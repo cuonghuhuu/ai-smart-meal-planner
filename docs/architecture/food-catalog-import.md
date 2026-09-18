@@ -1,4 +1,4 @@
-# P8.7A2 - SMILING Vietnam Food Composition Import
+# P8.7A2/A3 - SMILING Vietnam Food Composition and Ingredient Import
 
 ## Decision
 
@@ -47,9 +47,25 @@ zero. A source nutrient that cannot be mapped to one of the 16 existing
 canonical nutrient codes is represented with a null `canonicalCode`, reported
 as a warning, and not persisted.
 
-Ingredient creation is never inferred from a food row. The optional mapping
-must supply the canonical ingredient code, display name, preparation state,
-yield factor, and any aliases. Without that object, only the Food is imported.
+Food and Ingredient remain separate concepts: Food carries nutrition facts,
+while Ingredient is the canonical culinary identity used by recipes,
+preferences, and search. P8.7A3 bootstraps the current SMILING Vietnam catalog
+with one conservative Ingredient identity per imported Food, without merging
+similarly named foods or inferring culinary equivalence. The dedicated
+`SmilingVietnamIngredientMapper` creates `ING_SMILING_VN_<Code>` with the
+normalized Vietnamese display name, the Food's category, default unit `g`,
+`UNSPECIFIED` preparation state, yield factor `1.0000`, `primary=true`, and no
+aliases. English names, parenthetical text, preparation claims, and aliases
+are intentionally deferred for later curation.
+
+The current workbook has 164 imported Foods and produces 163 Ingredient
+mappings. Source code `10003` (`Sữa mẹ (sữa người)`) deliberately remains
+Food-only because it is a valid composition record but not a culinary
+ingredient for the meal-planning product. This exclusion is based only on the
+stable source code; the Food is not deleted or deactivated.
+
+The optional `ingredientMapping` remains the normalized handoff contract for
+other adapters. Without that object, only the Food is imported.
 
 The JSON adapter uses Jackson. The SMILING adapter uses Apache POI's XLSX
 support. No network client, queue, batch framework, or public import endpoint is
@@ -68,10 +84,10 @@ are not mistaken for source precision. Duplicate source codes, missing required
 headers, invalid numbers, unknown groups, and every unreviewed group/subgroup
 pair are blocking errors.
 
-The parser returns row accounting (`rowsParsed`, `rowsSkipped`, and imported
-food count) for the operator log. The import report adds created/updated counts,
-warnings, and errors. The parser never changes the workbook and does not copy it
-into the repository.
+The parser returns row accounting (`rowsParsed`, `rowsSkipped`, imported food
+count, and ingredient mapping count) for the operator log. The import report
+adds created/updated Food and Ingredient counts, warnings, and errors. The
+parser never changes the workbook and does not copy it into the repository.
 
 ## Source identity and provenance
 
@@ -161,10 +177,18 @@ is blocking and is never silently mapped to a parent or to `OTHER`.
 
 ## Ingredient strategy
 
-P8.7A2 imports Food rows only. It does not infer a canonical Ingredient from a
-Vietnamese or English food name, and it does not map prepared dishes to raw
-ingredients. Ingredient mappings remain an explicit, reviewed normalized-input
-feature of P8.7A1.
+P8.7A3 uses the existing `CatalogImportIngredientMapping` contract and
+`FoodCatalogImportService` upsert path. The bootstrap is intentionally
+one-to-one and source-code based: it creates a separate canonical Ingredient
+for each eligible SMILING Food rather than asserting that similarly named Foods
+are the same culinary identity. The mapped Ingredient's provenance is
+traceable through its `defaultFood` and the corresponding `ingredient_foods`
+row.
+
+No automatic aliases, allergen facts, conversions, piece weights, shelf-life
+values, staple flags, recipes, or preparation-state inference are added in
+this phase. The source XLSX remains an external, uncommitted input, and
+re-running the importer is idempotent for both Food and Ingredient identities.
 
 ## Validation and persistence rules
 
@@ -182,7 +206,11 @@ feature of P8.7A1.
   Missing facts remove stale imported facts so an old value is not presented as
   current. Nutrition changes increment `foods.revision` once per import unit.
 - Imported ingredient mappings are upserted by their stable ingredient code and
-  food relationship. Existing aliases and mappings are not duplicated.
+  food relationship. Existing aliases and mappings are not duplicated. A
+  rerun preserves both Food and Ingredient public IDs, keeps one
+  `ingredient_foods` mapping, preserves `default_food_id`, and does not change
+  Food nutrition revision when only the already-matching Ingredient mapping is
+  encountered.
 - The whole document is one transaction. A validation or persistence failure
   rolls back all foods, nutrient facts, ingredients, aliases and mappings from
   that document.

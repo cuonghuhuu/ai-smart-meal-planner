@@ -85,6 +85,18 @@ class SmilingVietnamWorkbookAdapterTest {
         assertThat(rauMuong.nutritionBasis()).isEqualTo(NutritionBasis.PER_100_G);
         assertThat(rauMuong.sourceReference())
                 .isEqualTo("SMILING Food Composition Table for Vietnam 2013; code=1001");
+        assertThat(report.ingredientMappings()).isEqualTo(3);
+        CatalogImportIngredientMapping ingredientMapping = rauMuong.ingredientMapping();
+        assertThat(ingredientMapping).isNotNull();
+        assertThat(ingredientMapping.ingredientCode()).isEqualTo("ING_SMILING_VN_1001");
+        assertThat(ingredientMapping.displayName()).isEqualTo(rauMuong.displayName());
+        assertThat(ingredientMapping.categoryCode()).isEqualTo(rauMuong.categoryCode());
+        assertThat(ingredientMapping.defaultUnitCode()).isEqualTo("g");
+        assertThat(ingredientMapping.preparationState())
+                .isEqualTo(IngredientPreparationState.UNSPECIFIED);
+        assertThat(ingredientMapping.yieldFactor()).isEqualByComparingTo("1.0000");
+        assertThat(ingredientMapping.primary()).isTrue();
+        assertThat(ingredientMapping.aliases()).isEmpty();
 
         Map<String, CatalogImportNutrientFact> supported = rauMuong.nutrientFacts().stream()
                 .filter(fact -> fact.canonicalCode() != null)
@@ -127,6 +139,23 @@ class SmilingVietnamWorkbookAdapterTest {
                 .noneMatch(fact -> "FIBER".equals(fact.canonicalCode()));
         assertThat(report.warningCounts())
                 .containsEntry(CatalogImportIssueType.UNSUPPORTED_NUTRIENT, 30L);
+    }
+
+    @Test
+    void sourceCode10003RemainsFoodOnly() throws IOException {
+        List<Map<String, Object>> rows = baseRows();
+        String excludedDisplayName = "S\u1eefa m\u1eb9 (s\u1eefa ng\u01b0\u1eddi)";
+        rows.getFirst().put("Code", "10003");
+        rows.getFirst().put("FOOD_NAME_LOCAL", excludedDisplayName);
+
+        SmilingVietnamWorkbookParseReport report = adapter.readWithReport(
+                writeWorkbook("food-only-breast-milk.xlsx", rows, Set.of()));
+
+        CatalogImportFood food = report.document().foods().getFirst();
+        assertThat(food.catalogCode()).isEqualTo("SMILING_VN_10003");
+        assertThat(food.displayName()).isEqualTo(excludedDisplayName);
+        assertThat(food.ingredientMapping()).isNull();
+        assertThat(report.ingredientMappings()).isEqualTo(2);
     }
 
     @Test
@@ -426,12 +455,7 @@ class SmilingVietnamWorkbookAdapterTest {
 
         assertThat(report.warningCounts())
                 .containsEntry(CatalogImportIssueType.UNSUPPORTED_NUTRIENT, 30L);
-        assertThat(report.warningCounts())
-                .containsEntry(CatalogImportIssueType.UNSUPPORTED_NUTRIENT, 30L);
 
-        assertThat(report.document().foods().getFirst().nutrientFacts())
-                .noneMatch(fact -> Set.of("ZN(mg)", "VITB6A(mg)", "DFE(mcg)")
-                        .contains(fact.sourceCode()));
         assertThat(report.document().foods().getFirst().nutrientFacts())
                 .noneMatch(fact -> Set.of("ZN(mg)", "VITB6A(mg)", "DFE(mcg)")
                         .contains(fact.sourceCode()));
