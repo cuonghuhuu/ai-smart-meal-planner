@@ -143,6 +143,17 @@ class Ingredient {
     List<IngredientAllergen> allergenFacts() { return List.copyOf(allergenFacts); }
     List<IngredientUnitConversion> unitConversions() { return List.copyOf(unitConversions); }
 
+    /** Updates only explicit catalog mapping metadata; null keeps unknown optional facts unknown. */
+    void applyImportedMetadata(String displayName, FoodCategory category, MeasurementUnit defaultUnit) {
+        this.displayName = requireText(displayName, 150, "displayName");
+        if (category != null) {
+            this.category = category;
+        }
+        if (defaultUnit != null) {
+            this.defaultUnit = defaultUnit;
+        }
+    }
+
     void retire(LocalDateTime retirementTime) {
         if (retirementTime == null) throw new IllegalArgumentException("retiredAt is required");
         if (!active) throw new IllegalStateException("Ingredient is already retired");

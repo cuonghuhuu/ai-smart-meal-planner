@@ -446,6 +446,16 @@ Endpoints that depend on the refresh cookie, such as refresh or logout, remain C
 
 The CSRF token is separate from the refresh token.
 
+For the Web SPA, `GET /api/v1/auth/csrf` is public and returns the current
+Spring Security CSRF value as `{ "headerName", "token" }` with
+`Cache-Control: no-store`. It establishes Spring Security's server-side CSRF
+session.
+The SPA sends that value in the returned header name (currently
+`X-CSRF-TOKEN`) for cookie-backed `POST /api/v1/auth/refresh` and
+`POST /api/v1/auth/logout`. This route is deliberately public so startup can
+attempt a session restore; it does not return or expose the HttpOnly refresh
+token.
+
 Deployment topologies that require cross-site browser authentication must explicitly revisit the SameSite setting.
 
 15. Android Authentication

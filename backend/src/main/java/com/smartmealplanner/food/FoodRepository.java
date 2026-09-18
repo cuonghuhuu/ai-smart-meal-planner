@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 
 interface FoodRepository extends JpaRepository<Food, Long> {
+    Optional<Food> findByCode(String code);
+
     Optional<Food> findByPublicId(byte[] publicId);
 
     @Query("""

@@ -43,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -160,7 +161,10 @@ class AccountRecoveryIT {
                                         tokenBody(
                                                 firstToken)))
                 .andExpect(
-                        status().isBadRequest());
+                        status().isBadRequest())
+                .andExpect(
+                        jsonPath("$.code")
+                                .value("BAD_REQUEST"));
 
         mvc.perform(
                         post(
@@ -224,7 +228,10 @@ class AccountRecoveryIT {
                                                 "0".repeat(64),
                                                 NEW_PASSWORD)))
                 .andExpect(
-                        status().isBadRequest());
+                        status().isBadRequest())
+                .andExpect(
+                        jsonPath("$.code")
+                                .value("INVALID_PASSWORD_RESET_TOKEN"));
     }
 
     @Test
@@ -261,7 +268,38 @@ class AccountRecoveryIT {
                                                 resetToken,
                                                 "another-password-for-tests-789")))
                 .andExpect(
-                        status().isBadRequest());
+                        status().isBadRequest())
+                .andExpect(
+                        jsonPath("$.code")
+                                .value("INVALID_PASSWORD_RESET_TOKEN"));
+    }
+
+    @Test
+    void resetPasswordPolicyFailureHasSpecificSafeCode()
+            throws Exception {
+
+        UserAccount account =
+                createActiveUser();
+
+        String resetToken =
+                passwordResetService.requestReset(
+                                account.email())
+                        .orElseThrow();
+
+        mvc.perform(
+                        post(
+                                "/api/v1/auth/reset-password")
+                                .contentType(
+                                        MediaType.APPLICATION_JSON)
+                                .content(
+                                        resetBody(
+                                                resetToken,
+                                                "short")))
+                .andExpect(
+                        status().isBadRequest())
+                .andExpect(
+                        jsonPath("$.code")
+                                .value("INVALID_PASSWORD"));
     }
 
     @Test

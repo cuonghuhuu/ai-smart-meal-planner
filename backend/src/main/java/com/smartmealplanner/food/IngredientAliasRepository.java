@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 interface IngredientAliasRepository extends JpaRepository<IngredientAlias, Long> {
+    Optional<IngredientAlias> findByAlias(String alias);
+
     @Query("""
             select alias from IngredientAlias alias
             join fetch alias.ingredient ingredient

@@ -2,7 +2,13 @@ package com.smartmealplanner.shared.web;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartmealplanner.auth.SecurityConfiguration;
+import com.smartmealplanner.auth.application.InvalidRefreshTokenException;
+import com.smartmealplanner.auth.persistence.ClientKind;
+import com.smartmealplanner.auth.web.AuthController;
+import com.smartmealplanner.auth.web.CsrfController;
 import com.smartmealplanner.auth.application.CurrentUserService;
 import com.smartmealplanner.auth.application.EmailVerificationService;
 import com.smartmealplanner.auth.application.LoginService;
@@ -32,6 +38,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,6 +53,12 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.when;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
@@ -57,7 +70,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(
-        controllers = ApiFoundationTest.ProbeController.class,
+        controllers = {
+                ApiFoundationTest.ProbeController.class,
+                CsrfController.class,
+                AuthController.class
+        },
         properties =
                 "app.cors.allowed-origins=https://planner.example")
 @ActiveProfiles("test")
@@ -75,6 +92,9 @@ class ApiFoundationTest {
 
     @Autowired
     PasswordEncoder encoder;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @MockitoBean
     RegistrationService registrationService;
@@ -384,6 +404,96 @@ class ApiFoundationTest {
                         header()
                                 .doesNotExist(
                                         "Access-Control-Allow-Origin"));
+
+        mvc.perform(
+                        options("/actuator/health")
+                                .header(
+                                        "Origin",
+                                        "https://planner.example")
+                                .header(
+                                        "Access-Control-Request-Method",
+                                        "GET"))
+                .andExpect(
+                        status().isOk())
+                .andExpect(
+                        header().string(
+                                "Access-Control-Allow-Origin",
+                                "https://planner.example"));
+    }
+
+    @Test
+    void exposesPublicNoStoreCsrfTokenForBrowserCookieOperations()
+            throws Exception {
+
+        mvc.perform(
+                        get("/api/v1/auth/csrf"))
+                .andExpect(
+                        status().isOk())
+                .andExpect(
+                        header().string(
+                                "Cache-Control",
+                                org.hamcrest.Matchers.containsString(
+                                        "no-store")))
+                .andExpect(
+                        jsonPath("$.headerName")
+                                .value("X-CSRF-TOKEN"))
+                .andExpect(
+                        jsonPath("$.token")
+                                .isString());
+    }
+
+    @Test
+    void acceptsTheIssuedCsrfTokenForACookieBackedMutation()
+            throws Exception {
+
+        var result =
+                mvc.perform(
+                                get("/api/v1/auth/csrf"))
+                        .andExpect(
+                                status().isOk())
+                        .andReturn();
+
+        JsonNode body =
+                objectMapper.readTree(
+                        result.getResponse()
+                                .getContentAsString());
+
+        MockHttpSession session =
+                (MockHttpSession) result.getRequest()
+                        .getSession(false);
+
+        assertThat(session)
+                .isNotNull();
+
+        when(refreshRotationService.rotate(
+                anyString(),
+                eq(ClientKind.WEB),
+                any(),
+                isNull()))
+                .thenThrow(
+                        new InvalidRefreshTokenException());
+
+        mvc.perform(
+                        post("/api/v1/auth/refresh")
+                                .session(session)
+                                .cookie(
+                                        new jakarta.servlet.http.Cookie(
+                                                "__Host-smartmeal_refresh",
+                                                "invalid-refresh-token"))
+                                .header(
+                                        body.get("headerName")
+                                                .asText(),
+                                        body.get("token")
+                                                .asText())
+                                .contentType(
+                                        MediaType.APPLICATION_JSON)
+                                .content(
+                                        "{}"))
+                .andExpect(
+                        status().isUnauthorized())
+                .andExpect(
+                        jsonPath("$.code")
+                                .value("UNAUTHORIZED"));
     }
 
     @Test
