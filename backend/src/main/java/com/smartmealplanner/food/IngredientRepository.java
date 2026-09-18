@@ -55,4 +55,13 @@ interface IngredientRepository extends JpaRepository<Ingredient, Long> {
             where ingredient.active = true and ingredient.publicId in :publicIds
             """)
     List<Ingredient> findActiveByPublicIdIn(@Param("publicIds") Collection<byte[]> publicIds);
+
+    @Query("""
+            select ingredient
+            from Ingredient ingredient
+            left join fetch ingredient.defaultFood
+            where ingredient.id in :ids
+            """)
+    List<Ingredient> findAllWithDefaultFoodByIdIn(
+            @Param("ids") Collection<Long> ids);
 }

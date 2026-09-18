@@ -4,9 +4,12 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import jakarta.persistence.LockModeType;
 
 interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
@@ -92,4 +95,13 @@ interface RecipeRepository extends JpaRepository<Recipe, Long> {
               and status = 'PUBLISHED'
             """, nativeQuery = true)
     Optional<Recipe> findPublishedByPublicId(@Param("publicId") byte[] publicId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select recipe
+            from Recipe recipe
+            where recipe.publicId = :publicId
+            """)
+    Optional<Recipe> findByPublicIdForUpdate(
+            @Param("publicId") byte[] publicId);
 }

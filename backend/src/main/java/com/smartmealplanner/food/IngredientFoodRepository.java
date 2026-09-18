@@ -1,5 +1,6 @@
 package com.smartmealplanner.food;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +16,16 @@ interface IngredientFoodRepository extends JpaRepository<IngredientFood, Ingredi
             order by mapping.primary desc, food.displayName asc, food.publicId asc
             """)
     List<IngredientFood> findByIngredientIdWithFood(@Param("ingredientId") Long ingredientId);
+
+    @Query("""
+            select mapping
+            from IngredientFood mapping
+            join fetch mapping.ingredient ingredient
+            join fetch mapping.food food
+            where mapping.ingredient.id in :ingredientIds
+            order by mapping.ingredient.id asc, mapping.primary desc,
+                     food.displayName asc
+            """)
+    List<IngredientFood> findByIngredientIdsWithFood(
+            @Param("ingredientIds") Collection<Long> ingredientIds);
 }

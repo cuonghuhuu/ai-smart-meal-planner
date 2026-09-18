@@ -57,15 +57,13 @@ display data or surrogate IDs.
 
 ## Nutrition snapshot behavior
 
-P9A only reads the current `recipe_nutrition_snapshots` row and its
-`recipe_nutrition_values`. It does not calculate, create, update, or refresh a
-snapshot during a GET request. If no current snapshot exists, `nutrition` is
-`null`. Missing nutrient values remain missing rather than becoming zero.
-
-P9B will own nutrition computation and snapshot lifecycle. The snapshot's
-`ingredientRevision`, completeness ratio, computation note, and per-serving
-values remain visible so a later computation workflow can report provenance and
-completeness honestly.
+The catalog only reads the current `recipe_nutrition_snapshots` row and its
+`recipe_nutrition_values`. P9B computes snapshots through the explicit Java
+`RecipeNutritionComputationService`; it does not calculate, create, update, or
+refresh a snapshot during a GET request. If no current snapshot exists,
+`nutrition` is `null`. Missing nutrient values remain missing rather than
+becoming zero. See [Recipe nutrition calculation](recipe-nutrition.md) for the
+conversion and lifecycle rules.
 
 ## Persistence authority and future phases
 

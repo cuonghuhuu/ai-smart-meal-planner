@@ -70,4 +70,8 @@ class RecipeNutritionSnapshot {
     BigDecimal completenessRatio() { return completenessRatio; }
     String computationNote() { return computationNote; }
     boolean isCurrent() { return current; }
+
+    void markNotCurrent() {
+        current = false;
+    }
 }

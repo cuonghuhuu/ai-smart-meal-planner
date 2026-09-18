@@ -47,6 +47,9 @@ call Python directly.
 - [Recipe catalog core](recipe-catalog.md) - P9A Recipe persistence ownership,
   published-only read API, cross-module reference boundaries, and nutrition
   snapshot read behavior.
+- [Recipe nutrition calculation](recipe-nutrition.md) - P9B BigDecimal
+  calculation, conservative unit conversion, completeness, and immutable
+  nutrition snapshot replacement.
 
 ## Diagrams
 
