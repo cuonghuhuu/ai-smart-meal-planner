@@ -146,11 +146,11 @@ final class AppStrings {
   static const passwordResetSuccess =
       'Đã đặt lại mật khẩu. Bạn có thể đăng nhập ngay.';
   static const email = 'Email';
-  static const password = 'Mật khẩu';
-  static const confirmPassword = 'Xác nhận mật khẩu';
-  static const enterPassword = 'Nhập mật khẩu';
+  static const password = 'Mật khẩu'; // pragma: allowlist secret
+  static const confirmPassword = 'Xác nhận mật khẩu'; // pragma: allowlist secret
+  static const enterPassword = 'Nhập mật khẩu'; // pragma: allowlist secret
   static const signIn = 'Đăng nhập';
-  static const forgotPassword = 'Quên mật khẩu?';
+  static const forgotPassword = 'Quên mật khẩu?'; // pragma: allowlist secret
   static const createAccountLink = 'Tạo tài khoản';
   static const createYourAccount = 'Tạo tài khoản';
   static const registrationSubtitle =
@@ -170,19 +170,19 @@ final class AppStrings {
   static const backToSignIn = 'Quay lại đăng nhập';
   static const verificationEmailSent =
       'Nếu tài khoản cần xác minh, email mới đã được gửi.';
-  static const resetYourPassword = 'Đặt lại mật khẩu';
+  static const resetYourPassword = 'Đặt lại mật khẩu'; // pragma: allowlist secret
   static const resetPasswordSubtitle =
       'Nhập email; nếu tài khoản phù hợp, chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu.';
   static const resetInstructionsSent =
       'Nếu email khớp với một tài khoản, hướng dẫn đặt lại mật khẩu đã được gửi.';
   static const sendResetInstructions = 'Gửi hướng dẫn đặt lại';
-  static const chooseNewPassword = 'Chọn mật khẩu mới';
+  static const chooseNewPassword = 'Chọn mật khẩu mới'; // pragma: allowlist secret
   static const passwordRequirements =
       'Mật khẩu phải có ít nhất 12 ký tự và không quá 72 byte UTF-8.';
   static const resetPassword = 'Đặt lại mật khẩu';
-  static const passwordHelper = '12–72 byte UTF-8';
-  static const showPassword = 'Hiện mật khẩu';
-  static const hidePassword = 'Ẩn mật khẩu';
+  static const passwordHelper = '12–72 byte UTF-8'; // pragma: allowlist secret
+  static const showPassword = 'Hiện mật khẩu'; // pragma: allowlist secret
+  static const hidePassword = 'Ẩn mật khẩu'; // pragma: allowlist secret
 
   // Profile.
   static const completeProfileSubtitle =
@@ -338,12 +338,12 @@ final class AppStrings {
   // Validation messages.
   static const enterEmail = 'Vui lòng nhập email.';
   static const validEmail = 'Vui lòng nhập email hợp lệ.';
-  static const enterPasswordError = 'Vui lòng nhập mật khẩu.';
+  static const enterPasswordError = 'Vui lòng nhập mật khẩu.'; // pragma: allowlist secret
   static const displayNameRequired = 'Vui lòng nhập tên hiển thị.';
   static const displayNameTooLong =
       'Tên hiển thị không được vượt quá 100 ký tự.';
-  static const passwordTooShort = 'Mật khẩu phải có ít nhất 12 ký tự.';
-  static const passwordTooLong = 'Mật khẩu không được vượt quá 72 byte UTF-8.';
+  static const passwordTooShort = 'Mật khẩu phải có ít nhất 12 ký tự.'; // pragma: allowlist secret
+  static const passwordTooLong = 'Mật khẩu không được vượt quá 72 byte UTF-8.'; // pragma: allowlist secret
   static const birthDateTooEarly = 'Ngày sinh phải sau 01/01/1900.';
   static const birthDateInFuture = 'Ngày sinh không được ở tương lai.';
   static const heightInvalid =
