@@ -179,7 +179,7 @@ final class AppStrings {
   static const chooseNewPassword = 'Chọn mật khẩu mới'; // pragma: allowlist secret
   static const passwordRequirements =
       'Mật khẩu phải có ít nhất 12 ký tự và không quá 72 byte UTF-8.';
-  static const resetPassword = 'Đặt lại mật khẩu';
+  static const resetPassword = 'Đặt lại mật khẩu'; // pragma: allowlist secret
   static const passwordHelper = '12–72 byte UTF-8'; // pragma: allowlist secret
   static const showPassword = 'Hiện mật khẩu'; // pragma: allowlist secret
   static const hidePassword = 'Ẩn mật khẩu'; // pragma: allowlist secret
