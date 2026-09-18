@@ -21,6 +21,125 @@ final class AppStrings {
   static const loading = 'Đang tải...';
   static const loadingPreferences = 'Đang tải sở thích ăn uống…';
 
+  // Catalog.
+  static const catalogFoodsSubtitle =
+      'Tra cứu thành phần dinh dưỡng của các thực phẩm Việt Nam.';
+  static const catalogIngredientsSubtitle =
+      'Các nguyên liệu dùng làm danh tính chuẩn cho công thức và kế hoạch bữa ăn.';
+  static const catalogSearchHint = 'Tìm theo tên thực phẩm hoặc nguyên liệu';
+  static const catalogSearchSubmit = 'Tìm kiếm';
+  static const catalogAllCategories = 'Tất cả nhóm';
+  static const catalogUncategorized = 'Chưa phân loại';
+  static const catalogUnknownValue = 'Chưa xác định';
+  static const catalogNoFoods = 'Không tìm thấy thực phẩm phù hợp.';
+  static const catalogNoIngredients = 'Không tìm thấy nguyên liệu phù hợp.';
+  static const catalogLoadFailed =
+      'Không thể tải danh mục. Vui lòng thử lại.';
+  static const catalogDetailLoadFailed =
+      'Không thể tải thông tin chi tiết. Vui lòng thử lại.';
+  static const catalogLoadMoreFailed =
+      'Không thể tải thêm dữ liệu. Vui lòng thử lại.';
+  static const catalogUnavailable = 'Danh mục hiện không khả dụng.';
+  static const catalogCode = 'Mã';
+  static const catalogDescription = 'Mô tả';
+  static const catalogNutrition = 'Dinh dưỡng';
+  static const catalogServings = 'Khẩu phần';
+  static const catalogSource = 'Nguồn dữ liệu';
+  static const catalogRevision = 'Phiên bản dữ liệu';
+  static const catalogNoNutrients = 'Chưa có dữ liệu dinh dưỡng.';
+  static const catalogNoServings = 'Chưa có thông tin khẩu phần.';
+  static const catalogNoSource = 'Chưa có thông tin nguồn.';
+  static const catalogNutritionPer100g =
+      'Giá trị dinh dưỡng trên 100 g phần ăn được';
+  static const catalogNutritionBasis = 'Cơ sở tính';
+  static const catalogUnit = 'Đơn vị';
+  static const catalogAmount = 'Lượng';
+  static const catalogDataQuality = 'Chất lượng dữ liệu';
+  static const catalogBrand = 'Nhãn hiệu';
+  static const catalogDefault = 'Mặc định';
+  static const ingredientDefaultUnit = 'Đơn vị mặc định';
+  static const ingredientAliases = 'Tên gọi khác';
+  static const ingredientFoodMappings = 'Thực phẩm liên kết';
+  static const ingredientAllergens = 'Chất gây dị ứng';
+  static const ingredientConversions = 'Quy đổi đơn vị';
+  static const ingredientNoAliases = 'Chưa có tên gọi khác.';
+  static const ingredientNoFoodMappings = 'Chưa có thực phẩm liên kết.';
+  static const ingredientNoAllergens = 'Chưa có thông tin chất gây dị ứng.';
+  static const ingredientNoConversions = 'Chưa có quy đổi đơn vị.';
+  static const ingredientPreparation = 'Trạng thái chế biến';
+  static const ingredientYield = 'Hệ số hao hụt';
+  static const ingredientPrimary = 'Nguyên liệu chính';
+  static const ingredientViewFoodNutrition = 'Xem thông tin dinh dưỡng';
+  static const ingredientShelfLife = 'Thời hạn bảo quản';
+  static const ingredientPieceWeight = 'Khối lượng mỗi phần';
+  static const ingredientStaple = 'Thực phẩm thiết yếu';
+  static const catalogDays = 'ngày';
+  static const catalogBack = 'Quay lại';
+
+  static const catalogCategoryLabels = <String, String>{
+    'BEVERAGES': 'Đồ uống',
+    'GRAINS_BREAD': 'Bánh mì và ngũ cốc',
+    'DAIRY_CHEESE': 'Phô mai',
+    'DAIRY': 'Sữa và chế phẩm',
+    'PROTEIN_EGG': 'Trứng',
+    'FATS_OILS': 'Dầu và chất béo',
+    'PROTEIN_SEAFOOD': 'Cá và hải sản',
+    'FRUITS': 'Trái cây',
+    'GRAINS': 'Ngũ cốc',
+    'SEASONING_HERB': 'Rau thơm và gia vị',
+    'VEG_LEAFY': 'Rau lá',
+    'PROTEIN_LEGUME': 'Đậu',
+    'PROTEIN_MEAT': 'Thịt',
+    'DAIRY_MILK': 'Sữa',
+    'PROTEIN_NUT': 'Hạt',
+    'VEG_ALLIUM': 'Rau họ hành',
+    'OTHER': 'Khác',
+    'GRAINS_PASTA': 'Mì và pasta',
+    'PROTEIN_POULTRY': 'Gia cầm',
+    'PREPARED': 'Thực phẩm chế biến',
+    'PROTEIN': 'Thực phẩm giàu đạm',
+    'GRAINS_RICE': 'Gạo',
+    'VEG_ROOT': 'Củ và rễ',
+    'SEASONING_SAUCE': 'Nước xốt',
+    'SEASONINGS': 'Gia vị',
+    'VEGETABLES': 'Rau củ',
+  };
+
+  static const catalogNutrientLabels = <String, String>{
+    'ENERGY': 'Năng lượng',
+    'PROTEIN': 'Chất đạm',
+    'WATER': 'Nước',
+    'FAT_TOTAL': 'Chất béo tổng số',
+    'CARBOHYDRATE': 'Carbohydrate',
+    'CALCIUM': 'Canxi',
+    'IRON': 'Sắt',
+    'VITAMIN_C': 'Vitamin C',
+    'VITAMIN_A': 'Vitamin A',
+    'VITAMIN_D': 'Vitamin D',
+  };
+
+  static const catalogEnumLabels = <String, String>{
+    'PER_100_G': 'Trên 100 g phần ăn được',
+    'PER_100_ML': 'Trên 100 ml',
+    'IMPORTED': 'Dữ liệu nhập khẩu',
+    'CURATED': 'Dữ liệu được biên soạn',
+    'USER_SUBMITTED': 'Người dùng cung cấp',
+    'ANALYTICAL': 'Phân tích',
+    'CALCULATED': 'Tính toán',
+    'ESTIMATED': 'Ước tính/tham khảo',
+    'RAW': 'Tươi/sống',
+    'COOKED': 'Đã nấu chín',
+    'DRIED': 'Đã sấy khô',
+    'CANNED': 'Đóng hộp',
+    'FROZEN': 'Đông lạnh',
+    'UNSPECIFIED': 'Chưa phân loại trạng thái chế biến',
+    'CONTAINS': 'Có chứa',
+    'MAY_CONTAIN': 'Có thể chứa',
+    'FREE_FROM': 'Không chứa',
+    'MEASURED': 'Đo lường',
+    'REFERENCE': 'Tham khảo',
+  };
+
   // Auth.
   static const welcomeBack = 'Chào mừng bạn quay lại';
   static const signInSubtitle = 'Đăng nhập để tiếp tục lập kế hoạch bữa ăn.';

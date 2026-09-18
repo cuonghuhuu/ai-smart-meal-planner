@@ -12,6 +12,12 @@ import 'package:smart_meal_planner/features/measurements/application/measurement
 import 'package:smart_meal_planner/features/measurements/presentation/measurements_page.dart';
 import 'package:smart_meal_planner/features/profile/application/profile_controller.dart';
 import 'package:smart_meal_planner/features/profile/presentation/profile_page.dart';
+import 'package:smart_meal_planner/features/catalog/application/food_catalog_controller.dart';
+import 'package:smart_meal_planner/features/catalog/application/ingredient_catalog_controller.dart';
+import 'package:smart_meal_planner/features/catalog/presentation/food_catalog_page.dart';
+import 'package:smart_meal_planner/features/catalog/presentation/food_detail_page.dart';
+import 'package:smart_meal_planner/features/catalog/presentation/ingredient_catalog_page.dart';
+import 'package:smart_meal_planner/features/catalog/presentation/ingredient_detail_page.dart';
 
 final class AppRouter {
   AppRouter(
@@ -19,6 +25,8 @@ final class AppRouter {
     ProfileController? profileController,
     PreferencesController? preferencesController,
     MeasurementsController? measurementsController,
+    FoodCatalogController? foodCatalogController,
+    IngredientCatalogController? ingredientCatalogController,
   }) : router = GoRouter(
          initialLocation: '/catalog/foods',
          refreshListenable: sessionController,
@@ -74,8 +82,74 @@ final class AppRouter {
              path: '/catalog/foods',
              builder: (context, state) => SessionRouteGate(
                sessionController: sessionController,
-               child: AuthenticatedShell(sessionController: sessionController),
+               child: foodCatalogController == null
+                   ? AuthenticatedShell(sessionController: sessionController)
+                   : FoodCatalogPage(
+                       sessionController: sessionController,
+                       controller: foodCatalogController,
+                     ),
              ),
+           ),
+           GoRoute(
+             path: '/catalog/foods/:publicId',
+             builder: (context, state) {
+               final publicId = state.pathParameters['publicId'] ?? '';
+               final child = foodCatalogController == null
+                   ? AuthenticatedShell(
+                       sessionController: sessionController,
+                       content: const _CatalogUnavailableContent(),
+                     )
+                   : !_isValidPublicId(publicId)
+                   ? const _NotFoundPage()
+                   : FoodDetailPage(
+                       sessionController: sessionController,
+                       controller: foodCatalogController,
+                       publicId: publicId,
+                     );
+               return SessionRouteGate(
+                 sessionController: sessionController,
+                 child: child,
+               );
+             },
+           ),
+           GoRoute(
+             path: '/catalog/ingredients',
+             builder: (context, state) => SessionRouteGate(
+               sessionController: sessionController,
+               child: ingredientCatalogController == null
+                   ? AuthenticatedShell(
+                       sessionController: sessionController,
+                       selectedIndex: 1,
+                       content: const _CatalogUnavailableContent(),
+                     )
+                   : IngredientCatalogPage(
+                       sessionController: sessionController,
+                       controller: ingredientCatalogController,
+                     ),
+             ),
+           ),
+           GoRoute(
+             path: '/catalog/ingredients/:publicId',
+             builder: (context, state) {
+               final publicId = state.pathParameters['publicId'] ?? '';
+               final child = ingredientCatalogController == null
+                   ? AuthenticatedShell(
+                       sessionController: sessionController,
+                       selectedIndex: 1,
+                       content: const _CatalogUnavailableContent(),
+                     )
+                   : !_isValidPublicId(publicId)
+                   ? const _NotFoundPage()
+                   : IngredientDetailPage(
+                       sessionController: sessionController,
+                       controller: ingredientCatalogController,
+                       publicId: publicId,
+                     );
+               return SessionRouteGate(
+                 sessionController: sessionController,
+                 child: child,
+               );
+             },
            ),
            GoRoute(
              path: '/profile',
@@ -127,6 +201,9 @@ final class AppRouter {
     final isAuthRoute = path.startsWith('/auth/');
     final isProtectedRoute =
         path == '/catalog/foods' ||
+        path == '/catalog/ingredients' ||
+        _isCatalogDetailPath(path, 'foods') ||
+        _isCatalogDetailPath(path, 'ingredients') ||
         path == '/profile' ||
         path == '/preferences' ||
         path == '/measurements';
@@ -152,12 +229,30 @@ final class AppRouter {
             uri.host.isEmpty &&
             uri.userInfo.isEmpty &&
             (uri.path == '/catalog/foods' ||
+                uri.path == '/catalog/ingredients' ||
+                (_isCatalogDetailPath(uri.path, 'foods') &&
+                    _isValidPublicId(uri.path.split('/').last)) ||
+                (_isCatalogDetailPath(uri.path, 'ingredients') &&
+                    _isValidPublicId(uri.path.split('/').last)) ||
                 uri.path == '/profile' ||
                 uri.path == '/preferences' ||
                 uri.path == '/measurements')
         ? uri.toString()
         : '/catalog/foods';
   }
+
+  static bool _isCatalogDetailPath(String path, String collection) {
+    final prefix = '/catalog/$collection/';
+    if (!path.startsWith(prefix)) {
+      return false;
+    }
+    final segment = path.substring(prefix.length);
+    return segment.isNotEmpty && !segment.contains('/');
+  }
+
+  static bool _isValidPublicId(String value) => RegExp(
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+  ).hasMatch(value);
 }
 
 class _ProfileUnavailablePage extends StatelessWidget {
@@ -206,6 +301,18 @@ class _NotFoundPage extends StatelessWidget {
           ),
         ],
       ),
+    ),
+  );
+}
+
+class _CatalogUnavailableContent extends StatelessWidget {
+  const _CatalogUnavailableContent();
+
+  @override
+  Widget build(BuildContext context) => const Center(
+    child: Padding(
+      padding: EdgeInsets.all(24),
+      child: Text(AppStrings.catalogUnavailable),
     ),
   );
 }

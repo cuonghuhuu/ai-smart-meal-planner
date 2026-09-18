@@ -10,6 +10,9 @@ import 'package:smart_meal_planner/features/preferences/application/preferences_
 import 'package:smart_meal_planner/features/preferences/data/preferences_repository.dart';
 import 'package:smart_meal_planner/features/measurements/application/measurements_controller.dart';
 import 'package:smart_meal_planner/features/measurements/data/measurements_repository.dart';
+import 'package:smart_meal_planner/features/catalog/application/food_catalog_controller.dart';
+import 'package:smart_meal_planner/features/catalog/application/ingredient_catalog_controller.dart';
+import 'package:smart_meal_planner/features/catalog/data/catalog_repository.dart';
 
 final class AppSessionDependencies {
   const AppSessionDependencies({
@@ -17,12 +20,16 @@ final class AppSessionDependencies {
     required this.profileController,
     required this.preferencesController,
     required this.measurementsController,
+    required this.foodCatalogController,
+    required this.ingredientCatalogController,
   });
 
   final SessionController sessionController;
   final ProfileController profileController;
   final PreferencesController preferencesController;
   final MeasurementsController measurementsController;
+  final FoodCatalogController foodCatalogController;
+  final IngredientCatalogController ingredientCatalogController;
 }
 
 final class AppSessionFactory {
@@ -41,6 +48,7 @@ final class AppSessionFactory {
       accessTokenProvider: () => session.accessToken,
       refreshAccessToken: session.refresh,
     );
+    final catalogRepository = HttpCatalogRepository(apiClient);
     return AppSessionDependencies(
       sessionController: session,
       profileController: ProfileController(
@@ -52,6 +60,12 @@ final class AppSessionFactory {
       ),
       measurementsController: MeasurementsController(
         repository: HttpMeasurementsRepository(apiClient),
+      ),
+      foodCatalogController: FoodCatalogController(
+        repository: catalogRepository,
+      ),
+      ingredientCatalogController: IngredientCatalogController(
+        repository: catalogRepository,
       ),
     );
   }

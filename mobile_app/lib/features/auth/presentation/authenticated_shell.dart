@@ -37,6 +37,7 @@ class AuthenticatedShell extends StatelessWidget {
               labelType: NavigationRailLabelType.all,
               onDestinationSelected: (index) {
                 if (index == 0) context.go('/catalog/foods');
+                if (index == 1) context.go('/catalog/ingredients');
                 if (index == 2) context.go('/profile');
                 if (index == 3) context.go('/preferences');
                 if (index == 4) context.go('/measurements');
@@ -48,11 +49,17 @@ class AuthenticatedShell extends StatelessWidget {
               ),
               destinations: const [
                 NavigationRailDestination(
-                  icon: Icon(Icons.restaurant),
+                  icon: Icon(
+                    Icons.restaurant,
+                    key: ValueKey('catalog-nav-foods-rail'),
+                  ),
                   label: Text(AppStrings.foods),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.kitchen),
+                  icon: Icon(
+                    Icons.kitchen,
+                    key: ValueKey('catalog-nav-ingredients-rail'),
+                  ),
                   label: Text(AppStrings.ingredients),
                 ),
                 NavigationRailDestination(
@@ -91,14 +98,18 @@ class _NavigationDrawer extends StatelessWidget {
       children: [
         const DrawerHeader(child: Text(AppStrings.productName)),
         ListTile(
+          key: const ValueKey('catalog-nav-foods-drawer'),
           selected: selectedIndex == 0,
           leading: const Icon(Icons.restaurant),
           title: const Text(AppStrings.foods),
           onTap: () => context.go('/catalog/foods'),
         ),
-        const ListTile(
-          leading: Icon(Icons.kitchen),
-          title: Text(AppStrings.ingredientsComingSoon),
+        ListTile(
+          key: const ValueKey('catalog-nav-ingredients-drawer'),
+          selected: selectedIndex == 1,
+          leading: const Icon(Icons.kitchen),
+          title: const Text(AppStrings.ingredients),
+          onTap: () => context.go('/catalog/ingredients'),
         ),
         ListTile(
           selected: selectedIndex == 2,
