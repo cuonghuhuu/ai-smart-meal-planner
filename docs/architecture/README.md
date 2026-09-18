@@ -44,6 +44,9 @@ call Python directly.
 - [Food & ingredient catalog core](food-ingredient-catalog.md) - P7 catalog
   ownership, normalized Food nutrition/servings, canonical Ingredients, search,
   authorization, and the implementation sequence.
+- [Recipe catalog core](recipe-catalog.md) - P9A Recipe persistence ownership,
+  published-only read API, cross-module reference boundaries, and nutrition
+  snapshot read behavior.
 
 ## Diagrams
 
