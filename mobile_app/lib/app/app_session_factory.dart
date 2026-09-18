@@ -7,7 +7,9 @@ import 'package:smart_meal_planner/features/profile/application/profile_controll
 import 'package:smart_meal_planner/features/profile/data/profile_repository.dart';
 import 'package:smart_meal_planner/features/profile/data/reference_data_repository.dart';
 import 'package:smart_meal_planner/features/preferences/application/preferences_controller.dart';
+import 'package:smart_meal_planner/features/preferences/application/disliked_ingredients_controller.dart';
 import 'package:smart_meal_planner/features/preferences/data/preferences_repository.dart';
+import 'package:smart_meal_planner/features/preferences/data/disliked_ingredients_repository.dart';
 import 'package:smart_meal_planner/features/measurements/application/measurements_controller.dart';
 import 'package:smart_meal_planner/features/measurements/data/measurements_repository.dart';
 import 'package:smart_meal_planner/features/catalog/application/food_catalog_controller.dart';
@@ -19,6 +21,7 @@ final class AppSessionDependencies {
     required this.sessionController,
     required this.profileController,
     required this.preferencesController,
+    required this.dislikedIngredientsController,
     required this.measurementsController,
     required this.foodCatalogController,
     required this.ingredientCatalogController,
@@ -27,6 +30,7 @@ final class AppSessionDependencies {
   final SessionController sessionController;
   final ProfileController profileController;
   final PreferencesController preferencesController;
+  final DislikedIngredientsController dislikedIngredientsController;
   final MeasurementsController measurementsController;
   final FoodCatalogController foodCatalogController;
   final IngredientCatalogController ingredientCatalogController;
@@ -57,6 +61,10 @@ final class AppSessionFactory {
       ),
       preferencesController: PreferencesController(
         repository: HttpPreferencesRepository(apiClient),
+      ),
+      dislikedIngredientsController: DislikedIngredientsController(
+        repository: HttpDislikedIngredientsRepository(apiClient),
+        catalogRepository: catalogRepository,
       ),
       measurementsController: MeasurementsController(
         repository: HttpMeasurementsRepository(apiClient),

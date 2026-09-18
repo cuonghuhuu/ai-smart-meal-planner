@@ -7,6 +7,7 @@ import 'package:smart_meal_planner/app/theme/app_theme.dart';
 import 'package:smart_meal_planner/features/auth/domain/auth_models.dart';
 import 'package:smart_meal_planner/features/auth/application/session_controller.dart';
 import 'package:smart_meal_planner/features/preferences/application/preferences_controller.dart';
+import 'package:smart_meal_planner/features/preferences/application/disliked_ingredients_controller.dart';
 import 'package:smart_meal_planner/features/measurements/application/measurements_controller.dart';
 import 'package:smart_meal_planner/features/profile/application/profile_controller.dart';
 import 'package:smart_meal_planner/features/catalog/application/food_catalog_controller.dart';
@@ -18,6 +19,7 @@ class SmartMealPlannerApp extends StatefulWidget {
     this.sessionController,
     this.profileController,
     this.preferencesController,
+    this.dislikedIngredientsController,
     this.measurementsController,
     this.foodCatalogController,
     this.ingredientCatalogController,
@@ -26,6 +28,7 @@ class SmartMealPlannerApp extends StatefulWidget {
   final SessionController? sessionController;
   final ProfileController? profileController;
   final PreferencesController? preferencesController;
+  final DislikedIngredientsController? dislikedIngredientsController;
   final MeasurementsController? measurementsController;
   final FoodCatalogController? foodCatalogController;
   final IngredientCatalogController? ingredientCatalogController;
@@ -38,6 +41,7 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
   late final SessionController _sessionController;
   late final ProfileController? _profileController;
   late final PreferencesController? _preferencesController;
+  late final DislikedIngredientsController? _dislikedIngredientsController;
   late final MeasurementsController? _measurementsController;
   late final FoodCatalogController? _foodCatalogController;
   late final IngredientCatalogController? _ingredientCatalogController;
@@ -53,6 +57,8 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       _sessionController = dependencies.sessionController;
       _profileController = dependencies.profileController;
       _preferencesController = dependencies.preferencesController;
+      _dislikedIngredientsController =
+          dependencies.dislikedIngredientsController;
       _measurementsController = dependencies.measurementsController;
       _foodCatalogController = dependencies.foodCatalogController;
       _ingredientCatalogController = dependencies.ingredientCatalogController;
@@ -60,6 +66,7 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       _sessionController = widget.sessionController!;
       _profileController = widget.profileController;
       _preferencesController = widget.preferencesController;
+      _dislikedIngredientsController = widget.dislikedIngredientsController;
       _measurementsController = widget.measurementsController;
       _foodCatalogController = widget.foodCatalogController;
       _ingredientCatalogController = widget.ingredientCatalogController;
@@ -68,6 +75,7 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       _sessionController,
       profileController: _profileController,
       preferencesController: _preferencesController,
+      dislikedIngredientsController: _dislikedIngredientsController,
       measurementsController: _measurementsController,
       foodCatalogController: _foodCatalogController,
       ingredientCatalogController: _ingredientCatalogController,
@@ -98,6 +106,7 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
 
     if (leftAuthenticated || changedAuthenticatedPrincipal) {
       _measurementsController?.resetForSessionChange();
+      _dislikedIngredientsController?.resetForSessionChange();
       _foodCatalogController?.resetForSessionChange();
       _ingredientCatalogController?.resetForSessionChange();
     }

@@ -234,6 +234,51 @@ final class AppStrings {
   static const saveAllergens = 'Lưu thông tin dị ứng';
   static const allergensSaved = 'Đã lưu thông tin dị ứng.';
 
+  // Disliked ingredients and personal avoidance preferences.
+  static const dislikedIngredients = 'Nguyên liệu không thích / muốn tránh';
+  static const dislikedIngredientsDescription =
+      'Ghi lại nguyên liệu bạn không thích hoặc muốn tránh. Đây là sở thích ăn uống, không thay thế thông tin dị ứng.';
+  static const dislikedIngredientsStored =
+      'Các lựa chọn này được lưu để dùng cho việc lập kế hoạch bữa ăn sau này.';
+  static const dislikedIngredientStrengthDescription =
+      '“Không thích” thể hiện sở thích không muốn ăn; “Tránh dùng” là mức tránh mạnh hơn theo lựa chọn cá nhân.';
+  static const dislikedIngredientsEmpty =
+      'Bạn chưa thêm nguyên liệu nào vào danh sách này.';
+  static const dislikedIngredientAdd = 'Thêm nguyên liệu';
+  static const dislikedIngredientSave = 'Lưu nguyên liệu không thích';
+  static const dislikedIngredientRemove = 'Xóa nguyên liệu';
+  static const dislikedIngredientStrength = 'Mức độ ưu tiên tránh';
+  static const dislikedIngredientNote = 'Ghi chú (không bắt buộc)';
+  static const dislikedIngredientNoteTooLong =
+      'Ghi chú nguyên liệu không được vượt quá 255 ký tự.';
+  static const dislikedIngredientIdBlank =
+      'Nguyên liệu không được thiếu mã định danh.';
+  static const dislikedIngredientDuplicate =
+      'Không được chọn trùng nguyên liệu.';
+  static const dislikedIngredientDislike = 'Không thích';
+  static const dislikedIngredientAvoid = 'Tránh dùng';
+  static const dislikedIngredientsSaved =
+      'Đã lưu danh sách nguyên liệu không thích.';
+  static const dislikedIngredientsLoadFailed =
+      'Không thể tải danh sách nguyên liệu. Vui lòng thử lại.';
+  static const dislikedIngredientsSaveFailed =
+      'Không thể lưu danh sách nguyên liệu. Vui lòng thử lại.';
+  static const dislikedIngredientPickerTitle = 'Chọn nguyên liệu';
+  static const dislikedIngredientPickerSearch = 'Tìm nguyên liệu';
+  static const dislikedIngredientPickerNoResults =
+      'Không tìm thấy nguyên liệu phù hợp.';
+  static const dislikedIngredientPickerSelected = 'Đã chọn';
+  static const dislikedIngredientPickerLoadFailed =
+      'Không thể tải danh sách nguyên liệu để chọn. Vui lòng thử lại.';
+  static const dislikedIngredientPickerLoadMoreFailed =
+      'Không thể tải thêm nguyên liệu. Vui lòng thử lại.';
+  static const dislikedIngredientPickerRetry = 'Thử lại';
+  static const dislikedIngredientPickerClose = 'Đóng';
+  static const dislikedIngredientStrengthLabels = <String, String>{
+    'DISLIKE': dislikedIngredientDislike,
+    'AVOID': dislikedIngredientAvoid,
+  };
+
   // Body measurements.
   static const measurements = 'Số đo cơ thể';
   static const measurementsSubtitle =

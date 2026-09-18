@@ -7,6 +7,7 @@ import 'package:smart_meal_planner/features/auth/presentation/auth_pages.dart';
 import 'package:smart_meal_planner/features/auth/presentation/authenticated_shell.dart';
 import 'package:smart_meal_planner/features/auth/presentation/session_gate.dart';
 import 'package:smart_meal_planner/features/preferences/application/preferences_controller.dart';
+import 'package:smart_meal_planner/features/preferences/application/disliked_ingredients_controller.dart';
 import 'package:smart_meal_planner/features/preferences/presentation/preferences_page.dart';
 import 'package:smart_meal_planner/features/measurements/application/measurements_controller.dart';
 import 'package:smart_meal_planner/features/measurements/presentation/measurements_page.dart';
@@ -24,6 +25,7 @@ final class AppRouter {
     SessionController sessionController, {
     ProfileController? profileController,
     PreferencesController? preferencesController,
+    DislikedIngredientsController? dislikedIngredientsController,
     MeasurementsController? measurementsController,
     FoodCatalogController? foodCatalogController,
     IngredientCatalogController? ingredientCatalogController,
@@ -170,8 +172,10 @@ final class AppRouter {
                child: preferencesController == null
                    ? const _PreferencesUnavailablePage()
                    : PreferencesPage(
-                       sessionController: sessionController,
-                       preferencesController: preferencesController,
+                      sessionController: sessionController,
+                      preferencesController: preferencesController,
+                      dislikedIngredientsController:
+                          dislikedIngredientsController,
                      ),
              ),
            ),

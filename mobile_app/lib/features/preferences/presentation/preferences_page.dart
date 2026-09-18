@@ -4,8 +4,10 @@ import 'package:smart_meal_planner/core/ui/responsive_content.dart';
 import 'package:smart_meal_planner/features/auth/application/session_controller.dart';
 import 'package:smart_meal_planner/features/auth/presentation/authenticated_shell.dart';
 import 'package:smart_meal_planner/features/preferences/application/preferences_controller.dart';
+import 'package:smart_meal_planner/features/preferences/application/disliked_ingredients_controller.dart';
 import 'package:smart_meal_planner/features/preferences/application/preferences_validation.dart';
 import 'package:smart_meal_planner/features/preferences/data/preference_models.dart';
+import 'package:smart_meal_planner/features/preferences/presentation/disliked_ingredients_section.dart';
 import 'package:smart_meal_planner/l10n/app_strings.dart';
 import 'package:smart_meal_planner/l10n/reference_localizations.dart';
 
@@ -14,10 +16,12 @@ class PreferencesPage extends StatefulWidget {
     super.key,
     required this.sessionController,
     required this.preferencesController,
+    this.dislikedIngredientsController,
   });
 
   final SessionController sessionController;
   final PreferencesController preferencesController;
+  final DislikedIngredientsController? dislikedIngredientsController;
 
   @override
   State<PreferencesPage> createState() => _PreferencesPageState();
@@ -32,12 +36,21 @@ class _PreferencesPageState extends State<PreferencesPage> {
   void initState() {
     super.initState();
     _controller.addListener(_onControllerChanged);
+    final dislikedController = widget.dislikedIngredientsController;
+    dislikedController?.addListener(_onControllerChanged);
+    if (dislikedController != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        dislikedController.load();
+      });
+    }
     _controller.load();
   }
 
   @override
   void dispose() {
     _controller.removeListener(_onControllerChanged);
+    widget.dislikedIngredientsController?.removeListener(_onControllerChanged);
     super.dispose();
   }
 
@@ -119,6 +132,10 @@ class _PreferencesPageState extends State<PreferencesPage> {
               key: _allergensFormKey,
               child: _buildAllergenSection(state, busy),
             ),
+            if (widget.dislikedIngredientsController case final controller?) ...[
+              const SizedBox(height: 20),
+              DislikedIngredientsSection(controller: controller),
+            ],
           ],
         ),
       ),
