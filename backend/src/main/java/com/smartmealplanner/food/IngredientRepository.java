@@ -61,6 +61,15 @@ interface IngredientRepository extends JpaRepository<Ingredient, Long> {
     @Query("""
             select ingredient
             from Ingredient ingredient
+            where ingredient.active = true
+              and ingredient.publicId = :publicId
+            """)
+    Optional<Ingredient> findActiveByPublicId(
+            @Param("publicId") byte[] publicId);
+
+    @Query("""
+            select ingredient
+            from Ingredient ingredient
             left join fetch ingredient.defaultFood
             where ingredient.id in :ids
             """)

@@ -8,6 +8,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 interface IngredientFoodRepository extends JpaRepository<IngredientFood, IngredientFoodId> {
+
+    @Query("""
+            select case when count(mapping) > 0 then true else false end
+            from IngredientFood mapping
+            where mapping.ingredient.id = :ingredientId
+              and mapping.food.id = :foodId
+            """)
+    boolean existsByIngredientIdAndFoodId(
+            @Param("ingredientId") Long ingredientId,
+            @Param("foodId") Long foodId);
+
     @Query("""
             select mapping from IngredientFood mapping
             join fetch mapping.food food
