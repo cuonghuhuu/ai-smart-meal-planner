@@ -53,6 +53,8 @@ call Python directly.
 - [Vietnamese Recipe offline import](vietnam-recipe-import.md) - P9C
   project-curated starter data, canonical SMILING Ingredient mappings,
   validation, idempotency, and explicit offline execution.
+- [Pantry / Fridge backend](pantry.md) - P10 owner-scoped pantry lots,
+  quantity events, honest expiry semantics, and the P11 availability boundary.
 
 ## Diagrams
 

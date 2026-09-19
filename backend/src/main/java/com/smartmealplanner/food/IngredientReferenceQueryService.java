@@ -4,13 +4,16 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Food-module boundary for read-only Ingredient identity resolution.
- * Recipe must not depend on the Ingredient entity or repository directly.
+ * Recipe and Pantry must not depend on the Ingredient entity or repository
+ * directly.
  */
 @Service
 public class IngredientReferenceQueryService {
@@ -84,5 +87,49 @@ public class IngredientReferenceQueryService {
                             ingredient.displayName()));
         }
         return Map.copyOf(snapshots);
+    }
+
+    /** Resolves an active Ingredient selected by its public UUID. */
+    @Transactional(readOnly = true)
+    public Optional<IngredientReferenceSnapshot> resolveActiveByPublicId(
+            UUID publicId) {
+
+        if (publicId == null) {
+            return Optional.empty();
+        }
+
+        return ingredients.findActiveByPublicId(CatalogIds.uuidToBytes(publicId))
+                .map(IngredientReferenceQueryService::snapshot);
+    }
+
+    /** Resolves a historical Ingredient reference without applying activity filtering. */
+    @Transactional(readOnly = true)
+    public Optional<IngredientReferenceSnapshot> resolveByPublicId(
+            UUID publicId) {
+
+        if (publicId == null) {
+            return Optional.empty();
+        }
+
+        return ingredients.findByPublicId(CatalogIds.uuidToBytes(publicId))
+                .map(IngredientReferenceQueryService::snapshot);
+    }
+
+    private static IngredientReferenceSnapshot snapshot(Ingredient ingredient) {
+        if (ingredient == null
+                || ingredient.internalId() == null
+                || ingredient.publicId() == null
+                || ingredient.code() == null
+                || ingredient.displayName() == null) {
+
+            throw new IllegalStateException(
+                    "Ingredient reference data is inconsistent");
+        }
+
+        return new IngredientReferenceSnapshot(
+                ingredient.internalId(),
+                ingredient.publicId(),
+                ingredient.code(),
+                ingredient.displayName());
     }
 }
