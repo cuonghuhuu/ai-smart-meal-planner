@@ -65,9 +65,16 @@ refresh a snapshot during a GET request. If no current snapshot exists,
 becoming zero. See [Recipe nutrition calculation](recipe-nutrition.md) for the
 conversion and lifecycle rules.
 
+## P9C curated import
+
+P9C supplies a small project-curated Vietnamese Recipe catalog through an
+explicit offline JSON import. It resolves existing canonical Ingredients by
+code, never creates or fuzzy-matches Ingredients, and calls the P9B Java
+nutrition computation service after new or nutrition-affecting definitions are
+flushed. See [Vietnamese Recipe offline import](vietnam-recipe-import.md).
+
 ## Persistence authority and future phases
 
 The Java backend is authoritative for Recipe persistence and API validation.
-P9A does not import recipes, add user recipe CRUD, calculate nutrition, connect
-Pantry or Recommendation workflows, or call the Python AI service. Those
-responsibilities remain future phases.
+P9A does not add user recipe CRUD, connect Pantry or Recommendation workflows,
+or call the Python AI service. Those responsibilities remain future phases.

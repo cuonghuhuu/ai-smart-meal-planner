@@ -1,0 +1,28 @@
+{
+  "dataset": "Synthetic fixture only - Vietnamese Recipe import",
+  "datasetVersion": "test-v1",
+  "recipes": [
+    {
+      "sourceIdentifier": "TEST_RECIPE_001",
+      "title": "Canh rau muống thử nghiệm",
+      "slug": "test-canh-rau-muong",
+      "summary": "Dữ liệu tổng hợp để kiểm tra Unicode và hợp đồng JSON.",
+      "servings": 2,
+      "prepMinutes": 5,
+      "cookMinutes": 10,
+      "difficulty": "EASY",
+      "instructionsNote": null,
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "TEST_RECIPE_DATASET_V1:TEST_RECIPE_001",
+      "tags": ["VIETNAMESE", "SOUP"],
+      "mealSlots": ["LUNCH"],
+      "ingredients": [
+        {"lineNumber": 1, "ingredientCode": "TEST_INGREDIENT_001", "quantity": 100, "unitCode": "g", "preparationNote": "Rửa sạch.", "optional": false, "allowSubstitution": true, "sectionLabel": "Phần chính"}
+      ],
+      "steps": [
+        {"stepNumber": 1, "instruction": "Nấu thử nghiệm đến khi rau mềm.", "durationMinutes": 10}
+      ]
+    }
+  ]
+}

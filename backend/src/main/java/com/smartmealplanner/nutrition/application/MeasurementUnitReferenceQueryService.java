@@ -58,4 +58,43 @@ public class MeasurementUnitReferenceQueryService {
         }
         return Map.copyOf(snapshots);
     }
+
+    /** Resolves unit vocabulary rows for an import document in one query. */
+    @Transactional(readOnly = true)
+    public Map<String, MeasurementUnitReferenceSnapshot> resolveByCodes(
+            Collection<String> codes) {
+
+        if (codes == null || codes.isEmpty()) {
+            return Map.of();
+        }
+
+        List<MeasurementUnit> values = units.findAllWithBaseUnitByCodeIn(codes);
+        Map<String, MeasurementUnitReferenceSnapshot> snapshots = new LinkedHashMap<>();
+        for (MeasurementUnit unit : values) {
+            if (unit == null
+                    || unit.id() == null
+                    || unit.code() == null
+                    || unit.displayName() == null
+                    || unit.unitType() == null
+                    || (unit.baseUnit() != null
+                    && (unit.baseUnit().id() == null
+                    || unit.baseUnit().code() == null))) {
+
+                throw new IllegalStateException(
+                        "Measurement unit reference data is inconsistent");
+            }
+
+            snapshots.put(
+                    unit.code(),
+                    new MeasurementUnitReferenceSnapshot(
+                            unit.id(),
+                            unit.code(),
+                            unit.displayName(),
+                            unit.unitType(),
+                            unit.baseUnit() == null ? null : unit.baseUnit().id(),
+                            unit.baseUnit() == null ? null : unit.baseUnit().code(),
+                            unit.factorToBaseUnit()));
+        }
+        return Map.copyOf(snapshots);
+    }
 }

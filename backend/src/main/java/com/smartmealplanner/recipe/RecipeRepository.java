@@ -1,6 +1,8 @@
 package com.smartmealplanner.recipe;
 
 import java.util.Optional;
+import java.util.Collection;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +14,12 @@ import org.springframework.data.repository.query.Param;
 import jakarta.persistence.LockModeType;
 
 interface RecipeRepository extends JpaRepository<Recipe, Long> {
+
+    Optional<Recipe> findBySlug(String slug);
+
+    List<Recipe> findAllBySlugIn(Collection<String> slugs);
+
+    List<Recipe> findAllBySourceReferenceIn(Collection<String> sourceReferences);
 
     @Query(value = """
             select r.*

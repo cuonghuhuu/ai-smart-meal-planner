@@ -22,4 +22,13 @@ public interface MeasurementUnitRepository
             """)
     List<MeasurementUnit> findAllWithBaseUnitByIdIn(
             @Param("ids") Collection<Long> ids);
+
+    @Query("""
+            select unit
+            from MeasurementUnit unit
+            left join fetch unit.baseUnit
+            where unit.code in :codes
+            """)
+    List<MeasurementUnit> findAllWithBaseUnitByCodeIn(
+            @Param("codes") Collection<String> codes);
 }

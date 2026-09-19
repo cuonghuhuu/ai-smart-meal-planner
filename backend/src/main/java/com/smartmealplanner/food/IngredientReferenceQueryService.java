@@ -52,4 +52,37 @@ public class IngredientReferenceQueryService {
         }
         return Map.copyOf(snapshots);
     }
+
+    /** Resolves canonical Ingredient identities for an import document in one query. */
+    @Transactional(readOnly = true)
+    public Map<String, IngredientReferenceSnapshot> resolveByCodes(
+            Collection<String> codes) {
+
+        if (codes == null || codes.isEmpty()) {
+            return Map.of();
+        }
+
+        List<Ingredient> values = ingredients.findAllByCodeIn(codes);
+        Map<String, IngredientReferenceSnapshot> snapshots = new LinkedHashMap<>();
+        for (Ingredient ingredient : values) {
+            if (ingredient == null
+                    || ingredient.internalId() == null
+                    || ingredient.publicId() == null
+                    || ingredient.code() == null
+                    || ingredient.displayName() == null) {
+
+                throw new IllegalStateException(
+                        "Ingredient reference data is inconsistent");
+            }
+
+            snapshots.put(
+                    ingredient.code(),
+                    new IngredientReferenceSnapshot(
+                            ingredient.internalId(),
+                            ingredient.publicId(),
+                            ingredient.code(),
+                            ingredient.displayName()));
+        }
+        return Map.copyOf(snapshots);
+    }
 }

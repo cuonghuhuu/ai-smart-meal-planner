@@ -50,6 +50,9 @@ call Python directly.
 - [Recipe nutrition calculation](recipe-nutrition.md) - P9B BigDecimal
   calculation, conservative unit conversion, completeness, and immutable
   nutrition snapshot replacement.
+- [Vietnamese Recipe offline import](vietnam-recipe-import.md) - P9C
+  project-curated starter data, canonical SMILING Ingredient mappings,
+  validation, idempotency, and explicit offline execution.
 
 ## Diagrams
 

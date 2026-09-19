@@ -81,6 +81,19 @@ app:
       source-file: ${CATALOG_IMPORT_SOURCE_FILE:}
 
 ---
+# Recipe import is an explicit offline operator task, never normal startup.
+spring:
+  config:
+    activate:
+      on-profile: recipe-import
+
+app:
+  recipe:
+    import:
+      enabled: ${RECIPE_IMPORT_ENABLED:false}
+      source-file: ${RECIPE_IMPORT_SOURCE_FILE:}
+
+---
 # Profile documents keep non-secret defaults versioned without a private local file.
 spring:
   config:

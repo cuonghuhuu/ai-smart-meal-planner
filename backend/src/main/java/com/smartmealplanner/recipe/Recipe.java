@@ -3,6 +3,7 @@ package com.smartmealplanner.recipe;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -211,6 +212,68 @@ class Recipe {
 
     void setSummary(String summary) {
         this.summary = optionalText(summary, 500, "summary");
+    }
+
+    /** Applies fields owned by the project-curated offline Recipe dataset. */
+    boolean applyImportedDefinition(
+            String title,
+            String slug,
+            String summary,
+            Integer servings,
+            Integer prepMinutes,
+            Integer cookMinutes,
+            RecipeDifficulty difficulty,
+            String instructionsNote,
+            String imageUrl,
+            RecipeSource source,
+            String sourceReference,
+            LocalDateTime publishedAt) {
+
+        String validatedTitle = requiredText(title, 200, "title");
+        String validatedSlug = requiredText(slug, 220, "slug");
+        String validatedSummary = optionalText(summary, 500, "summary");
+        Short validatedServings = requireRange(servings, 1, 100, "servings");
+        Short validatedPrepMinutes = optionalMinutes(prepMinutes, "prepMinutes");
+        Short validatedCookMinutes = optionalMinutes(cookMinutes, "cookMinutes");
+        RecipeDifficulty validatedDifficulty = required(difficulty, "difficulty");
+        String validatedInstructions = optionalText(
+                instructionsNote, 1000, "instructionsNote");
+        String validatedImageUrl = optionalText(imageUrl, 500, "imageUrl");
+        RecipeSource validatedSource = required(source, "source");
+        String validatedSourceReference = optionalText(
+                sourceReference, 255, "sourceReference");
+        validateLifecycle(RecipeStatus.PUBLISHED, publishedAt, null);
+
+        boolean changed = !Objects.equals(this.title, validatedTitle)
+                || !Objects.equals(this.slug, validatedSlug)
+                || !Objects.equals(this.summary, validatedSummary)
+                || !Objects.equals(this.servings, validatedServings)
+                || !Objects.equals(this.prepMinutes, validatedPrepMinutes)
+                || !Objects.equals(this.cookMinutes, validatedCookMinutes)
+                || !Objects.equals(this.difficulty, validatedDifficulty)
+                || !Objects.equals(this.instructionsNote, validatedInstructions)
+                || !Objects.equals(this.imageUrl, validatedImageUrl)
+                || !Objects.equals(this.source, validatedSource)
+                || !Objects.equals(this.sourceReference, validatedSourceReference)
+                || !Objects.equals(this.status, RecipeStatus.PUBLISHED)
+                || !Objects.equals(this.publishedAt, publishedAt)
+                || this.archivedAt != null;
+
+        this.title = validatedTitle;
+        this.slug = validatedSlug;
+        this.summary = validatedSummary;
+        this.servings = validatedServings;
+        this.prepMinutes = validatedPrepMinutes;
+        this.cookMinutes = validatedCookMinutes;
+        this.difficulty = validatedDifficulty;
+        this.instructionsNote = validatedInstructions;
+        this.imageUrl = validatedImageUrl;
+        this.source = validatedSource;
+        this.sourceReference = validatedSourceReference;
+        this.status = RecipeStatus.PUBLISHED;
+        this.publishedAt = publishedAt;
+        this.archivedAt = null;
+        return changed;
     }
 
     static void validateLifecycle(

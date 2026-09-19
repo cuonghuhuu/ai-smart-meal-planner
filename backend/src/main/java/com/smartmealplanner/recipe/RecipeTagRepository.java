@@ -14,6 +14,8 @@ interface RecipeTagRepository extends JpaRepository<RecipeTag, Long> {
 
     boolean existsByCode(String code);
 
+    List<RecipeTag> findAllByCodeIn(Collection<String> codes);
+
     List<RecipeTag> findAllByOrderByDisplayNameAscCodeAsc();
 
     @Query(value = """

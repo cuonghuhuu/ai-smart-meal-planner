@@ -14,6 +14,8 @@ interface MealSlotTypeRepository extends JpaRepository<MealSlotType, Long> {
 
     boolean existsByCode(String code);
 
+    List<MealSlotType> findAllByCodeIn(Collection<String> codes);
+
     List<MealSlotType> findAllByOrderByDisplayOrderAscCodeAsc();
 
     @Query(value = """

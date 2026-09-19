@@ -2,17 +2,18 @@ package com.smartmealplanner.recipe;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+interface RecipeTagAssignmentRepository
+        extends JpaRepository<RecipeTagAssignment, RecipeTagAssignmentId> {
 
-interface RecipeIngredientRepository extends JpaRepository<RecipeIngredient, Long> {
-
-    List<RecipeIngredient> findByRecipeIdOrderByLineNumberAsc(Long recipeId);
+    List<RecipeTagAssignment> findByRecipeId(Long recipeId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("delete from RecipeIngredient line where line.recipeId = :recipeId")
+    @Query("delete from RecipeTagAssignment assignment "
+            + "where assignment.recipeId = :recipeId")
     void deleteByRecipeId(@Param("recipeId") Long recipeId);
 }
