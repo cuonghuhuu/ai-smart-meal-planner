@@ -15,6 +15,8 @@ import 'package:smart_meal_planner/features/catalog/application/ingredient_catal
 import 'package:smart_meal_planner/features/pantry/application/pantry_controller.dart';
 import 'package:smart_meal_planner/features/recipes/application/recipe_controller.dart';
 import 'package:smart_meal_planner/features/meal_plan/application/meal_plan_controller.dart';
+import 'package:smart_meal_planner/features/admin/users/application/admin_user_controller.dart';
+import 'package:smart_meal_planner/features/admin/recipes/application/admin_recipe_controller.dart';
 
 class SmartMealPlannerApp extends StatefulWidget {
   const SmartMealPlannerApp({
@@ -29,6 +31,8 @@ class SmartMealPlannerApp extends StatefulWidget {
     this.pantryController,
     this.recipeController,
     this.mealPlanController,
+    this.adminUserController,
+    this.adminRecipeController,
   });
 
   final SessionController? sessionController;
@@ -41,6 +45,8 @@ class SmartMealPlannerApp extends StatefulWidget {
   final PantryController? pantryController;
   final RecipeController? recipeController;
   final MealPlanController? mealPlanController;
+  final AdminUserController? adminUserController;
+  final AdminRecipeController? adminRecipeController;
 
   @override
   State<SmartMealPlannerApp> createState() => _SmartMealPlannerAppState();
@@ -57,6 +63,8 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
   late final PantryController? _pantryController;
   late final RecipeController? _recipeController;
   late final MealPlanController? _mealPlanController;
+  late final AdminUserController? _adminUserController;
+  late final AdminRecipeController? _adminRecipeController;
   late final AppRouter _appRouter;
   late SessionStatus _observedSessionStatus;
   String? _observedAuthenticatedPublicId;
@@ -77,6 +85,8 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       _pantryController = dependencies.pantryController;
       _recipeController = dependencies.recipeController;
       _mealPlanController = dependencies.mealPlanController;
+      _adminUserController = dependencies.adminUserController;
+      _adminRecipeController = dependencies.adminRecipeController;
     } else {
       _sessionController = widget.sessionController!;
       _profileController = widget.profileController;
@@ -88,6 +98,8 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       _pantryController = widget.pantryController;
       _recipeController = widget.recipeController;
       _mealPlanController = widget.mealPlanController;
+      _adminUserController = widget.adminUserController;
+      _adminRecipeController = widget.adminRecipeController;
     }
     _appRouter = AppRouter(
       _sessionController,
@@ -100,6 +112,8 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       pantryController: _pantryController,
       recipeController: _recipeController,
       mealPlanController: _mealPlanController,
+      adminUserController: _adminUserController,
+      adminRecipeController: _adminRecipeController,
     );
     _observedSessionStatus = _sessionController.status;
     _observedAuthenticatedPublicId = _sessionController.identity?.publicId;
@@ -133,6 +147,8 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       _pantryController?.resetForSessionChange();
       _recipeController?.resetForSessionChange();
       _mealPlanController?.resetForSessionChange();
+      _adminUserController?.resetForSessionChange();
+      _adminRecipeController?.resetForSessionChange();
     }
   }
 

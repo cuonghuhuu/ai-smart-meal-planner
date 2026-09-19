@@ -27,6 +27,11 @@ import 'package:smart_meal_planner/features/recipes/presentation/recipe_list_pag
 import 'package:smart_meal_planner/features/meal_plan/application/meal_plan_controller.dart';
 import 'package:smart_meal_planner/features/meal_plan/presentation/meal_plan_detail_page.dart';
 import 'package:smart_meal_planner/features/meal_plan/presentation/meal_plan_page.dart';
+import 'package:smart_meal_planner/features/admin/users/application/admin_user_controller.dart';
+import 'package:smart_meal_planner/features/admin/users/presentation/admin_users_page.dart';
+import 'package:smart_meal_planner/features/admin/recipes/application/admin_recipe_controller.dart';
+import 'package:smart_meal_planner/features/admin/recipes/presentation/admin_recipe_edit_page.dart';
+import 'package:smart_meal_planner/features/admin/recipes/presentation/admin_recipes_page.dart';
 
 final class AppRouter {
   AppRouter(
@@ -40,6 +45,8 @@ final class AppRouter {
     PantryController? pantryController,
     RecipeController? recipeController,
     MealPlanController? mealPlanController,
+    AdminUserController? adminUserController,
+    AdminRecipeController? adminRecipeController,
   }) : router = GoRouter(
          initialLocation: '/catalog/foods',
          refreshListenable: sessionController,
@@ -294,8 +301,8 @@ final class AppRouter {
                      ),
              ),
            ),
-           GoRoute(
-             path: '/measurements',
+            GoRoute(
+              path: '/measurements',
              builder: (context, state) => SessionRouteGate(
                sessionController: sessionController,
                child: measurementsController == null
@@ -303,8 +310,87 @@ final class AppRouter {
                    : MeasurementsPage(
                        sessionController: sessionController,
                        measurementsController: measurementsController,
+               ),
+             ),
+           ),
+           GoRoute(
+             path: '/admin/users',
+             builder: (context, state) => SessionRouteGate(
+               sessionController: sessionController,
+               child: adminUserController == null
+                   ? AuthenticatedShell(
+                       sessionController: sessionController,
+                       selectedIndex: 8,
+                       content: const _FeatureUnavailableContent(
+                         message: AppStrings.adminUserLoadFailed,
+                       ),
+                     )
+                   : AdminUsersPage(
+                       sessionController: sessionController,
+                       controller: adminUserController,
                      ),
              ),
+           ),
+           GoRoute(
+             path: '/admin/recipes',
+             builder: (context, state) => SessionRouteGate(
+               sessionController: sessionController,
+               child: adminRecipeController == null
+                   ? AuthenticatedShell(
+                       sessionController: sessionController,
+                       selectedIndex: 9,
+                       content: const _FeatureUnavailableContent(
+                         message: AppStrings.adminRecipeLoadFailed,
+                       ),
+                     )
+                   : AdminRecipesPage(
+                       sessionController: sessionController,
+                       controller: adminRecipeController,
+                     ),
+             ),
+           ),
+           GoRoute(
+             path: '/admin/recipes/new',
+             builder: (context, state) => SessionRouteGate(
+               sessionController: sessionController,
+               child: adminRecipeController == null
+                   ? AuthenticatedShell(
+                       sessionController: sessionController,
+                       selectedIndex: 9,
+                       content: const _FeatureUnavailableContent(
+                         message: AppStrings.adminRecipeLoadFailed,
+                       ),
+                     )
+                   : AdminRecipeEditPage(
+                       sessionController: sessionController,
+                       controller: adminRecipeController,
+                     ),
+             ),
+           ),
+           GoRoute(
+             path: '/admin/recipes/:publicId/edit',
+             builder: (context, state) {
+               final publicId = state.pathParameters['publicId'] ?? '';
+               final child = adminRecipeController == null
+                   ? AuthenticatedShell(
+                       sessionController: sessionController,
+                       selectedIndex: 9,
+                       content: const _FeatureUnavailableContent(
+                         message: AppStrings.adminRecipeLoadFailed,
+                       ),
+                     )
+                   : !_isValidPublicId(publicId)
+                   ? const _NotFoundPage()
+                   : AdminRecipeEditPage(
+                       sessionController: sessionController,
+                       controller: adminRecipeController,
+                       publicId: publicId,
+                     );
+               return SessionRouteGate(
+                 sessionController: sessionController,
+                 child: child,
+               );
+             },
            ),
          ],
          errorBuilder: (context, state) => const _NotFoundPage(),
@@ -330,10 +416,17 @@ final class AppRouter {
         _isFeatureDetailPath(path, 'meal-plans') ||
         path == '/profile' ||
         path == '/preferences' ||
-        path == '/measurements';
+        path == '/measurements' ||
+        _isAdminPath(path);
 
     if (session.status == SessionStatus.anonymous && isProtectedRoute) {
       return '/auth/login?from=${Uri.encodeComponent(state.uri.toString())}';
+    }
+
+    if (session.status == SessionStatus.authenticated &&
+        _isAdminPath(path) &&
+        !session.isAdmin) {
+      return '/catalog/foods';
     }
 
     if (session.status == SessionStatus.authenticated && isAuthRoute) {
@@ -367,7 +460,12 @@ final class AppRouter {
                     _isValidPublicId(uri.path.split('/').last)) ||
                 uri.path == '/profile' ||
                 uri.path == '/preferences' ||
-                uri.path == '/measurements')
+                uri.path == '/measurements' ||
+                uri.path == '/admin/users' ||
+                uri.path == '/admin/recipes' ||
+                uri.path == '/admin/recipes/new' ||
+                (_isAdminRecipeEditPath(uri.path) &&
+                    _isValidPublicId(uri.path.split('/')[3])))
         ? uri.toString()
         : '/catalog/foods';
   }
@@ -388,6 +486,19 @@ final class AppRouter {
     }
     final segment = path.substring(prefix.length);
     return segment.isNotEmpty && !segment.contains('/');
+  }
+
+  static bool _isAdminPath(String path) =>
+      path == '/admin/users' ||
+      path == '/admin/recipes' ||
+      path == '/admin/recipes/new' ||
+      _isAdminRecipeEditPath(path);
+
+  static bool _isAdminRecipeEditPath(String path) {
+    const prefix = '/admin/recipes/';
+    if (!path.startsWith(prefix) || !path.endsWith('/edit')) return false;
+    final publicId = path.substring(prefix.length, path.length - '/edit'.length);
+    return publicId.isNotEmpty && !publicId.contains('/');
   }
 
   static bool _isValidPublicId(String value) => RegExp(

@@ -449,6 +449,96 @@ final class AppStrings {
   static const mealPlanReason = 'Giải thích';
   static const mealPlanRetry = 'Tải lại kế hoạch';
 
+  // P12/F13B admin demo flow.
+  static const adminUsers = 'Quản trị người dùng';
+  static const adminUsersSubtitle =
+      'Xem tài khoản và quản lý trạng thái người dùng.';
+  static const adminRecipes = 'Quản trị công thức';
+  static const adminRecipesSubtitle =
+      'Tạo, chỉnh sửa và quản lý vòng đời công thức.';
+  static const adminSearch = 'Tìm kiếm';
+  static const adminStatusFilter = 'Trạng thái';
+  static const adminAllStatuses = 'Tất cả trạng thái';
+  static const adminActive = 'Đang hoạt động';
+  static const adminSuspended = 'Đã tạm khóa';
+  static const adminPendingVerification = 'Chờ xác minh';
+  static const adminDeactivated = 'Đã vô hiệu hóa';
+  static const adminDraft = 'Bản nháp';
+  static const adminPublished = 'Đã xuất bản';
+  static const adminArchived = 'Đã lưu trữ';
+  static const adminSuspend = 'Tạm khóa';
+  static const adminReactivate = 'Kích hoạt lại';
+  static const adminSuspendConfirmation =
+      'Bạn có chắc muốn tạm khóa tài khoản này không?';
+  static const adminReactivateConfirmation =
+      'Bạn có chắc muốn kích hoạt lại tài khoản này không?';
+  static const adminPublish = 'Xuất bản';
+  static const adminArchive = 'Lưu trữ';
+  static const adminPublishConfirmation =
+      'Công thức sẽ trở thành công thức đã xuất bản và được hiển thị trong danh mục.';
+  static const adminArchiveConfirmation =
+      'Công thức sẽ được lưu trữ và không còn xuất hiện trong danh mục công khai.';
+  static const adminCreateRecipe = 'Tạo công thức';
+  static const adminEditRecipe = 'Chỉnh sửa công thức';
+  static const adminEdit = 'Chỉnh sửa';
+  static const adminView = 'Xem';
+  static const adminBackToRecipes = 'Quay lại danh sách công thức';
+  static const adminSaveDraft = 'Lưu bản nháp';
+  static const adminRecipeSaved = 'Đã lưu công thức.';
+  static const adminRecipePublished = 'Đã xuất bản công thức.';
+  static const adminRecipeArchived = 'Đã lưu trữ công thức.';
+  static const adminCreatedAt = 'Tạo lúc';
+  static const adminPublishedAt = 'Xuất bản lúc';
+  static const adminArchivedAt = 'Lưu trữ lúc';
+  static const adminSource = 'Nguồn';
+  static const adminSlug = 'Slug';
+  static const adminRecipeTitle = 'Tên công thức';
+  static const adminRecipeSummary = 'Tóm tắt';
+  static const adminDifficulty = 'Độ khó';
+  static const adminEasy = 'Dễ';
+  static const adminMedium = 'Trung bình';
+  static const adminHard = 'Khó';
+  static const adminPrepMinutes = 'Thời gian chuẩn bị (phút)';
+  static const adminCookMinutes = 'Thời gian nấu (phút)';
+  static const adminInstructionsNote = 'Ghi chú hướng dẫn';
+  static const adminImageUrl = 'URL hình ảnh';
+  static const adminAddIngredient = 'Thêm nguyên liệu';
+  static const adminAddStep = 'Thêm bước';
+  static const adminQuantity = 'Số lượng';
+  static const adminUnitCode = 'Mã đơn vị';
+  static const adminPreparationNote = 'Ghi chú sơ chế';
+  static const adminSectionLabel = 'Nhóm nguyên liệu';
+  static const adminOptional = 'Không bắt buộc';
+  static const adminAllowSubstitution = 'Cho phép thay thế';
+  static const adminStep = 'Bước';
+  static const adminStepDuration = 'Thời lượng bước (phút)';
+  static const adminTags = 'Nhãn';
+  static const adminMealSlots = 'Khung bữa ăn';
+  static const adminChooseIngredient = 'Chọn nguyên liệu';
+  static const adminIngredientLoadFailed =
+      'Không thể tải danh sách nguyên liệu. Vui lòng thử lại.';
+  static const adminIngredientEmpty = 'Không tìm thấy nguyên liệu.';
+  static const adminAlreadySelected = 'Đã chọn';
+  static const adminRemove = 'Xóa';
+  static const adminFieldRequired = 'Vui lòng nhập trường này.';
+  static const adminInvalidNumber = 'Vui lòng nhập số hợp lệ.';
+  static const adminQuantityUnitTogether =
+      'Số lượng và đơn vị phải cùng được nhập hoặc cùng để trống.';
+  static const adminUsersEmpty = 'Không tìm thấy người dùng.';
+  static const adminRecipesEmpty = 'Không tìm thấy công thức.';
+  static const adminUserLoadFailed =
+      'Không thể tải danh sách người dùng. Vui lòng thử lại.';
+  static const adminRecipeLoadFailed =
+      'Không thể tải danh sách công thức. Vui lòng thử lại.';
+  static const adminUserRequestFailed =
+      'Không thể hoàn tất thao tác với người dùng. Vui lòng thử lại.';
+  static const adminRecipeRequestFailed =
+      'Không thể hoàn tất thao tác với công thức. Vui lòng thử lại.';
+  static const adminForbidden = 'Bạn không có quyền thực hiện thao tác này.';
+  static const adminNotFound = 'Không tìm thấy dữ liệu quản trị.';
+  static const adminConflict =
+      'Dữ liệu đã thay đổi hoặc thao tác không hợp lệ. Vui lòng thử lại.';
+
   // Safe, user-facing error copy. Backend problem details are intentionally
   // not returned directly to the UI.
   static const incorrectCredentials = 'Email hoặc mật khẩu không chính xác.';

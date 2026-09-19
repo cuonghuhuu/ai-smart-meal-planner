@@ -21,6 +21,10 @@ import 'package:smart_meal_planner/features/recipes/application/recipe_controlle
 import 'package:smart_meal_planner/features/recipes/data/recipe_repository.dart';
 import 'package:smart_meal_planner/features/meal_plan/application/meal_plan_controller.dart';
 import 'package:smart_meal_planner/features/meal_plan/data/meal_plan_repository.dart';
+import 'package:smart_meal_planner/features/admin/users/application/admin_user_controller.dart';
+import 'package:smart_meal_planner/features/admin/users/data/admin_user_repository.dart';
+import 'package:smart_meal_planner/features/admin/recipes/application/admin_recipe_controller.dart';
+import 'package:smart_meal_planner/features/admin/recipes/data/admin_recipe_repository.dart';
 
 final class AppSessionDependencies {
   const AppSessionDependencies({
@@ -34,6 +38,8 @@ final class AppSessionDependencies {
     required this.pantryController,
     required this.recipeController,
     required this.mealPlanController,
+    required this.adminUserController,
+    required this.adminRecipeController,
   });
 
   final SessionController sessionController;
@@ -46,6 +52,8 @@ final class AppSessionDependencies {
   final PantryController pantryController;
   final RecipeController recipeController;
   final MealPlanController mealPlanController;
+  final AdminUserController adminUserController;
+  final AdminRecipeController adminRecipeController;
 }
 
 final class AppSessionFactory {
@@ -65,6 +73,7 @@ final class AppSessionFactory {
       refreshAccessToken: session.refresh,
     );
     final catalogRepository = HttpCatalogRepository(apiClient);
+    final adminRecipeRepository = HttpAdminRecipeRepository(apiClient);
     return AppSessionDependencies(
       sessionController: session,
       profileController: ProfileController(
@@ -96,6 +105,13 @@ final class AppSessionFactory {
       ),
       mealPlanController: MealPlanController(
         repository: HttpMealPlanRepository(apiClient),
+      ),
+      adminUserController: AdminUserController(
+        repository: HttpAdminUserRepository(apiClient),
+      ),
+      adminRecipeController: AdminRecipeController(
+        repository: adminRecipeRepository,
+        catalogRepository: catalogRepository,
       ),
     );
   }

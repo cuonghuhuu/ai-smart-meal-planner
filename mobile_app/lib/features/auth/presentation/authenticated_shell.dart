@@ -14,6 +14,8 @@ class AuthenticatedShell extends StatelessWidget {
   final Widget? content;
   final int selectedIndex;
 
+  bool get _isAdmin => sessionController.isAdmin;
+
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
@@ -44,13 +46,15 @@ class AuthenticatedShell extends StatelessWidget {
                 if (index == 5) context.go('/profile');
                 if (index == 6) context.go('/preferences');
                 if (index == 7) context.go('/measurements');
+                if (_isAdmin && index == 8) context.go('/admin/users');
+                if (_isAdmin && index == 9) context.go('/admin/recipes');
               },
               leading: IconButton(
                 tooltip: AppStrings.signOut,
                 onPressed: sessionController.logout,
                 icon: const Icon(Icons.logout),
               ),
-              destinations: const [
+              destinations: [
                 NavigationRailDestination(
                   icon: Icon(
                     Icons.restaurant,
@@ -98,6 +102,22 @@ class AuthenticatedShell extends StatelessWidget {
                   icon: Icon(Icons.monitor_weight),
                   label: Text(AppStrings.measurements),
                 ),
+                if (_isAdmin) ...[
+                  NavigationRailDestination(
+                    icon: Icon(
+                      Icons.manage_accounts,
+                      key: const ValueKey('admin-nav-users-rail'),
+                    ),
+                    label: const Text(AppStrings.adminUsers),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(
+                      Icons.menu_book_outlined,
+                      key: const ValueKey('admin-nav-recipes-rail'),
+                    ),
+                    label: const Text(AppStrings.adminRecipes),
+                  ),
+                ],
               ],
             ),
             const VerticalDivider(width: 1),
@@ -117,9 +137,11 @@ class _NavigationDrawer extends StatelessWidget {
   final SessionController sessionController;
   final int selectedIndex;
   @override
-  Widget build(BuildContext context) => Drawer(
-    child: ListView(
-      children: [
+  Widget build(BuildContext context) {
+    final isAdmin = sessionController.isAdmin;
+    return Drawer(
+      child: ListView(
+        children: [
         const DrawerHeader(child: Text(AppStrings.productName)),
         ListTile(
           key: const ValueKey('catalog-nav-foods-drawer'),
@@ -174,15 +196,33 @@ class _NavigationDrawer extends StatelessWidget {
           title: const Text(AppStrings.measurements),
           onTap: () => context.go('/measurements'),
         ),
+        if (isAdmin) ...[
+          const Divider(),
+          ListTile(
+            key: const ValueKey('admin-nav-users-drawer'),
+            selected: selectedIndex == 8,
+            leading: const Icon(Icons.manage_accounts),
+            title: const Text(AppStrings.adminUsers),
+            onTap: () => context.go('/admin/users'),
+          ),
+          ListTile(
+            key: const ValueKey('admin-nav-recipes-drawer'),
+            selected: selectedIndex == 9,
+            leading: const Icon(Icons.menu_book_outlined),
+            title: const Text(AppStrings.adminRecipes),
+            onTap: () => context.go('/admin/recipes'),
+          ),
+        ],
         const Divider(),
         ListTile(
           leading: const Icon(Icons.logout),
           title: const Text(AppStrings.signOut),
           onTap: sessionController.logout,
         ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }
 
 class _FoodsPlaceholder extends StatelessWidget {
