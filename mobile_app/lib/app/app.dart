@@ -12,6 +12,9 @@ import 'package:smart_meal_planner/features/measurements/application/measurement
 import 'package:smart_meal_planner/features/profile/application/profile_controller.dart';
 import 'package:smart_meal_planner/features/catalog/application/food_catalog_controller.dart';
 import 'package:smart_meal_planner/features/catalog/application/ingredient_catalog_controller.dart';
+import 'package:smart_meal_planner/features/pantry/application/pantry_controller.dart';
+import 'package:smart_meal_planner/features/recipes/application/recipe_controller.dart';
+import 'package:smart_meal_planner/features/meal_plan/application/meal_plan_controller.dart';
 
 class SmartMealPlannerApp extends StatefulWidget {
   const SmartMealPlannerApp({
@@ -23,6 +26,9 @@ class SmartMealPlannerApp extends StatefulWidget {
     this.measurementsController,
     this.foodCatalogController,
     this.ingredientCatalogController,
+    this.pantryController,
+    this.recipeController,
+    this.mealPlanController,
   });
 
   final SessionController? sessionController;
@@ -32,6 +38,9 @@ class SmartMealPlannerApp extends StatefulWidget {
   final MeasurementsController? measurementsController;
   final FoodCatalogController? foodCatalogController;
   final IngredientCatalogController? ingredientCatalogController;
+  final PantryController? pantryController;
+  final RecipeController? recipeController;
+  final MealPlanController? mealPlanController;
 
   @override
   State<SmartMealPlannerApp> createState() => _SmartMealPlannerAppState();
@@ -45,6 +54,9 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
   late final MeasurementsController? _measurementsController;
   late final FoodCatalogController? _foodCatalogController;
   late final IngredientCatalogController? _ingredientCatalogController;
+  late final PantryController? _pantryController;
+  late final RecipeController? _recipeController;
+  late final MealPlanController? _mealPlanController;
   late final AppRouter _appRouter;
   late SessionStatus _observedSessionStatus;
   String? _observedAuthenticatedPublicId;
@@ -62,6 +74,9 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       _measurementsController = dependencies.measurementsController;
       _foodCatalogController = dependencies.foodCatalogController;
       _ingredientCatalogController = dependencies.ingredientCatalogController;
+      _pantryController = dependencies.pantryController;
+      _recipeController = dependencies.recipeController;
+      _mealPlanController = dependencies.mealPlanController;
     } else {
       _sessionController = widget.sessionController!;
       _profileController = widget.profileController;
@@ -70,6 +85,9 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       _measurementsController = widget.measurementsController;
       _foodCatalogController = widget.foodCatalogController;
       _ingredientCatalogController = widget.ingredientCatalogController;
+      _pantryController = widget.pantryController;
+      _recipeController = widget.recipeController;
+      _mealPlanController = widget.mealPlanController;
     }
     _appRouter = AppRouter(
       _sessionController,
@@ -79,6 +97,9 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       measurementsController: _measurementsController,
       foodCatalogController: _foodCatalogController,
       ingredientCatalogController: _ingredientCatalogController,
+      pantryController: _pantryController,
+      recipeController: _recipeController,
+      mealPlanController: _mealPlanController,
     );
     _observedSessionStatus = _sessionController.status;
     _observedAuthenticatedPublicId = _sessionController.identity?.publicId;
@@ -109,6 +130,9 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       _dislikedIngredientsController?.resetForSessionChange();
       _foodCatalogController?.resetForSessionChange();
       _ingredientCatalogController?.resetForSessionChange();
+      _pantryController?.resetForSessionChange();
+      _recipeController?.resetForSessionChange();
+      _mealPlanController?.resetForSessionChange();
     }
   }
 

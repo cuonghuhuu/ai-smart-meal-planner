@@ -38,9 +38,12 @@ class AuthenticatedShell extends StatelessWidget {
               onDestinationSelected: (index) {
                 if (index == 0) context.go('/catalog/foods');
                 if (index == 1) context.go('/catalog/ingredients');
-                if (index == 2) context.go('/profile');
-                if (index == 3) context.go('/preferences');
-                if (index == 4) context.go('/measurements');
+                if (index == 2) context.go('/recipes');
+                if (index == 3) context.go('/pantry');
+                if (index == 4) context.go('/meal-plans');
+                if (index == 5) context.go('/profile');
+                if (index == 6) context.go('/preferences');
+                if (index == 7) context.go('/measurements');
               },
               leading: IconButton(
                 tooltip: AppStrings.signOut,
@@ -61,6 +64,27 @@ class AuthenticatedShell extends StatelessWidget {
                     key: ValueKey('catalog-nav-ingredients-rail'),
                   ),
                   label: Text(AppStrings.ingredients),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(
+                    Icons.menu_book,
+                    key: ValueKey('recipes-nav-rail'),
+                  ),
+                  label: Text(AppStrings.recipes),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(
+                    Icons.kitchen_outlined,
+                    key: ValueKey('pantry-nav-rail'),
+                  ),
+                  label: Text(AppStrings.pantry),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(
+                    Icons.calendar_month,
+                    key: ValueKey('meal-plans-nav-rail'),
+                  ),
+                  label: Text(AppStrings.mealPlans),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.person),
@@ -112,19 +136,40 @@ class _NavigationDrawer extends StatelessWidget {
           onTap: () => context.go('/catalog/ingredients'),
         ),
         ListTile(
+          key: const ValueKey('recipes-nav-drawer'),
           selected: selectedIndex == 2,
+          leading: const Icon(Icons.menu_book),
+          title: const Text(AppStrings.recipes),
+          onTap: () => context.go('/recipes'),
+        ),
+        ListTile(
+          key: const ValueKey('pantry-nav-drawer'),
+          selected: selectedIndex == 3,
+          leading: const Icon(Icons.kitchen_outlined),
+          title: const Text(AppStrings.pantry),
+          onTap: () => context.go('/pantry'),
+        ),
+        ListTile(
+          key: const ValueKey('meal-plans-nav-drawer'),
+          selected: selectedIndex == 4,
+          leading: const Icon(Icons.calendar_month),
+          title: const Text(AppStrings.mealPlans),
+          onTap: () => context.go('/meal-plans'),
+        ),
+        ListTile(
+          selected: selectedIndex == 5,
           leading: const Icon(Icons.person),
           title: const Text(AppStrings.profile),
           onTap: () => context.go('/profile'),
         ),
         ListTile(
-          selected: selectedIndex == 3,
+          selected: selectedIndex == 6,
           leading: const Icon(Icons.tune),
           title: const Text(AppStrings.preferences),
           onTap: () => context.go('/preferences'),
         ),
         ListTile(
-          selected: selectedIndex == 4,
+          selected: selectedIndex == 7,
           leading: const Icon(Icons.monitor_weight),
           title: const Text(AppStrings.measurements),
           onTap: () => context.go('/measurements'),

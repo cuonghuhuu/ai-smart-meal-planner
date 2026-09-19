@@ -15,6 +15,12 @@ import 'package:smart_meal_planner/features/measurements/data/measurements_repos
 import 'package:smart_meal_planner/features/catalog/application/food_catalog_controller.dart';
 import 'package:smart_meal_planner/features/catalog/application/ingredient_catalog_controller.dart';
 import 'package:smart_meal_planner/features/catalog/data/catalog_repository.dart';
+import 'package:smart_meal_planner/features/pantry/application/pantry_controller.dart';
+import 'package:smart_meal_planner/features/pantry/data/pantry_repository.dart';
+import 'package:smart_meal_planner/features/recipes/application/recipe_controller.dart';
+import 'package:smart_meal_planner/features/recipes/data/recipe_repository.dart';
+import 'package:smart_meal_planner/features/meal_plan/application/meal_plan_controller.dart';
+import 'package:smart_meal_planner/features/meal_plan/data/meal_plan_repository.dart';
 
 final class AppSessionDependencies {
   const AppSessionDependencies({
@@ -25,6 +31,9 @@ final class AppSessionDependencies {
     required this.measurementsController,
     required this.foodCatalogController,
     required this.ingredientCatalogController,
+    required this.pantryController,
+    required this.recipeController,
+    required this.mealPlanController,
   });
 
   final SessionController sessionController;
@@ -34,6 +43,9 @@ final class AppSessionDependencies {
   final MeasurementsController measurementsController;
   final FoodCatalogController foodCatalogController;
   final IngredientCatalogController ingredientCatalogController;
+  final PantryController pantryController;
+  final RecipeController recipeController;
+  final MealPlanController mealPlanController;
 }
 
 final class AppSessionFactory {
@@ -74,6 +86,16 @@ final class AppSessionFactory {
       ),
       ingredientCatalogController: IngredientCatalogController(
         repository: catalogRepository,
+      ),
+      pantryController: PantryController(
+        repository: HttpPantryRepository(apiClient),
+        catalogRepository: catalogRepository,
+      ),
+      recipeController: RecipeController(
+        repository: HttpRecipeRepository(apiClient),
+      ),
+      mealPlanController: MealPlanController(
+        repository: HttpMealPlanRepository(apiClient),
       ),
     );
   }

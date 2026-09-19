@@ -383,6 +383,72 @@ final class AppStrings {
       'Ghi chú không được vượt quá 255 ký tự.';
   static const measurementInvalidNumber = 'Vui lòng nhập một số hợp lệ.';
 
+  // P10/P11 user demo flow.
+  static const pantry = 'Tủ lạnh & kho';
+  static const pantrySubtitle =
+      'Theo dõi những thực phẩm và nguyên liệu hiện có ở nhà.';
+  static const addPantryItem = 'Thêm thực phẩm';
+  static const pantryEmpty = 'Bạn chưa có thực phẩm nào trong kho.';
+  static const pantryLoadFailed = 'Không thể tải kho thực phẩm. Vui lòng thử lại.';
+  static const pantryRequestFailed =
+      'Không thể hoàn tất thao tác với kho thực phẩm. Vui lòng thử lại.';
+  static const pantryIngredient = 'Nguyên liệu';
+  static const pantryQuantity = 'Số lượng';
+  static const pantryUnit = 'Đơn vị';
+  static const pantryStorage = 'Nơi bảo quản';
+  static const pantryExpiryDate = 'Hạn dùng';
+  static const pantryAcquiredDate = 'Ngày mua';
+  static const pantryNote = 'Ghi chú';
+  static const pantrySave = 'Thêm vào kho';
+  static const pantryAdjust = 'Điều chỉnh';
+  static const pantryConsume = 'Đã dùng';
+  static const pantryDiscard = 'Bỏ đi';
+  static const pantryRefresh = 'Làm mới kho';
+  static const pantrySearchIngredient = 'Tìm nguyên liệu';
+  static const pantryChooseIngredient = 'Chọn nguyên liệu';
+  static const pantryNoIngredients = 'Không tìm thấy nguyên liệu.';
+  static const pantryDateFormat = 'YYYY-MM-DD';
+  static const pantryInvalidQuantity = 'Số lượng phải lớn hơn 0.';
+
+  static const recipes = 'Công thức';
+  static const recipesSubtitle =
+      'Khám phá các công thức đã được tuyển chọn cho bữa ăn của bạn.';
+  static const recipeSearchHint = 'Tìm công thức';
+  static const recipeEmpty = 'Chưa có công thức phù hợp.';
+  static const recipeLoadFailed = 'Không thể tải công thức. Vui lòng thử lại.';
+  static const recipeRequestFailed =
+      'Không thể hoàn tất yêu cầu về công thức. Vui lòng thử lại.';
+  static const recipeBack = 'Quay lại danh sách công thức';
+  static const recipeSummary = 'Tóm tắt';
+  static const recipeIngredients = 'Nguyên liệu';
+  static const recipeSteps = 'Cách làm';
+  static const recipeNutrition = 'Dinh dưỡng mỗi khẩu phần';
+  static const recipeNoNutrition = 'Công thức chưa có dữ liệu dinh dưỡng.';
+  static const recipeNoIngredients = 'Công thức chưa có nguyên liệu.';
+  static const recipeNoSteps = 'Công thức chưa có hướng dẫn.';
+  static const recipeToTaste = 'Theo khẩu vị';
+  static const recipeDataCompleteness = 'dữ liệu đã tính';
+  static const recipeMinutes = 'phút';
+  static const recipeServings = 'khẩu phần';
+
+  static const mealPlans = 'Kế hoạch bữa ăn';
+  static const mealPlansSubtitle =
+      'Tạo kế hoạch 3 ngày dựa trên kho thực phẩm và mục tiêu hiện có.';
+  static const generateMealPlan = 'Tạo kế hoạch bữa ăn';
+  static const mealPlanEmpty = 'Bạn chưa có kế hoạch bữa ăn nào.';
+  static const mealPlanLoadFailed =
+      'Không thể tải kế hoạch bữa ăn. Vui lòng thử lại.';
+  static const mealPlanRequestFailed =
+      'Không thể hoàn tất yêu cầu về kế hoạch bữa ăn. Vui lòng thử lại.';
+  static const mealPlanAccept = 'Chấp nhận kế hoạch';
+  static const mealPlanBack = 'Quay lại kế hoạch bữa ăn';
+  static const mealPlanAccepted = 'Đã chấp nhận';
+  static const mealPlanNoEntries = 'Kế hoạch chưa có món ăn được chọn.';
+  static const mealPlanWarnings = 'Lưu ý';
+  static const mealPlanScore = 'Điểm phù hợp';
+  static const mealPlanReason = 'Giải thích';
+  static const mealPlanRetry = 'Tải lại kế hoạch';
+
   // Safe, user-facing error copy. Backend problem details are intentionally
   // not returned directly to the UI.
   static const incorrectCredentials = 'Email hoặc mật khẩu không chính xác.';

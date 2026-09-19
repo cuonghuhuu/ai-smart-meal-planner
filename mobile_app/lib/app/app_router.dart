@@ -19,6 +19,14 @@ import 'package:smart_meal_planner/features/catalog/presentation/food_catalog_pa
 import 'package:smart_meal_planner/features/catalog/presentation/food_detail_page.dart';
 import 'package:smart_meal_planner/features/catalog/presentation/ingredient_catalog_page.dart';
 import 'package:smart_meal_planner/features/catalog/presentation/ingredient_detail_page.dart';
+import 'package:smart_meal_planner/features/pantry/application/pantry_controller.dart';
+import 'package:smart_meal_planner/features/pantry/presentation/pantry_page.dart';
+import 'package:smart_meal_planner/features/recipes/application/recipe_controller.dart';
+import 'package:smart_meal_planner/features/recipes/presentation/recipe_detail_page.dart';
+import 'package:smart_meal_planner/features/recipes/presentation/recipe_list_page.dart';
+import 'package:smart_meal_planner/features/meal_plan/application/meal_plan_controller.dart';
+import 'package:smart_meal_planner/features/meal_plan/presentation/meal_plan_detail_page.dart';
+import 'package:smart_meal_planner/features/meal_plan/presentation/meal_plan_page.dart';
 
 final class AppRouter {
   AppRouter(
@@ -29,6 +37,9 @@ final class AppRouter {
     MeasurementsController? measurementsController,
     FoodCatalogController? foodCatalogController,
     IngredientCatalogController? ingredientCatalogController,
+    PantryController? pantryController,
+    RecipeController? recipeController,
+    MealPlanController? mealPlanController,
   }) : router = GoRouter(
          initialLocation: '/catalog/foods',
          refreshListenable: sessionController,
@@ -153,8 +164,112 @@ final class AppRouter {
                );
              },
            ),
-           GoRoute(
-             path: '/profile',
+            GoRoute(
+              path: '/pantry',
+              builder: (context, state) => SessionRouteGate(
+                sessionController: sessionController,
+                child: pantryController == null
+                    ? AuthenticatedShell(
+                        sessionController: sessionController,
+                        selectedIndex: 3,
+                        content: const _FeatureUnavailableContent(
+                          message: AppStrings.pantryLoadFailed,
+                        ),
+                      )
+                    : PantryPage(
+                        sessionController: sessionController,
+                        controller: pantryController,
+                      ),
+              ),
+            ),
+            GoRoute(
+              path: '/recipes',
+              builder: (context, state) => SessionRouteGate(
+                sessionController: sessionController,
+                child: recipeController == null
+                    ? AuthenticatedShell(
+                        sessionController: sessionController,
+                        selectedIndex: 2,
+                        content: const _FeatureUnavailableContent(
+                          message: AppStrings.recipeLoadFailed,
+                        ),
+                      )
+                    : RecipeListPage(
+                        sessionController: sessionController,
+                        controller: recipeController,
+                      ),
+              ),
+            ),
+            GoRoute(
+              path: '/recipes/:publicId',
+              builder: (context, state) {
+                final publicId = state.pathParameters['publicId'] ?? '';
+                final child = recipeController == null
+                    ? AuthenticatedShell(
+                        sessionController: sessionController,
+                        selectedIndex: 2,
+                        content: const _FeatureUnavailableContent(
+                          message: AppStrings.recipeLoadFailed,
+                        ),
+                      )
+                    : !_isValidPublicId(publicId)
+                    ? const _NotFoundPage()
+                    : RecipeDetailPage(
+                        sessionController: sessionController,
+                        controller: recipeController,
+                        publicId: publicId,
+                      );
+                return SessionRouteGate(
+                  sessionController: sessionController,
+                  child: child,
+                );
+              },
+            ),
+            GoRoute(
+              path: '/meal-plans',
+              builder: (context, state) => SessionRouteGate(
+                sessionController: sessionController,
+                child: mealPlanController == null
+                    ? AuthenticatedShell(
+                        sessionController: sessionController,
+                        selectedIndex: 4,
+                        content: const _FeatureUnavailableContent(
+                          message: AppStrings.mealPlanLoadFailed,
+                        ),
+                      )
+                    : MealPlanPage(
+                        sessionController: sessionController,
+                        controller: mealPlanController,
+                      ),
+              ),
+            ),
+            GoRoute(
+              path: '/meal-plans/:publicId',
+              builder: (context, state) {
+                final publicId = state.pathParameters['publicId'] ?? '';
+                final child = mealPlanController == null
+                    ? AuthenticatedShell(
+                        sessionController: sessionController,
+                        selectedIndex: 4,
+                        content: const _FeatureUnavailableContent(
+                          message: AppStrings.mealPlanLoadFailed,
+                        ),
+                      )
+                    : !_isValidPublicId(publicId)
+                    ? const _NotFoundPage()
+                    : MealPlanDetailPage(
+                        sessionController: sessionController,
+                        controller: mealPlanController,
+                        publicId: publicId,
+                      );
+                return SessionRouteGate(
+                  sessionController: sessionController,
+                  child: child,
+                );
+              },
+            ),
+            GoRoute(
+              path: '/profile',
              builder: (context, state) => SessionRouteGate(
                sessionController: sessionController,
                child: profileController == null
@@ -208,6 +323,11 @@ final class AppRouter {
         path == '/catalog/ingredients' ||
         _isCatalogDetailPath(path, 'foods') ||
         _isCatalogDetailPath(path, 'ingredients') ||
+        path == '/pantry' ||
+        path == '/recipes' ||
+        _isFeatureDetailPath(path, 'recipes') ||
+        path == '/meal-plans' ||
+        _isFeatureDetailPath(path, 'meal-plans') ||
         path == '/profile' ||
         path == '/preferences' ||
         path == '/measurements';
@@ -238,6 +358,13 @@ final class AppRouter {
                     _isValidPublicId(uri.path.split('/').last)) ||
                 (_isCatalogDetailPath(uri.path, 'ingredients') &&
                     _isValidPublicId(uri.path.split('/').last)) ||
+                uri.path == '/pantry' ||
+                uri.path == '/recipes' ||
+                (_isFeatureDetailPath(uri.path, 'recipes') &&
+                    _isValidPublicId(uri.path.split('/').last)) ||
+                uri.path == '/meal-plans' ||
+                (_isFeatureDetailPath(uri.path, 'meal-plans') &&
+                    _isValidPublicId(uri.path.split('/').last)) ||
                 uri.path == '/profile' ||
                 uri.path == '/preferences' ||
                 uri.path == '/measurements')
@@ -247,6 +374,15 @@ final class AppRouter {
 
   static bool _isCatalogDetailPath(String path, String collection) {
     final prefix = '/catalog/$collection/';
+    if (!path.startsWith(prefix)) {
+      return false;
+    }
+    final segment = path.substring(prefix.length);
+    return segment.isNotEmpty && !segment.contains('/');
+  }
+
+  static bool _isFeatureDetailPath(String path, String collection) {
+    final prefix = '/$collection/';
     if (!path.startsWith(prefix)) {
       return false;
     }
@@ -317,6 +453,20 @@ class _CatalogUnavailableContent extends StatelessWidget {
     child: Padding(
       padding: EdgeInsets.all(24),
       child: Text(AppStrings.catalogUnavailable),
+    ),
+  );
+}
+
+class _FeatureUnavailableContent extends StatelessWidget {
+  const _FeatureUnavailableContent({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Text(message),
     ),
   );
 }
