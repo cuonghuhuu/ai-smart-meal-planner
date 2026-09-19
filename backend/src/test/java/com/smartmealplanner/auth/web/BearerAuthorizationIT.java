@@ -29,6 +29,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.testcontainers.containers.MySQLContainer;
@@ -127,6 +128,29 @@ class BearerAuthorizationIT {
 
         mvc.perform(
                         get(
+                                "/api/v1/auth-test/protected")
+                                .header(
+                                        HttpHeaders.AUTHORIZATION,
+                                        bearer(
+                                                accessToken)))
+                .andExpect(
+                        status().isOk());
+    }
+
+    @Test
+    void validBearerPostDoesNotRequireCsrfToken()
+            throws Exception {
+
+        UserAccount account =
+                createActiveUserWithRole(
+                        ROLE_USER);
+
+        String accessToken =
+                loginAndGetAccessToken(
+                        account);
+
+        mvc.perform(
+                        post(
                                 "/api/v1/auth-test/protected")
                                 .header(
                                         HttpHeaders.AUTHORIZATION,
@@ -346,6 +370,12 @@ class BearerAuthorizationIT {
         @GetMapping(
                 "/api/v1/auth-test/protected")
         String protectedRoute() {
+            return "ok";
+        }
+
+        @PostMapping(
+                "/api/v1/auth-test/protected")
+        String protectedMutation() {
             return "ok";
         }
 

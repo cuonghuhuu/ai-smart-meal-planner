@@ -12,6 +12,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
@@ -83,6 +84,9 @@ public class SecurityConfiguration {
                 cookieLessPostMatcher(
                         LOGOUT_PATH);
 
+        RequestMatcher bearerAuthorizationMatcher =
+                SecurityConfiguration::hasNonBlankBearerAuthorization;
+
         RequestMatcher bearerLogoutAllMatcher =
                 request ->
                         matchesPostPath(
@@ -118,6 +122,14 @@ public class SecurityConfiguration {
                         .ignoringRequestMatchers(
                                 androidRefreshMatcher,
                                 androidLogoutMatcher)
+
+                        /*
+                         * Business API requests authenticated with an
+                         * explicit Bearer access token do not rely on the
+                         * browser refresh cookie.
+                         */
+                        .ignoringRequestMatchers(
+                                bearerAuthorizationMatcher)
 
                         /*
                          * logout-all requires a Bearer access JWT and does
@@ -357,5 +369,29 @@ public class SecurityConfiguration {
         }
 
         return false;
+    }
+
+    private static boolean hasNonBlankBearerAuthorization(
+            HttpServletRequest request) {
+
+        String authorization =
+                request.getHeader(
+                        HttpHeaders.AUTHORIZATION);
+
+        if (authorization == null) {
+            return false;
+        }
+
+        int separator =
+                authorization.indexOf(' ');
+
+        return separator > 0
+                && "Bearer".equalsIgnoreCase(
+                        authorization.substring(
+                                0,
+                                separator))
+                && !authorization.substring(
+                                separator + 1)
+                        .isBlank();
     }
 }
