@@ -214,6 +214,76 @@ class Recipe {
         this.summary = optionalText(summary, 500, "summary");
     }
 
+    /** Applies the editable definition of an administrator-owned draft. */
+    void applyAdminDraftUpdate(
+            String title,
+            String slug,
+            String summary,
+            Integer servings,
+            Integer prepMinutes,
+            Integer cookMinutes,
+            RecipeDifficulty difficulty,
+            String instructionsNote,
+            String imageUrl) {
+
+        if (status != RecipeStatus.DRAFT) {
+            throw new IllegalStateException(
+                    "Only draft recipes can be edited");
+        }
+
+        String validatedTitle = requiredText(title, 200, "title");
+        String validatedSlug = requiredText(slug, 220, "slug");
+        String validatedSummary = optionalText(summary, 500, "summary");
+        Short validatedServings = requireRange(servings, 1, 100, "servings");
+        Short validatedPrepMinutes = optionalMinutes(prepMinutes, "prepMinutes");
+        Short validatedCookMinutes = optionalMinutes(cookMinutes, "cookMinutes");
+        RecipeDifficulty validatedDifficulty = required(difficulty, "difficulty");
+        String validatedInstructions = optionalText(
+                instructionsNote, 1000, "instructionsNote");
+        String validatedImageUrl = optionalText(imageUrl, 500, "imageUrl");
+        validateLifecycle(RecipeStatus.DRAFT, null, null);
+
+        this.title = validatedTitle;
+        this.slug = validatedSlug;
+        this.summary = validatedSummary;
+        this.servings = validatedServings;
+        this.prepMinutes = validatedPrepMinutes;
+        this.cookMinutes = validatedCookMinutes;
+        this.difficulty = validatedDifficulty;
+        this.instructionsNote = validatedInstructions;
+        this.imageUrl = validatedImageUrl;
+        this.status = RecipeStatus.DRAFT;
+        this.publishedAt = null;
+        this.archivedAt = null;
+    }
+
+    void publish(LocalDateTime publishedAt) {
+        if (publishedAt == null) {
+            throw new IllegalArgumentException("publishedAt is required");
+        }
+        if (status != RecipeStatus.DRAFT) {
+            throw new IllegalStateException(
+                    "Only draft recipes can be published");
+        }
+        validateLifecycle(RecipeStatus.PUBLISHED, publishedAt, null);
+        this.status = RecipeStatus.PUBLISHED;
+        this.publishedAt = publishedAt;
+        this.archivedAt = null;
+    }
+
+    void archive(LocalDateTime archivedAt) {
+        if (archivedAt == null) {
+            throw new IllegalArgumentException("archivedAt is required");
+        }
+        if (status != RecipeStatus.PUBLISHED || publishedAt == null) {
+            throw new IllegalStateException(
+                    "Only published recipes can be archived");
+        }
+        validateLifecycle(RecipeStatus.ARCHIVED, publishedAt, archivedAt);
+        this.status = RecipeStatus.ARCHIVED;
+        this.archivedAt = archivedAt;
+    }
+
     /** Applies fields owned by the project-curated offline Recipe dataset. */
     boolean applyImportedDefinition(
             String title,

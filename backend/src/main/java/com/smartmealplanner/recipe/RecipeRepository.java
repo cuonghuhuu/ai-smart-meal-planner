@@ -26,6 +26,29 @@ interface RecipeRepository extends JpaRepository<Recipe, Long> {
     @Query(value = """
             select r.*
             from recipes r
+            where (:query is null
+                   or lower(r.title) like concat('%', lower(:query), '%')
+                   or lower(r.summary) like concat('%', lower(:query), '%'))
+              and (:status is null or r.status = :status)
+            order by r.title asc, r.public_id asc
+            """, countQuery = """
+            select count(*)
+            from recipes r
+            where (:query is null
+                   or lower(r.title) like concat('%', lower(:query), '%')
+                   or lower(r.summary) like concat('%', lower(:query), '%'))
+              and (:status is null or r.status = :status)
+            """, nativeQuery = true)
+    Page<Recipe> findForAdmin(
+            @Param("query") String query,
+            @Param("status") String status,
+            Pageable pageable);
+
+    Optional<Recipe> findByPublicId(byte[] publicId);
+
+    @Query(value = """
+            select r.*
+            from recipes r
             where r.status = 'PUBLISHED'
               and (:query is null
                    or match(r.title, r.summary)

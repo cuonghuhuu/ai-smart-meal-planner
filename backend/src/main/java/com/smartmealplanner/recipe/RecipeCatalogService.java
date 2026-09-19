@@ -108,13 +108,63 @@ public class RecipeCatalogService {
     }
 
     @Transactional(readOnly = true)
+    public RecipeAdminPage getAdminRecipes(
+            String query,
+            RecipeStatus status,
+            int page,
+            int size) {
+
+        validatePage(page, size);
+        String normalizedQuery = normalizeQuery(query);
+        Page<Recipe> result = recipes.findForAdmin(
+                normalizedQuery,
+                status == null ? null : status.name(),
+                PageRequest.of(page, size));
+
+        Set<Long> recipeIds = new LinkedHashSet<>();
+        for (Recipe recipe : result.getContent()) {
+            if (recipe == null || recipe.internalId() == null) {
+                throw corrupted();
+            }
+            recipeIds.add(recipe.internalId());
+        }
+        Map<Long, List<RecipeTagView>> tagsByRecipe = batchTags(recipeIds);
+        Map<Long, List<RecipeMealSlotView>> mealSlotsByRecipe =
+                batchMealSlots(recipeIds);
+
+        return new RecipeAdminPage(
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.getContent().stream()
+                        .map(recipe -> adminSummary(
+                                recipe,
+                                tagsByRecipe.getOrDefault(
+                                        recipe.internalId(), List.of()),
+                                mealSlotsByRecipe.getOrDefault(
+                                        recipe.internalId(), List.of())))
+                        .toList());
+    }
+
+    @Transactional(readOnly = true)
     public RecipeDetailView getRecipe(UUID publicId) {
+        return loadRecipe(publicId, true);
+    }
+
+    @Transactional(readOnly = true)
+    public RecipeDetailView getAdminRecipe(UUID publicId) {
+        return loadRecipe(publicId, false);
+    }
+
+    private RecipeDetailView loadRecipe(UUID publicId, boolean publishedOnly) {
         if (publicId == null) {
             throw invalidRequest();
         }
 
-        Recipe recipe = recipes.findPublishedByPublicId(
-                        RecipeIds.uuidToBytes(publicId))
+        Recipe recipe = (publishedOnly
+                ? recipes.findPublishedByPublicId(RecipeIds.uuidToBytes(publicId))
+                : recipes.findByPublicId(RecipeIds.uuidToBytes(publicId)))
                 .orElseThrow(() -> new RecipeException(
                         RecipeFailure.RECIPE_NOT_FOUND));
 
@@ -176,6 +226,7 @@ public class RecipeCatalogService {
                 recipe.sourceReference(),
                 recipe.status(),
                 recipe.publishedAt(),
+                recipe.archivedAt(),
                 ingredientViews,
                 stepViews,
                 tagViews,
@@ -455,6 +506,32 @@ public class RecipeCatalogService {
                 recipe.difficulty(),
                 recipe.imageUrl(),
                 recipe.source(),
+                List.copyOf(tags),
+                List.copyOf(mealSlots));
+    }
+
+    private static RecipeAdminSummaryView adminSummary(
+            Recipe recipe,
+            List<RecipeTagView> tags,
+            List<RecipeMealSlotView> mealSlots) {
+
+        if (recipe.publicId() == null || recipe.title() == null
+                || recipe.difficulty() == null || recipe.source() == null
+                || recipe.status() == null) {
+            throw corrupted();
+        }
+        return new RecipeAdminSummaryView(
+                recipe.publicId(),
+                recipe.title(),
+                recipe.summary(),
+                RecipeSmallInt.toInteger(recipe.servings()),
+                RecipeSmallInt.toInteger(recipe.prepMinutes()),
+                RecipeSmallInt.toInteger(recipe.cookMinutes()),
+                RecipeSmallInt.toInteger(recipe.totalMinutes()),
+                recipe.difficulty(),
+                recipe.imageUrl(),
+                recipe.source(),
+                recipe.status(),
                 List.copyOf(tags),
                 List.copyOf(mealSlots));
     }

@@ -89,6 +89,31 @@ public class IngredientReferenceQueryService {
         return Map.copyOf(snapshots);
     }
 
+    /** Resolves active canonical Ingredient identities selected by public UUID. */
+    @Transactional(readOnly = true)
+    public Map<UUID, IngredientReferenceSnapshot> resolveActiveByPublicIds(
+            Collection<UUID> publicIds) {
+
+        if (publicIds == null || publicIds.isEmpty()) {
+            return Map.of();
+        }
+
+        List<byte[]> binaryIds = publicIds.stream()
+                .filter(java.util.Objects::nonNull)
+                .map(CatalogIds::uuidToBytes)
+                .toList();
+        if (binaryIds.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<UUID, IngredientReferenceSnapshot> snapshots = new LinkedHashMap<>();
+        for (Ingredient ingredient : ingredients.findActiveByPublicIdIn(binaryIds)) {
+            IngredientReferenceSnapshot snapshot = snapshot(ingredient);
+            snapshots.put(snapshot.publicId(), snapshot);
+        }
+        return Map.copyOf(snapshots);
+    }
+
     /** Resolves an active Ingredient selected by its public UUID. */
     @Transactional(readOnly = true)
     public Optional<IngredientReferenceSnapshot> resolveActiveByPublicId(

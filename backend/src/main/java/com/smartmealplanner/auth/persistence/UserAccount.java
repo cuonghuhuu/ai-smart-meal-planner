@@ -203,6 +203,10 @@ public class UserAccount {
         return emailVerifiedAt;
     }
 
+    public LocalDateTime lastLoginAt() {
+        return lastLoginAt;
+    }
+
     public Short failedLoginCount() {
         return failedLoginCount;
     }
@@ -271,6 +275,24 @@ public class UserAccount {
 
         this.passwordUpdatedAt =
                 changedAt;
+    }
+
+    public void suspend() {
+        if (accountStatus != AccountStatus.ACTIVE) {
+            throw new IllegalStateException(
+                    "Only active accounts can be suspended");
+        }
+
+        this.accountStatus = AccountStatus.SUSPENDED;
+    }
+
+    public void reactivate() {
+        if (accountStatus != AccountStatus.SUSPENDED) {
+            throw new IllegalStateException(
+                    "Only suspended accounts can be reactivated");
+        }
+
+        this.accountStatus = AccountStatus.ACTIVE;
     }
 
     private static String normalizeEmail(

@@ -58,6 +58,8 @@ call Python directly.
 - [Deterministic recommendation and meal planning](recommendation-meal-planning.md)
   - P11 Java RULE_BASED_V1 scoring, virtual pantry depletion, provenance, and
   meal-plan lifecycle.
+- [Minimal admin backend](admin.md) - P12 `ROLE_ADMIN` user status actions and
+  Recipe draft/publish/archive workflow.
 
 ## Diagrams
 
