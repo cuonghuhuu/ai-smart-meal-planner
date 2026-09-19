@@ -15,6 +15,8 @@ import jakarta.persistence.LockModeType;
 
 interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
+    List<Recipe> findAllByStatusOrderByTitleAsc(RecipeStatus status);
+
     Optional<Recipe> findBySlug(String slug);
 
     List<Recipe> findAllBySlugIn(Collection<String> slugs);

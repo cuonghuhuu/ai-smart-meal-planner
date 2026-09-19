@@ -23,6 +23,7 @@ class IngredientAllergenId implements Serializable {
         this.allergenId = allergenId;
     }
 
+    Long ingredientId() { return ingredientId; }
     Long allergenId() { return allergenId; }
 
     @Override

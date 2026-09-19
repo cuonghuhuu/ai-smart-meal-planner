@@ -55,6 +55,9 @@ call Python directly.
   validation, idempotency, and explicit offline execution.
 - [Pantry / Fridge backend](pantry.md) - P10 owner-scoped pantry lots,
   quantity events, honest expiry semantics, and the P11 availability boundary.
+- [Deterministic recommendation and meal planning](recommendation-meal-planning.md)
+  - P11 Java RULE_BASED_V1 scoring, virtual pantry depletion, provenance, and
+  meal-plan lifecycle.
 
 ## Diagrams
 

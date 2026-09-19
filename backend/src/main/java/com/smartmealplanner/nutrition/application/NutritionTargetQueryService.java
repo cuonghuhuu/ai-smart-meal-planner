@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -79,6 +80,25 @@ public class NutritionTargetQueryService {
     public NutritionTargetView getCurrentTarget(
             UUID authenticatedPublicId) {
 
+        return findCurrentTarget(authenticatedPublicId)
+                .orElseThrow(
+                        () -> new NutritionApplicationException(
+                                NutritionApplicationFailure.NO_CURRENT_TARGET,
+                                "No current nutrition target is available"));
+    }
+
+    /**
+     * Reads the current target without throwing for an absent target.
+     *
+     * <p>This distinction matters to callers that are already inside a write
+     * transaction: an expected absence must not be raised as a runtime
+     * exception and then caught after Spring has marked the transaction
+     * rollback-only.</p>
+     */
+    @Transactional(readOnly = true)
+    public Optional<NutritionTargetView> findCurrentTarget(
+            UUID authenticatedPublicId) {
+
         CurrentUserIdentity identity = currentUserService.getIdentity(
                 authenticatedPublicId);
         ZoneId zoneId = parseZone(identity.timeZone());
@@ -92,9 +112,7 @@ public class NutritionTargetQueryService {
                         localDate);
 
         if (matches == null || matches.isEmpty()) {
-            throw new NutritionApplicationException(
-                    NutritionApplicationFailure.NO_CURRENT_TARGET,
-                    "No current nutrition target is available");
+            return Optional.empty();
         }
 
         if (matches.size() > 1) {
@@ -115,10 +133,11 @@ public class NutritionTargetQueryService {
         NutritionProfileReferenceCodes references = referenceCodesFor(
                 List.of(target));
 
-        return NutritionTargetViewAssembler.toView(
-                target,
-                valuesByTargetId.get(target.id()),
-                references);
+        return Optional.of(
+                NutritionTargetViewAssembler.toView(
+                        target,
+                        valuesByTargetId.get(target.id()),
+                        references));
     }
 
     /**
