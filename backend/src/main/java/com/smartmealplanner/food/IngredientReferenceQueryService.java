@@ -124,7 +124,7 @@ public class IngredientReferenceQueryService {
                 || ingredient.code() == null
                 || ingredient.displayName() == null) {
 
-            throw new IllegalStateException(
+            throw new ReferenceDataIntegrityException(
                     "Ingredient reference data is inconsistent");
         }
 

@@ -14,6 +14,7 @@ import com.smartmealplanner.food.IngredientReferenceQueryService;
 import com.smartmealplanner.food.IngredientReferenceSnapshot;
 import com.smartmealplanner.nutrition.application.MeasurementUnitReferenceQueryService;
 import com.smartmealplanner.nutrition.application.MeasurementUnitReferenceSnapshot;
+import com.smartmealplanner.shared.application.ReferenceDataIntegrityException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,7 +76,7 @@ public class PantryAvailabilityQueryService {
         if (ingredientsById.size() != ingredientIds.size()
                 || foodsById.size() != foodIds.size()
                 || unitsById.size() != unitIds.size()) {
-            throw new PantryException(PantryFailure.CORRUPTED_PANTRY_DATA);
+            throw inconsistentReferenceData();
         }
 
         return values.stream()
@@ -89,8 +90,7 @@ public class PantryAvailabilityQueryService {
                             item.unitId());
                     if (ingredient == null || unit == null
                             || (item.foodId() != null && food == null)) {
-                        throw new PantryException(
-                                PantryFailure.CORRUPTED_PANTRY_DATA);
+                        throw inconsistentReferenceData();
                     }
                     return new PantryAvailabilitySnapshot(
                             item.publicId(),
@@ -103,5 +103,10 @@ public class PantryAvailabilityQueryService {
                             item.storageLocation());
                 })
                 .toList();
+    }
+
+    private static ReferenceDataIntegrityException inconsistentReferenceData() {
+        return new ReferenceDataIntegrityException(
+                "Pantry item references inconsistent catalog data");
     }
 }

@@ -66,6 +66,20 @@ class PantryItemTest {
                 LocalDate.of(2026, 9, 22), LocalDate.of(2026, 9, 19),
                 PantryExpiryKind.USE_BY, PantryExpiryConfidence.LABELLED, null))
                 .isInstanceOf(IllegalArgumentException.class);
+
+        assertThatThrownBy(() -> new PantryItem(
+                UUID.randomUUID(), 10L, 20L, null, new BigDecimal("1.0000"),
+                30L, PantryStorageLocation.FRIDGE,
+                LocalDate.of(2026, 9, 19), LocalDate.of(2026, 9, 22),
+                PantryExpiryKind.UNKNOWN, PantryExpiryConfidence.LABELLED, null))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        assertThatThrownBy(() -> new PantryItem(
+                UUID.randomUUID(), 10L, 20L, null, new BigDecimal("1.0000"),
+                30L, PantryStorageLocation.FRIDGE,
+                LocalDate.of(2026, 9, 19), LocalDate.of(2026, 9, 22),
+                PantryExpiryKind.USE_BY, PantryExpiryConfidence.UNKNOWN, null))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +25,7 @@ import com.smartmealplanner.pantry.web.ConsumePantryItemRequest;
 import com.smartmealplanner.pantry.web.CreatePantryItemRequest;
 import com.smartmealplanner.pantry.web.PantryResponse;
 import com.smartmealplanner.pantry.web.UpdatePantryItemRequest;
+import com.smartmealplanner.shared.application.ReferenceDataIntegrityException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -113,6 +115,8 @@ public class PantryService {
         CurrentUserIdentity identity = identity(authenticatedPublicId);
         BigDecimal quantity = positiveQuantity(request.quantity(), "quantity");
         String unitCode = requiredUnitCode(request.unitCode());
+        PantryStorageLocation storageLocation = requiredStorageLocation(
+                request.storageLocation());
         MeasurementUnitReferenceSnapshot unit = resolveUnit(unitCode);
         IngredientReferenceSnapshot ingredient = ingredientReferences
                 .resolveActiveByPublicId(request.ingredientPublicId())
@@ -137,7 +141,7 @@ public class PantryService {
                     food == null ? null : food.internalId(),
                     quantity,
                     unit.internalId(),
-                    request.storageLocation(),
+                    storageLocation,
                     request.acquiredOn(),
                     expiry.expiryDate(),
                     expiry.kind(),
@@ -167,8 +171,13 @@ public class PantryService {
         if (request == null) {
             throw invalid();
         }
+        if (request.hasQuantityProperty()) {
+            throw invalid();
+        }
         CurrentUserIdentity identity = identity(authenticatedPublicId);
         PantryItem item = findOwned(identity, pantryItemPublicId);
+        PantryStorageLocation storageLocation = requiredStorageLocation(
+                request.storageLocation());
         Expiry expiry = resolveExpiry(
                 request.acquiredOn(),
                 request.expiryDate(),
@@ -176,7 +185,7 @@ public class PantryService {
                 request.expiryConfidence());
         try {
             item.updateMetadata(
-                    request.storageLocation(),
+                    storageLocation,
                     request.acquiredOn(),
                     expiry.expiryDate(),
                     expiry.kind(),
@@ -259,9 +268,10 @@ public class PantryService {
 
         CurrentUserIdentity identity = identity(authenticatedPublicId);
         PantryItem item = findOwned(identity, pantryItemPublicId);
+        LocalDateTime occurredAt = now();
         BigDecimal previousRemaining;
         try {
-            previousRemaining = item.discard(now());
+            previousRemaining = item.discard(occurredAt);
         } catch (IllegalStateException exception) {
             throw new PantryException(PantryFailure.ITEM_NOT_OPEN);
         }
@@ -272,7 +282,7 @@ public class PantryService {
                 previousRemaining.negate(),
                 BigDecimal.ZERO,
                 normalizeNote(note),
-                now()));
+                occurredAt));
         return getPersisted(identity, item.publicId());
     }
 
@@ -333,7 +343,7 @@ public class PantryService {
         if (ingredientsById.size() != ingredientIds.size()
                 || foodsById.size() != foodIds.size()
                 || unitsById.size() != unitIds.size()) {
-            throw new PantryException(PantryFailure.CORRUPTED_PANTRY_DATA);
+            throw inconsistentReferenceData();
         }
 
         return values.stream()
@@ -353,7 +363,7 @@ public class PantryService {
 
         if (ingredient == null || unit == null
                 || (item.foodId() != null && food == null)) {
-            throw new PantryException(PantryFailure.CORRUPTED_PANTRY_DATA);
+            throw inconsistentReferenceData();
         }
         return new PantryResponse.Item(
                 item.publicId(),
@@ -416,6 +426,15 @@ public class PantryService {
         return normalized;
     }
 
+    private static PantryStorageLocation requiredStorageLocation(
+            PantryStorageLocation value) {
+
+        if (value == null) {
+            throw invalid();
+        }
+        return value;
+    }
+
     private static BigDecimal positiveQuantity(BigDecimal value, String field) {
         try {
             return PantryItem.requirePositiveQuantity(value, field);
@@ -460,11 +479,17 @@ public class PantryService {
     }
 
     private LocalDateTime now() {
-        return LocalDateTime.now(clock);
+        return LocalDateTime.now(clock)
+                .truncatedTo(ChronoUnit.MICROS);
     }
 
     private static PantryException invalid() {
         return new PantryException(PantryFailure.INVALID_REQUEST);
+    }
+
+    private static ReferenceDataIntegrityException inconsistentReferenceData() {
+        return new ReferenceDataIntegrityException(
+                "Pantry item references inconsistent catalog data");
     }
 
     private record Expiry(

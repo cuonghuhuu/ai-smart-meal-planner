@@ -88,7 +88,7 @@ public class FoodReferenceQueryService {
                 || food.publicId() == null
                 || food.displayName() == null) {
 
-            throw new IllegalStateException(
+            throw new ReferenceDataIntegrityException(
                     "Food reference data is inconsistent");
         }
 
