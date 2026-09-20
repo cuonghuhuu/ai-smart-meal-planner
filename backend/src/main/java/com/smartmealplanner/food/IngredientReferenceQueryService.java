@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.smartmealplanner.shared.application.ReferenceDataIntegrityException;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +40,7 @@ public class IngredientReferenceQueryService {
                     || ingredient.code() == null
                     || ingredient.displayName() == null) {
 
-                throw new IllegalStateException(
+                throw new ReferenceDataIntegrityException(
                         "Ingredient reference data is inconsistent");
             }
 
@@ -71,7 +73,7 @@ public class IngredientReferenceQueryService {
                     || ingredient.code() == null
                     || ingredient.displayName() == null) {
 
-                throw new IllegalStateException(
+                throw new ReferenceDataIntegrityException(
                         "Ingredient reference data is inconsistent");
             }
 

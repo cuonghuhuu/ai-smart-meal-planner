@@ -217,18 +217,41 @@ re-running the importer is idempotent for both Food and Ingredient identities.
 
 ## Explicit local commands
 
-Run a non-persisting parse/report:
+`CatalogImportRunner` is guarded by both the `catalog-import` Spring profile
+and `app.catalog.import.enabled=true`; the profile alone is not sufficient.
+From the repository root, the following Windows PowerShell commands use an
+absolute environment-backed source path, so paths containing spaces are safe:
 
-   ```text
-   mvn -f backend/pom.xml spring-boot:run \
-     -Dspring-boot.run.profiles=catalog-import \
-     -Dspring-boot.run.arguments="--app.catalog.import.enabled=true --catalog-import-file=C:/path/to/D3_5a_SMILING_FCT_Vietnam_180713_protected.xlsx --catalog-import-dry-run"
-   ```
+```powershell
+$catalogImportFile = (Resolve-Path 'C:\temp\smiling-vietnam\D3_5a_SMILING_FCT_Vietnam_180713_protected.xlsx').Path
+$env:CATALOG_IMPORT_SOURCE_FILE = $catalogImportFile
+mvn -f backend/pom.xml spring-boot:run `
+  '-Dspring-boot.run.profiles=catalog-import' `
+  '-Dspring-boot.run.arguments=--app.catalog.import.enabled=true --catalog-import-dry-run'
+```
 
-Then, after reviewing the dry-run counts, run the explicit import by removing
-`--catalog-import-dry-run` from the same command. The configured equivalent is
-`CATALOG_IMPORT_SOURCE_FILE=<external path>` with the `catalog-import` profile
-and `CATALOG_IMPORT_ENABLED=true`.
+After reviewing the dry-run counts, stop the operator process with `Ctrl+C` if
+it remains running, then run the actual import by setting the source variable
+again and removing `--catalog-import-dry-run`:
+
+```powershell
+$catalogImportFile = (Resolve-Path 'C:\temp\smiling-vietnam\D3_5a_SMILING_FCT_Vietnam_180713_protected.xlsx').Path
+$env:CATALOG_IMPORT_SOURCE_FILE = $catalogImportFile
+mvn -f backend/pom.xml spring-boot:run `
+  '-Dspring-boot.run.profiles=catalog-import' `
+  '-Dspring-boot.run.arguments=--app.catalog.import.enabled=true'
+```
+
+Stop the operator process with `Ctrl+C` afterward and clear the temporary
+variable:
+
+```powershell
+Remove-Item Env:CATALOG_IMPORT_SOURCE_FILE -ErrorAction SilentlyContinue
+```
+
+The configured equivalent is `CATALOG_IMPORT_SOURCE_FILE=<external path>` with
+the `catalog-import` profile and `CATALOG_IMPORT_ENABLED=true`. Normal
+application startup does not activate the catalog importer.
 
 Automated tests generate a tiny project-owned workbook with the same six sheet
 names, title/header layout, Unicode names, missing cells, unsupported nutrient

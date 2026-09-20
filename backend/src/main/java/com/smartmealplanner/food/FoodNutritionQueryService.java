@@ -17,6 +17,7 @@ import com.smartmealplanner.food.RecipeNutritionCatalogSnapshot.IngredientNutrit
 import com.smartmealplanner.food.RecipeNutritionCatalogSnapshot.NutrientFact;
 import com.smartmealplanner.food.RecipeNutritionCatalogSnapshot.Unit;
 import com.smartmealplanner.nutrition.persistence.MeasurementUnit;
+import com.smartmealplanner.shared.application.ReferenceDataIntegrityException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -319,19 +320,20 @@ public class FoodNutritionQueryService {
 
     private static Long requireInternalId(Long value, String field) {
         if (value == null || value <= 0) {
-            throw new IllegalStateException(field + " is inconsistent");
+            throw new ReferenceDataIntegrityException(field + " is inconsistent");
         }
         return value;
     }
 
     private static String requireText(String value, String field) {
         if (value == null || value.isBlank()) {
-            throw new IllegalStateException(field + " is inconsistent");
+            throw new ReferenceDataIntegrityException(field + " is inconsistent");
         }
         return value;
     }
 
-    private static IllegalStateException inconsistentCatalog() {
-        return new IllegalStateException("Nutrition catalog data is inconsistent");
+    private static ReferenceDataIntegrityException inconsistentCatalog() {
+        return new ReferenceDataIntegrityException(
+                "Nutrition catalog data is inconsistent");
     }
 }

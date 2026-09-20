@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -15,6 +16,7 @@ import com.smartmealplanner.food.FoodNutritionQueryService;
 import com.smartmealplanner.food.RecipeNutritionCatalogSnapshot;
 import com.smartmealplanner.nutrition.application.MeasurementUnitReferenceQueryService;
 import com.smartmealplanner.nutrition.application.MeasurementUnitReferenceSnapshot;
+import com.smartmealplanner.shared.application.ReferenceDataIntegrityException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -126,7 +128,7 @@ public class RecipeNutritionComputationService {
                 catalog,
                 unitFacts);
 
-        LocalDateTime computedAt = LocalDateTime.now(clock);
+        LocalDateTime computedAt = databaseTimestamp(clock);
         RecipeNutritionSnapshot current = snapshots
                 .findCurrentByRecipeId(recipeId)
                 .orElse(null);
@@ -179,7 +181,7 @@ public class RecipeNutritionComputationService {
             return units.resolveByInternalIds(ids);
         } catch (RecipeException exception) {
             throw exception;
-        } catch (RuntimeException exception) {
+        } catch (ReferenceDataIntegrityException exception) {
             throw corrupted();
         }
     }
@@ -191,9 +193,14 @@ public class RecipeNutritionComputationService {
             return foodNutrition.resolve(ingredientIds, pinnedFoodIds);
         } catch (RecipeException exception) {
             throw exception;
-        } catch (RuntimeException exception) {
+        } catch (ReferenceDataIntegrityException exception) {
             throw corrupted();
         }
+    }
+
+    private static LocalDateTime databaseTimestamp(Clock clock) {
+        return LocalDateTime.now(clock)
+                .truncatedTo(ChronoUnit.MICROS);
     }
 
     private static BigDecimal roundAmount(BigDecimal value) {

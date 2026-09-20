@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.smartmealplanner.nutrition.persistence.MeasurementUnit;
 import com.smartmealplanner.nutrition.persistence.MeasurementUnitRepository;
+import com.smartmealplanner.shared.application.ReferenceDataIntegrityException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +42,7 @@ public class MeasurementUnitReferenceQueryService {
                     && (unit.baseUnit().id() == null
                     || unit.baseUnit().code() == null))) {
 
-                throw new IllegalStateException(
+                throw new ReferenceDataIntegrityException(
                         "Measurement unit reference data is inconsistent");
             }
 
@@ -80,7 +81,7 @@ public class MeasurementUnitReferenceQueryService {
                     && (unit.baseUnit().id() == null
                     || unit.baseUnit().code() == null))) {
 
-                throw new IllegalStateException(
+                throw new ReferenceDataIntegrityException(
                         "Measurement unit reference data is inconsistent");
             }
 

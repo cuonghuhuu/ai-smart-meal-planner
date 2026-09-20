@@ -53,6 +53,9 @@ call Python directly.
 - [Vietnamese Recipe offline import](vietnam-recipe-import.md) - P9C
   project-curated starter data, canonical SMILING Ingredient mappings,
   validation, idempotency, and explicit offline execution.
+- [Vietnamese Recipe data validation](vietnam-recipe-data-validation.md) - P9C
+  source-controlled semantic review of the committed starter dataset and its
+  diet/allergen evidence limits.
 
 ## Diagrams
 

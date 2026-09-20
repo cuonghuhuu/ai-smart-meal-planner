@@ -40,19 +40,97 @@ unknown references, invalid Recipe bounds, duplicate or non-contiguous child
 positions, quantity/unit mismatches, and source or slug conflicts. A blocking
 error prevents all persistence.
 
-The runner is disabled during normal startup. Enable the explicit profile and
-property only for a local operator task:
+## Reproducible local sequence
 
-```text
-mvn -f backend/pom.xml spring-boot:run \
-  -Dspring-boot.run.profiles=recipe-import \
-  -Dspring-boot.run.arguments="--recipe-import-file=C:\path\vietnam-curated-v1.json --recipe-import-dry-run"
-```
+Starting from a fresh migrated local database, use this order from the
+repository root in Windows PowerShell:
 
-For an actual import, omit `--recipe-import-dry-run` and set
-`RECIPE_IMPORT_ENABLED=true`, or use the equivalent
-`app.recipe.import.enabled=true` configuration. The source path is external to
-the repository in normal local workflows. There is no public import endpoint.
+1. Run the normal Flyway migration and repeatable reference seed. Do not add
+   recipe rows to `R001__reference_data.sql`.
+2. Prepare the Food/Ingredient catalog with the documented offline SMILING
+   import in [Food catalog import](food-catalog-import.md). That runner also
+   requires both the `catalog-import` profile and
+   `app.catalog.import.enabled=true`; the linked guide shows the complete
+   PowerShell activation. The verified bootstrap currently produces 164 Foods
+   and 163 Ingredient mappings; source code `10003` intentionally has no
+   Ingredient mapping.
+3. Resolve the committed Recipe file to an absolute path. Using an environment
+   variable keeps paths containing spaces safe when the Spring Boot process is
+   started by Maven:
+
+   ```powershell
+   $recipeImportFile = (Resolve-Path (Join-Path (Get-Location) 'backend/src/main/resources/recipe-import/vietnam-curated-v1.json')).Path
+   $env:RECIPE_IMPORT_SOURCE_FILE = $recipeImportFile
+   ```
+
+4. Validate the committed Recipe file without persistence. The runner is
+   guarded by both the `recipe-import` profile and the enabled property, so the
+   command explicitly supplies `--app.recipe.import.enabled=true`:
+
+   ```powershell
+   mvn -f backend/pom.xml spring-boot:run `
+     '-Dspring-boot.run.profiles=recipe-import' `
+     '-Dspring-boot.run.arguments=--app.recipe.import.enabled=true --recipe-import-dry-run'
+   ```
+
+   A successful run logs `Recipe import dry run: recipesRead=12, errors=0`.
+   The dry run performs validation only and persists nothing. Stop the operator
+   process with `Ctrl+C` when it remains running, then clear the temporary
+   variable:
+
+   ```powershell
+   Remove-Item Env:RECIPE_IMPORT_SOURCE_FILE -ErrorAction SilentlyContinue
+   ```
+
+5. Perform the actual import. Resolve/set the same absolute source path again
+   if it was cleared after the dry run:
+
+   ```powershell
+   $recipeImportFile = (Resolve-Path (Join-Path (Get-Location) 'backend/src/main/resources/recipe-import/vietnam-curated-v1.json')).Path
+   $env:RECIPE_IMPORT_SOURCE_FILE = $recipeImportFile
+   mvn -f backend/pom.xml spring-boot:run `
+     '-Dspring-boot.run.profiles=recipe-import' `
+     '-Dspring-boot.run.arguments=--app.recipe.import.enabled=true'
+   ```
+
+   A successful first import reports `recipesRead=12`,
+   `recipesCreated=12`, `recipesUpdated=0`, and
+   `nutritionSnapshotsComputed=12` (the warning count may reflect incomplete
+   nutrition). Verify that 12 `CURATED` Recipes exist with source references
+   beginning `AI_MEAL_PLANNER_VN_CURATED_V1:` and that each has a current
+   nutrition snapshot before using the public catalog. Stop the operator
+   process with `Ctrl+C` and clear `RECIPE_IMPORT_SOURCE_FILE` afterward.
+
+6. Run the same actual-import command a second time:
+
+   ```powershell
+   $recipeImportFile = (Resolve-Path (Join-Path (Get-Location) 'backend/src/main/resources/recipe-import/vietnam-curated-v1.json')).Path
+   $env:RECIPE_IMPORT_SOURCE_FILE = $recipeImportFile
+   mvn -f backend/pom.xml spring-boot:run `
+     '-Dspring-boot.run.profiles=recipe-import' `
+     '-Dspring-boot.run.arguments=--app.recipe.import.enabled=true'
+   ```
+
+   An identical import should report `recipesRead=12`, `recipesCreated=0`,
+   `recipesUpdated=0`, `recipesUnchanged=12`, and
+   `nutritionSnapshotsComputed=0`. It must preserve public UUIDs and create no
+   additional current nutrition snapshots. Stop the operator process with
+   `Ctrl+C`, then run:
+
+   ```powershell
+   Remove-Item Env:RECIPE_IMPORT_SOURCE_FILE -ErrorAction SilentlyContinue
+   ```
+
+The catalog workbook path is an operator-supplied external path. It is not a
+repository resource, credential, migration, or startup prerequisite for
+ordinary application launches. If the verified SMILING catalog is not
+available, the Recipe file must not be imported into a database that lacks its
+canonical Ingredient rows; the dry run should be used to expose those missing
+references. There is no public import endpoint.
+
+Normal application startup does not activate either offline runner: the
+`recipe-import`/`catalog-import` profile and the corresponding enabled property
+must both be supplied explicitly for an operator task.
 
 ## Idempotency and child replacement
 

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.smartmealplanner.nutrition.persistence.Nutrient;
 import com.smartmealplanner.nutrition.persistence.NutrientRepository;
+import com.smartmealplanner.shared.application.ReferenceDataIntegrityException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +43,7 @@ public class NutritionReferenceQueryService {
                     || nutrient.unit().code() == null
                     || nutrient.unit().displayName() == null) {
 
-                throw new IllegalStateException(
+                throw new ReferenceDataIntegrityException(
                         "Nutrient reference data is inconsistent");
             }
 

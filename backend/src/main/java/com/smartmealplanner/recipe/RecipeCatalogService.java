@@ -18,6 +18,7 @@ import com.smartmealplanner.nutrition.application.MeasurementUnitReferenceQueryS
 import com.smartmealplanner.nutrition.application.MeasurementUnitReferenceSnapshot;
 import com.smartmealplanner.nutrition.application.NutritionReferenceQueryService;
 import com.smartmealplanner.nutrition.application.NutritionReferenceSnapshot;
+import com.smartmealplanner.shared.application.ReferenceDataIntegrityException;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -331,7 +332,7 @@ public class RecipeCatalogService {
             Collection<Long> ids) {
         try {
             return ingredientReferences.resolveByInternalIds(ids);
-        } catch (RuntimeException exception) {
+        } catch (ReferenceDataIntegrityException exception) {
             throw corrupted();
         }
     }
@@ -339,7 +340,7 @@ public class RecipeCatalogService {
     private Map<Long, FoodReferenceSnapshot> safeFoods(Collection<Long> ids) {
         try {
             return foodReferences.resolveByInternalIds(ids);
-        } catch (RuntimeException exception) {
+        } catch (ReferenceDataIntegrityException exception) {
             throw corrupted();
         }
     }
@@ -348,7 +349,7 @@ public class RecipeCatalogService {
             Collection<Long> ids) {
         try {
             return unitReferences.resolveByInternalIds(ids);
-        } catch (RuntimeException exception) {
+        } catch (ReferenceDataIntegrityException exception) {
             throw corrupted();
         }
     }
@@ -357,7 +358,7 @@ public class RecipeCatalogService {
             Collection<Long> ids) {
         try {
             return nutrientReferences.resolveByInternalIds(ids);
-        } catch (RuntimeException exception) {
+        } catch (ReferenceDataIntegrityException exception) {
             throw corrupted();
         }
     }

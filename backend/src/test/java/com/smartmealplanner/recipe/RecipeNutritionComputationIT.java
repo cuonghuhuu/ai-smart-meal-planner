@@ -120,7 +120,8 @@ class RecipeNutritionComputationIT {
                   and nutrient_id = (select id from nutrients where code = 'ENERGY')
                 """, fixture.foodId());
         jdbc.update("update foods set revision = 2 where id = ?", fixture.foodId());
-        computation.recompute(fixture.recipePublicId());
+        RecipeNutritionComputationResult second = computation.recompute(
+                fixture.recipePublicId());
 
         List<Map<String, Object>> snapshots = jdbc.queryForList("""
                 select id, is_current
@@ -131,6 +132,10 @@ class RecipeNutritionComputationIT {
         assertThat(snapshots).hasSize(2);
         assertThat(snapshots.get(0).get("is_current")).isEqualTo(false);
         assertThat(snapshots.get(1).get("is_current")).isEqualTo(true);
+        assertThat(jdbc.queryForObject("""
+                select count(*) from recipe_nutrition_snapshots
+                where recipe_id = ? and is_current = true
+                """, Integer.class, fixture.recipeId())).isEqualTo(1);
         assertThat(jdbc.queryForObject("""
                 select count(*) from recipe_nutrition_values nutrition_value
                 join recipe_nutrition_snapshots snapshot
@@ -159,7 +164,60 @@ class RecipeNutritionComputationIT {
                 .andExpect(jsonPath("$.nutrition.values[0].nutrientCode")
                         .value("ENERGY"))
                 .andExpect(jsonPath("$.nutrition.values[0].amountPerServing")
-                        .value(25.0));
+                        .value(25.0))
+                .andExpect(jsonPath("$.nutrition.computedAt")
+                        .value(second.computedAt().toString()));
+    }
+
+    @Test
+    void pinnedFoodOverridesIngredientDefaultAndPrimaryFood() {
+        Fixture fixture = insertFixture(new BigDecimal("50.0000"));
+        Long pinnedFoodId = insertAdditionalFood(
+                "PINNED",
+                new BigDecimal("400.0000"),
+                7);
+        jdbc.update("""
+                insert into ingredient_foods
+                    (ingredient_id, food_id, preparation_state, yield_factor, is_primary)
+                values (?, ?, 'UNSPECIFIED', 1.0000, false)
+                """, fixture.ingredientId(), pinnedFoodId);
+        jdbc.update("""
+                update recipe_ingredients
+                set food_id = ?
+                where recipe_id = ?
+                """, pinnedFoodId, fixture.recipeId());
+
+        RecipeNutritionComputationResult result = computation.recompute(
+                fixture.recipePublicId());
+
+        assertThat(result.ingredientRevision()).isEqualTo(7);
+        assertThat(currentNutrientAmount(fixture.recipeId(), "ENERGY"))
+                .isEqualByComparingTo("100.0000");
+    }
+
+    @Test
+    void contradictoryDefaultAndPrimaryFoodMappingIsCorrupted() {
+        Fixture fixture = insertFixture(new BigDecimal("50.0000"));
+        Long primaryFoodId = insertAdditionalFood(
+                "CONTRADICTORY",
+                new BigDecimal("300.0000"),
+                3);
+        jdbc.update("""
+                update ingredient_foods
+                set is_primary = false
+                where ingredient_id = ? and food_id = ?
+                """, fixture.ingredientId(), fixture.foodId());
+        jdbc.update("""
+                insert into ingredient_foods
+                    (ingredient_id, food_id, preparation_state, yield_factor, is_primary)
+                values (?, ?, 'UNSPECIFIED', 1.0000, true)
+                """, fixture.ingredientId(), primaryFoodId);
+
+        assertThatThrownBy(() -> computation.recompute(fixture.recipePublicId()))
+                .isInstanceOf(RecipeException.class)
+                .satisfies(exception -> assertThat(
+                        ((RecipeException) exception).failure())
+                        .isEqualTo(RecipeFailure.CORRUPTED_RECIPE_DATA));
     }
 
     @Test
@@ -200,6 +258,58 @@ class RecipeNutritionComputationIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nutrition.values[?(@.nutrientCode == 'PROTEIN')]")
                         .isEmpty());
+    }
+
+    @Test
+    void missingNutrientsStayAbsentWhileStoredZeroRemainsKnown() {
+        Fixture fixture = insertFixture(new BigDecimal("50.0000"));
+        Long proteinId = jdbc.queryForObject(
+                "select id from nutrients where code = 'PROTEIN'", Long.class);
+        jdbc.update("""
+                insert into food_nutrients (food_id, nutrient_id, amount, data_quality)
+                values (?, ?, 0.0000, 'ANALYTICAL')
+                """, fixture.foodId(), proteinId);
+
+        computation.recompute(fixture.recipePublicId());
+
+        assertThat(jdbc.queryForObject("""
+                select count(*)
+                from recipe_nutrition_values value_row
+                join recipe_nutrition_snapshots snapshot
+                  on snapshot.id = value_row.snapshot_id
+                join nutrients nutrient on nutrient.id = value_row.nutrient_id
+                where snapshot.recipe_id = ? and snapshot.is_current = true
+                  and nutrient.code = 'PROTEIN'
+                """, Integer.class, fixture.recipeId())).isEqualTo(1);
+        assertThat(currentNutrientAmount(fixture.recipeId(), "PROTEIN"))
+                .isEqualByComparingTo("0.0000");
+        assertThat(jdbc.queryForObject("""
+                select count(*)
+                from recipe_nutrition_values value_row
+                join recipe_nutrition_snapshots snapshot
+                  on snapshot.id = value_row.snapshot_id
+                join nutrients nutrient on nutrient.id = value_row.nutrient_id
+                where snapshot.recipe_id = ? and snapshot.is_current = true
+                  and nutrient.code = 'FAT_TOTAL'
+                """, Integer.class, fixture.recipeId())).isZero();
+    }
+
+    @Test
+    void computedTimestampUsesPersistedMicrosecondPrecision() {
+        Fixture fixture = insertFixture(new BigDecimal("50.0000"));
+
+        RecipeNutritionComputationResult result = computation.recompute(
+                fixture.recipePublicId());
+        Timestamp persisted = jdbc.queryForObject("""
+                select computed_at
+                from recipe_nutrition_snapshots
+                where recipe_id = ? and is_current = true
+                """, Timestamp.class, fixture.recipeId());
+
+        assertThat(persisted).isNotNull();
+        assertThat(result.computedAt())
+                .isEqualTo(persisted.toLocalDateTime());
+        assertThat(result.computedAt().getNano() % 1_000).isZero();
     }
 
     @Test
@@ -338,6 +448,46 @@ class RecipeNutritionComputationIT {
                 """, publicId.toString(), code, foodId, unitId);
         return jdbc.queryForObject(
                 "select id from ingredients where code = ?", Long.class, code);
+    }
+
+    private Long insertAdditionalFood(
+            String suffix,
+            BigDecimal energyAmount,
+            int revision) {
+        Long energyId = jdbc.queryForObject(
+                "select id from nutrients where code = 'ENERGY'", Long.class);
+        Long categoryId = jdbc.queryForObject(
+                "select id from food_categories where code = 'PROTEIN'", Long.class);
+        UUID publicId = UUID.randomUUID();
+        String code = "P9B_PINNED_" + suffix + "_" + publicId;
+        jdbc.update("""
+                insert into foods
+                    (public_id, code, display_name, food_category_id,
+                     nutrition_basis, source, source_reference, revision,
+                     is_active, version)
+                values (unhex(replace(?, '-', '')), ?, 'P9B additional food', ?,
+                        'PER_100_G', 'CURATED', ?, ?, true, 0)
+                """, publicId.toString(), code, categoryId, SOURCE_REFERENCE,
+                revision);
+        Long foodId = jdbc.queryForObject(
+                "select id from foods where code = ?", Long.class, code);
+        jdbc.update("""
+                insert into food_nutrients (food_id, nutrient_id, amount, data_quality)
+                values (?, ?, ?, 'CALCULATED')
+                """, foodId, energyId, energyAmount);
+        return foodId;
+    }
+
+    private BigDecimal currentNutrientAmount(Long recipeId, String nutrientCode) {
+        return jdbc.queryForObject("""
+                select value_row.amount_per_serving
+                from recipe_nutrition_values value_row
+                join recipe_nutrition_snapshots snapshot
+                  on snapshot.id = value_row.snapshot_id
+                join nutrients nutrient on nutrient.id = value_row.nutrient_id
+                where snapshot.recipe_id = ? and snapshot.is_current = true
+                  and nutrient.code = ?
+                """, BigDecimal.class, recipeId, nutrientCode);
     }
 
     private static Timestamp timestamp(LocalDateTime value) {

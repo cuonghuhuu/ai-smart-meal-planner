@@ -74,6 +74,11 @@ its values are inserted before commit. Any computation or persistence failure
 rolls the transaction back, preserving the previous current snapshot; old
 snapshots and their values are never deleted or rewritten.
 
+Application-created snapshot timestamps are truncated to microseconds before
+persistence so they match MySQL `DATETIME(6)`. Recipe-import lifecycle
+timestamps use the same precision policy. A response returned immediately
+after computation therefore has the same timestamp as a later database reload.
+
 P9C may call this capability during recipe import/curation. Scheduled work,
 queues, recommendation filtering, and nutrition recalculation on GET remain
 out of scope.

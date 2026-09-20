@@ -3,6 +3,7 @@ package com.smartmealplanner.recipe;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -139,7 +140,7 @@ public class RecipeImportService {
             Recipe recipe;
             boolean metadataChanged;
             if (isNew) {
-                LocalDateTime publishedAt = LocalDateTime.now(clock);
+                LocalDateTime publishedAt = databaseTimestamp();
                 recipe = new Recipe(
                         UUID.randomUUID(),
                         requiredText(input.title()),
@@ -162,7 +163,7 @@ public class RecipeImportService {
                 created++;
             } else {
                 LocalDateTime publishedAt = existing.publishedAt() == null
-                        ? LocalDateTime.now(clock)
+                        ? databaseTimestamp()
                         : existing.publishedAt();
                 metadataChanged = existing.applyImportedDefinition(
                         requiredText(input.title()),
@@ -1092,6 +1093,10 @@ public class RecipeImportService {
 
     private static String optionalText(String value) {
         return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    private LocalDateTime databaseTimestamp() {
+        return LocalDateTime.now(clock).truncatedTo(ChronoUnit.MICROS);
     }
 
     private static boolean sameAmount(BigDecimal first, BigDecimal second) {
