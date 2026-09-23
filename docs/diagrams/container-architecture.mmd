@@ -13,5 +13,5 @@ flowchart LR
     user -->|"Uses"| flutter
     flutter -->|"HTTPS REST /api/v1"| java
     java -->|"JPA/Hibernate read and write"| mysql
-    java -->|"Internal HTTP /internal/ai/v1"| python
+    java -->|"Internal HTTP /internal/v1"| python
     java -.->|"Validated provider adapters"| external

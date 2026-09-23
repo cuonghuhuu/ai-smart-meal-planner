@@ -1,0 +1,33 @@
+{
+  "contractVersion": "1",
+  "requestId": "22222222-2222-4222-8222-222222222222",
+  "algorithmVersion": "HEURISTIC_MEAL_PLAN_V1",
+  "planning": {
+    "startDate": "2026-10-01T00:00:00",
+    "days": 7,
+    "requestedMealSlots": [
+      "BREAKFAST",
+      "MORNING_SNACK",
+      "LUNCH",
+      "AFTERNOON_SNACK",
+      "DINNER",
+      "EVENING_SNACK"
+    ],
+    "defaultServings": 50.00,
+    "maxMinutesPerMeal": 1440
+  },
+  "hardConstraints": {
+    "allergenCodes": [],
+    "exclusionaryDietaryCodes": [],
+    "avoidIngredientPublicIds": []
+  },
+  "softPreferences": {
+    "dislikeIngredientPublicIds": [],
+    "preferenceCodes": []
+  },
+  "nutritionTargets": [],
+  "unitDefinitions": [],
+  "pantryLots": [],
+  "ingredientFacts": [],
+  "recipeCandidates": []
+}

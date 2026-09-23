@@ -50,6 +50,11 @@ call Python directly.
 - [Recipe nutrition calculation](recipe-nutrition.md) - P9B BigDecimal
   calculation, conservative unit conversion, completeness, and immutable
   nutrition snapshot replacement.
+- [Pantry architecture](pantry.md) - P10 lot-level inventory, immutable
+  availability snapshots, ownership, expiry semantics, and mutation history.
+- [Meal Planning internal contract V1](meal-planning-contract-v1.md) - P11-B
+  Java/Python DTOs, bounds, outcomes, allergen safety, and internal service
+  security.
 - [Vietnamese Recipe offline import](vietnam-recipe-import.md) - P9C
   project-curated starter data, canonical SMILING Ingredient mappings,
   validation, idempotency, and explicit offline execution.

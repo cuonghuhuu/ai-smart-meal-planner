@@ -95,11 +95,12 @@ focused domain/application services, not controllers or JPA entities by default.
 
 ### 4.3 API versioning
 
-Public endpoints begin under `/api/v1`. The internal AI contract begins under
-`/internal/ai/v1`. A breaking contract change creates a new major path while the
-old version is supported for an announced transition. Additive fields remain
-backward compatible. API documentation must describe status codes, validation
-errors, authentication, pagination, and examples.
+Public endpoints begin under `/api/v1`. Internal AI endpoints begin under
+`/internal/v1`; P11 meal generation uses
+`POST /internal/v1/meal-plans/generate`. A breaking contract change creates a
+new major path while the old version is supported for an announced transition.
+Additive fields remain backward compatible. API documentation must describe
+status codes, validation errors, authentication, pagination, and examples.
 
 ### 4.4 Transaction boundaries
 
@@ -210,8 +211,8 @@ later algorithms or ML.
 
 ### 7.2 Java to Python
 
-- Java calls versioned `/internal/ai/v1` JSON endpoints through one AI integration
-  adapter.
+- Java calls versioned `/internal/v1` JSON endpoints through one AI integration
+  adapter. The P11 endpoint is `/internal/v1/meal-plans/generate`.
 - Contracts use stable domain identifiers and normalized values/units. Python
   receives only data needed for the computation.
 - Java never forwards an end-user access/refresh token. Service authentication
