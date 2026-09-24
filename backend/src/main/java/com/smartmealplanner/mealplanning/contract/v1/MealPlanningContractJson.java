@@ -1,15 +1,26 @@
 package com.smartmealplanner.mealplanning.contract.v1;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.cfg.CoercionAction;
 import com.fasterxml.jackson.databind.cfg.CoercionInputShape;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.LogicalType;
 
 import jakarta.validation.ConstraintViolation;
@@ -18,6 +29,12 @@ import jakarta.validation.Validator;
 
 /** Strict JSON codec and Jakarta validator for the internal version-1 contract. */
 public final class MealPlanningContractJson {
+    private static final Pattern STRICT_DATE_PATTERN = Pattern.compile(
+            "\\A[0-9]{4}-[0-9]{2}-[0-9]{2}\\z");
+    private static final DateTimeFormatter STRICT_DATE_FORMATTER = new DateTimeFormatterBuilder()
+            .appendPattern("uuuu-MM-dd")
+            .toFormatter(Locale.ROOT)
+            .withResolverStyle(ResolverStyle.STRICT);
 
     private final ObjectMapper objectMapper;
     private final Validator validator;
@@ -31,6 +48,9 @@ public final class MealPlanningContractJson {
                 .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
         strictMapper.coercionConfigFor(LogicalType.Float)
                 .setCoercion(CoercionInputShape.String, CoercionAction.Fail);
+        SimpleModule contractDates = new SimpleModule("meal-planning-contract-v1-dates");
+        contractDates.addDeserializer(LocalDate.class, new StrictLocalDateDeserializer());
+        strictMapper.registerModule(contractDates);
         this.objectMapper = strictMapper;
         this.validator = validator;
     }
@@ -101,5 +121,26 @@ public final class MealPlanningContractJson {
         }
         int newline = message.indexOf('\n');
         return newline < 0 ? message : message.substring(0, newline);
+    }
+
+    private static final class StrictLocalDateDeserializer extends JsonDeserializer<LocalDate> {
+        @Override
+        public LocalDate deserialize(JsonParser parser, DeserializationContext context)
+                throws IOException {
+            if (!parser.hasToken(JsonToken.VALUE_STRING)) {
+                return (LocalDate) context.handleUnexpectedToken(LocalDate.class, parser);
+            }
+            String value = parser.getText();
+            if (!STRICT_DATE_PATTERN.matcher(value).matches()) {
+                throw context.weirdStringException(value, LocalDate.class,
+                        "must use the exact YYYY-MM-DD format");
+            }
+            try {
+                return LocalDate.parse(value, STRICT_DATE_FORMATTER);
+            } catch (DateTimeParseException exception) {
+                throw context.weirdStringException(value, LocalDate.class,
+                        "must be a valid calendar date in YYYY-MM-DD format");
+            }
+        }
     }
 }

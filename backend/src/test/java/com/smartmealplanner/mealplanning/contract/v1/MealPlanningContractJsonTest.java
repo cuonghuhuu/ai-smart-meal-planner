@@ -146,6 +146,60 @@ class MealPlanningContractJsonTest {
     }
 
     @Test
+    void acceptsOnlyCanonicalValidLocalDatesAcrossV1Transport() throws Exception {
+        ObjectNode request = (ObjectNode) JSON.readTree(fixture("valid_request.json"));
+        ((ObjectNode) request.get("planning")).put("startDate", "2026-10-01");
+        CONTRACT.readRequest(request.toString());
+
+        ((ObjectNode) request.get("planning")).put("startDate", "2028-02-29");
+        ((ObjectNode) ((ArrayNode) request.get("pantryLots")).get(0))
+                .put("expiryDate", "2028-02-29");
+        CONTRACT.readRequest(request.toString());
+
+        ObjectNode succeeded = succeededResponse();
+        ArrayNode entries = (ArrayNode) succeeded.get("entries");
+        for (JsonNode entry : entries) { ((ObjectNode) entry).put("planDate", "2028-02-29"); }
+        CONTRACT.readResponse(succeeded.toString());
+
+        ObjectNode infeasible = (ObjectNode) JSON.readTree(
+                fixture("valid_infeasible_response.json"));
+        for (JsonNode slot : infeasible.get("unfilledSlots")) {
+            ((ObjectNode) slot).put("planDate", "2028-02-29");
+        }
+        CONTRACT.readResponse(infeasible.toString());
+    }
+
+    @Test
+    void rejectsNonCanonicalOrInvalidLocalDatesInEveryV1DateField() throws Exception {
+        for (String invalid : new String[] {
+                "2026-10-01T00:00:00", "2026-10-01Z", "2026-1-01",
+                "2026/10/01", "2026-02-30", " 2026-10-01", "2026-10-01 "
+        }) {
+            ObjectNode requestDate = (ObjectNode) JSON.readTree(fixture("valid_request.json"));
+            ((ObjectNode) requestDate.get("planning")).put("startDate", invalid);
+            assertInvalidRequest(requestDate);
+
+            ObjectNode expiryDate = (ObjectNode) JSON.readTree(fixture("valid_request.json"));
+            ((ObjectNode) ((ArrayNode) expiryDate.get("pantryLots")).get(0))
+                    .put("expiryDate", invalid);
+            assertInvalidRequest(expiryDate);
+
+            ObjectNode entryDate = succeededResponse();
+            firstEntry(entryDate).put("planDate", invalid);
+            assertInvalidResponse(entryDate);
+
+            ObjectNode gapDate = (ObjectNode) JSON.readTree(
+                    fixture("valid_infeasible_response.json"));
+            ((ObjectNode) ((ArrayNode) gapDate.get("unfilledSlots")).get(0))
+                    .put("planDate", invalid);
+            assertInvalidResponse(gapDate);
+        }
+        ObjectNode numericDate = (ObjectNode) JSON.readTree(fixture("valid_request.json"));
+        ((ObjectNode) numericDate.get("planning")).put("startDate", 20261001);
+        assertInvalidRequest(numericDate);
+    }
+
+    @Test
     void sharedLimitsMatchEveryJavaContractConstant() throws Exception {
         JsonNode expected = JSON.readTree(fixture("contract_limits.json"));
         Iterator<Map.Entry<String, JsonNode>> fields = expected.fields();
