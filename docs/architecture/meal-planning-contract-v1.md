@@ -38,8 +38,12 @@ Decimal quantities are JSON numbers bound to Java `BigDecimal` and Python
 arithmetic. NaN and infinity are rejected, and both implementations validate
 the declared precision and scale limits.
 
-Reference-data codes use `^[A-Z][A-Z0-9_]{0,63}$`. Closed transport vocabularies
-use enums.
+Semantic reference-data codes (allergens, dietary preferences, nutrients, recipe
+tags, and similar codes) use `^[A-Z][A-Z0-9_]{0,63}$`. Closed transport
+vocabularies use enums. Measurement-unit codes are a separate, case-sensitive
+catalog namespace: `^[a-z][a-z0-9_]{0,63}$`. Java must copy canonical unit
+codes such as `g`, `ml`, `piece`, and `kcal` exactly from the authoritative
+measurement-unit catalog. Neither Java nor Python case-normalizes them.
 
 ## Request hierarchy
 
@@ -106,10 +110,15 @@ Each definition contains:
 - `unitCode`;
 - `dimension`: `MASS`, `VOLUME`, `COUNT`, or `ENERGY`;
 - `baseUnitCode` for that dimension;
-- positive `toBaseFactor`.
+- positive `toBaseFactor`, an exact decimal with at most 10 integer and 12
+  fractional digits.
 
-The relation is `base quantity = quantity * toBaseFactor`. It supports only
-same-dimension multiplicative conversion. It does not authorize mass/volume,
+The relation is `base quantity = quantity * toBaseFactor`. The V1 precision
+preserves catalog factors such as `29.573529562500` (`floz` to `ml`) and
+`0.239005736138` (`kj` to `kcal`) without rounding or score quantization.
+Numeric JSON values may serialize without trailing zeroes, but their Decimal
+value must remain exact. The relation supports only same-dimension
+multiplicative conversion. It does not authorize mass/volume,
 count/mass, density, or speculative serving conversions.
 
 Every referenced unit must have a definition. Every `baseUnitCode` must also be

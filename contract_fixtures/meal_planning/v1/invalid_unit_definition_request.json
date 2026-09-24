@@ -21,10 +21,10 @@
   "nutritionTargets": [],
   "unitDefinitions": [
     {
-      "unitCode": "KG",
+      "unitCode": "kg",
       "dimension": "MASS",
-      "baseUnitCode": "G",
-      "toBaseFactor": 1000.00000000
+      "baseUnitCode": "g",
+      "toBaseFactor": 1000.000000000000
     }
   ],
   "pantryLots": [],

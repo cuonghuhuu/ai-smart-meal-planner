@@ -53,6 +53,16 @@ ReferenceCode = Annotated[
     ),
 ]
 
+UnitCode = Annotated[
+    str,
+    StringConstraints(
+        strip_whitespace=False,
+        min_length=1,
+        max_length=limits.MAX_REFERENCE_CODE_LENGTH,
+        pattern=limits.UNIT_CODE_PATTERN,
+    ),
+]
+
 
 def _require_json_decimal(value: object) -> object:
     if isinstance(value, (str, bool)):
@@ -268,7 +278,7 @@ class NutritionTarget(ContractModel):
     min_value: NonNegativeAmount | None
     max_value: NonNegativeAmount | None
     hard_limit: StrictBool
-    unit_code: ReferenceCode
+    unit_code: UnitCode
 
     @model_validator(mode="after")
     def values_are_present_and_ordered(self) -> Self:
@@ -287,12 +297,12 @@ class NutritionTarget(ContractModel):
 
 
 class UnitDefinition(ContractModel):
-    unit_code: ReferenceCode
+    unit_code: UnitCode
     dimension: UnitDimension
-    base_unit_code: ReferenceCode
+    base_unit_code: UnitCode
     to_base_factor: Annotated[
         DecimalNumber,
-        Field(gt=Decimal("0"), max_digits=18, decimal_places=8, allow_inf_nan=False),
+        Field(gt=Decimal("0"), max_digits=22, decimal_places=12, allow_inf_nan=False),
     ]
 
 
@@ -301,7 +311,7 @@ class PantryLot(ContractModel):
     ingredient_public_id: UUID
     food_public_id: UUID | None
     quantity_remaining: PositiveQuantity
-    unit_code: ReferenceCode
+    unit_code: UnitCode
     expiry_date: IsoDate | None
     expiry_kind: ExpiryKind
     storage_location: StorageLocation
@@ -336,7 +346,7 @@ class IngredientFact(ContractModel):
 class IngredientRequirement(ContractModel):
     ingredient_public_id: UUID
     quantity: PositiveQuantity | None
-    unit_code: ReferenceCode | None
+    unit_code: UnitCode | None
     optional: StrictBool
     allow_substitution: StrictBool
 
@@ -350,7 +360,7 @@ class IngredientRequirement(ContractModel):
 class NutritionValue(ContractModel):
     nutrient_code: ReferenceCode
     amount_per_serving: NonNegativeAmount
-    unit_code: ReferenceCode
+    unit_code: UnitCode
 
 
 class NutritionData(ContractModel):

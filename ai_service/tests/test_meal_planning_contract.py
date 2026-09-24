@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import date, timedelta
+from decimal import Decimal
 from pathlib import Path
 from uuid import UUID
 
@@ -36,6 +37,79 @@ def test_valid_request_fixture_is_strictly_typed_and_lot_level() -> None:
         != request.pantry_lots[1].pantry_item_public_id
     )
     assert request.ingredient_facts[0].allergen_facts[0].evidence_status.value == "FREE_FROM"
+
+
+def test_shared_catalog_units_are_canonical_and_exact() -> None:
+    request = MealPlanGenerationRequest.model_validate_json(
+        fixture("valid_catalog_units_request.json")
+    )
+    units = {item.unit_code: item for item in request.unit_definitions}
+    assert set(units) == {
+        "g", "kg", "mg", "mcg", "ml", "l", "tbsp", "floz", "kcal", "kj", "piece",
+    }
+    assert units["floz"].to_base_factor == Decimal("29.573529562500")
+    assert units["kj"].to_base_factor == Decimal("0.239005736138")
+    assert request.pantry_lots[0].unit_code == "floz"
+    assert request.recipe_candidates[0].ingredients[0].unit_code == "ml"
+    assert request.recipe_candidates[0].nutrition.values[0].unit_code == "kj"
+    assert request.nutrition_targets[0].unit_code == "kcal"
+
+
+@pytest.mark.parametrize("field", [
+    "target", "definition", "base", "pantry", "ingredient", "nutrition",
+])
+def test_uppercase_unit_variant_is_rejected_in_every_unit_field(field: str) -> None:
+    data = json.loads(fixture("valid_catalog_units_request.json"))
+    if field == "target":
+        data["nutritionTargets"][0]["unitCode"] = "KCAL"
+    elif field == "definition":
+        data["unitDefinitions"][0]["unitCode"] = "G"
+    elif field == "base":
+        data["unitDefinitions"][1]["baseUnitCode"] = "G"
+    elif field == "pantry":
+        data["pantryLots"][0]["unitCode"] = "ML"
+    elif field == "ingredient":
+        data["recipeCandidates"][0]["ingredients"][0]["unitCode"] = "ML"
+    else:
+        data["recipeCandidates"][0]["nutrition"]["values"][0]["unitCode"] = "KCAL"
+    with pytest.raises(ValidationError):
+        MealPlanGenerationRequest.model_validate(data)
+
+
+def test_semantic_reference_codes_remain_uppercase() -> None:
+    data = json.loads(fixture("valid_request.json"))
+    data["nutritionTargets"][0]["nutrientCode"] = "energy"
+    with pytest.raises(ValidationError):
+        MealPlanGenerationRequest.model_validate(data)
+
+
+def test_unit_codes_are_not_whitespace_normalized() -> None:
+    data = json.loads(fixture("valid_catalog_units_request.json"))
+    data["unitDefinitions"][0]["unitCode"] = " g "
+    with pytest.raises(ValidationError):
+        MealPlanGenerationRequest.model_validate(data)
+
+
+@pytest.mark.parametrize("factor", [
+    Decimal("0"), Decimal("-0.001"), Decimal("0.1234567890123"),
+])
+def test_invalid_conversion_factor_is_rejected(factor: Decimal) -> None:
+    data = json.loads(fixture("valid_catalog_units_request.json"))
+    data["unitDefinitions"][5]["toBaseFactor"] = factor
+    with pytest.raises(ValidationError):
+        MealPlanGenerationRequest.model_validate(data)
+
+
+def test_catalog_unit_graph_rejects_cross_dimension_and_missing_base() -> None:
+    data = json.loads(fixture("valid_catalog_units_request.json"))
+    data["unitDefinitions"][5]["baseUnitCode"] = "g"
+    with pytest.raises(ValidationError):
+        MealPlanGenerationRequest.model_validate(data)
+    data["unitDefinitions"][5]["baseUnitCode"] = "ml"
+    data["unitDefinitions"] = [item for item in data["unitDefinitions"]
+                               if item["unitCode"] != "ml"]
+    with pytest.raises(ValidationError):
+        MealPlanGenerationRequest.model_validate(data)
 
 
 def test_valid_boundary_request_accepts_locked_upper_bounds() -> None:

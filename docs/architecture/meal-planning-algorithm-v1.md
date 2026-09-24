@@ -80,6 +80,11 @@ unit, and public ID. Input snapshots and search branches are never mutated.
 Balances are stored in each dimension's declared base unit; conversion is
 permitted only when both units have the same dimension and base unit. No
 mass-volume, count-mass, density, serving-size, or guessed conversion occurs.
+Unit codes are the case-sensitive lowercase identifiers from Java's
+measurement-unit catalog, never normalized aliases. The algorithm uses the
+contract-supplied exact Decimal `toBaseFactor` (up to 12 fractional digits),
+including `floz` to `ml` and `kj` to `kcal`; these factors are not rounded to
+the four-place score precision.
 Compatible, usable lots are consumed in earliest-expiry order, with USE_BY
 before BEST_BEFORE on a tie and public UUID as the final tie-breaker. A lot
 past its expiry date is excluded; unknown expiry sorts last and receives no

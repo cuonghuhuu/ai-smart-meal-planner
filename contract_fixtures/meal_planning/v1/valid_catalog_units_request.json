@@ -1,0 +1,52 @@
+{
+  "contractVersion": "1",
+  "requestId": "33333333-3333-4333-8333-333333333333",
+  "algorithmVersion": "HEURISTIC_MEAL_PLAN_V1",
+  "planning": {
+    "startDate": "2026-10-01", "days": 1,
+    "requestedMealSlots": ["BREAKFAST"], "defaultServings": 1.00,
+    "maxMinutesPerMeal": null
+  },
+  "hardConstraints": {"allergenCodes": [], "exclusionaryDietaryCodes": [], "avoidIngredientPublicIds": []},
+  "softPreferences": {"dislikeIngredientPublicIds": [], "preferenceCodes": []},
+  "nutritionTargets": [{
+    "nutrientCode": "ENERGY", "targetValue": 100.0000,
+    "minValue": null, "maxValue": null, "hardLimit": false, "unitCode": "kcal"
+  }],
+  "unitDefinitions": [
+    {"unitCode": "g", "dimension": "MASS", "baseUnitCode": "g", "toBaseFactor": 1.000000000000},
+    {"unitCode": "kg", "dimension": "MASS", "baseUnitCode": "g", "toBaseFactor": 1000.000000000000},
+    {"unitCode": "mg", "dimension": "MASS", "baseUnitCode": "g", "toBaseFactor": 0.001000000000},
+    {"unitCode": "mcg", "dimension": "MASS", "baseUnitCode": "g", "toBaseFactor": 0.000001000000},
+    {"unitCode": "ml", "dimension": "VOLUME", "baseUnitCode": "ml", "toBaseFactor": 1.000000000000},
+    {"unitCode": "l", "dimension": "VOLUME", "baseUnitCode": "ml", "toBaseFactor": 1000.000000000000},
+    {"unitCode": "tbsp", "dimension": "VOLUME", "baseUnitCode": "ml", "toBaseFactor": 15.000000000000},
+    {"unitCode": "floz", "dimension": "VOLUME", "baseUnitCode": "ml", "toBaseFactor": 29.573529562500},
+    {"unitCode": "kcal", "dimension": "ENERGY", "baseUnitCode": "kcal", "toBaseFactor": 1.000000000000},
+    {"unitCode": "kj", "dimension": "ENERGY", "baseUnitCode": "kcal", "toBaseFactor": 0.239005736138},
+    {"unitCode": "piece", "dimension": "COUNT", "baseUnitCode": "piece", "toBaseFactor": 1.000000000000}
+  ],
+  "pantryLots": [{
+    "pantryItemPublicId": "cccccccc-cccc-4ccc-8ccc-ccccccccccc3",
+    "ingredientPublicId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+    "foodPublicId": null, "quantityRemaining": 2.0000,
+    "unitCode": "floz", "expiryDate": null, "expiryKind": "UNKNOWN",
+    "storageLocation": "PANTRY"
+  }],
+  "ingredientFacts": [{
+    "ingredientPublicId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1", "allergenFacts": []
+  }],
+  "recipeCandidates": [{
+    "recipePublicId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd3",
+    "servings": 1.00, "totalMinutes": 10,
+    "mealSlotCodes": ["BREAKFAST"], "dietaryCodes": [], "tagCodes": [],
+    "ingredients": [{
+      "ingredientPublicId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "quantity": 50.0000, "unitCode": "ml",
+      "optional": false, "allowSubstitution": false
+    }],
+    "nutrition": {"completenessRatio": 1.000000, "values": [{
+      "nutrientCode": "ENERGY", "amountPerServing": 400.0000, "unitCode": "kj"
+    }]}
+  }]
+}

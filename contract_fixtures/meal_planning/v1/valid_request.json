@@ -25,7 +25,7 @@
       "minValue": 1800.0000,
       "maxValue": 2200.0000,
       "hardLimit": false,
-      "unitCode": "KCAL"
+      "unitCode": "kcal"
     },
     {
       "nutrientCode": "PROTEIN",
@@ -33,27 +33,27 @@
       "minValue": 70.0000,
       "maxValue": null,
       "hardLimit": false,
-      "unitCode": "G"
+      "unitCode": "g"
     }
   ],
   "unitDefinitions": [
     {
-      "unitCode": "G",
+      "unitCode": "g",
       "dimension": "MASS",
-      "baseUnitCode": "G",
-      "toBaseFactor": 1.00000000
+      "baseUnitCode": "g",
+      "toBaseFactor": 1.000000000000
     },
     {
-      "unitCode": "KG",
+      "unitCode": "kg",
       "dimension": "MASS",
-      "baseUnitCode": "G",
-      "toBaseFactor": 1000.00000000
+      "baseUnitCode": "g",
+      "toBaseFactor": 1000.000000000000
     },
     {
-      "unitCode": "KCAL",
+      "unitCode": "kcal",
       "dimension": "ENERGY",
-      "baseUnitCode": "KCAL",
-      "toBaseFactor": 1.00000000
+      "baseUnitCode": "kcal",
+      "toBaseFactor": 1.000000000000
     }
   ],
   "pantryLots": [
@@ -62,7 +62,7 @@
       "ingredientPublicId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
       "foodPublicId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
       "quantityRemaining": 500.0000,
-      "unitCode": "G",
+      "unitCode": "g",
       "expiryDate": "2026-10-03",
       "expiryKind": "BEST_BEFORE",
       "storageLocation": "PANTRY"
@@ -72,7 +72,7 @@
       "ingredientPublicId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
       "foodPublicId": null,
       "quantityRemaining": 200.0000,
-      "unitCode": "G",
+      "unitCode": "g",
       "expiryDate": null,
       "expiryKind": "UNKNOWN",
       "storageLocation": "FRIDGE"
@@ -126,14 +126,14 @@
         {
           "ingredientPublicId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
           "quantity": 150.0000,
-          "unitCode": "G",
+          "unitCode": "g",
           "optional": false,
           "allowSubstitution": false
         },
         {
           "ingredientPublicId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
           "quantity": 100.0000,
-          "unitCode": "G",
+          "unitCode": "g",
           "optional": false,
           "allowSubstitution": true
         }
@@ -141,8 +141,8 @@
       "nutrition": {
         "completenessRatio": 1.000000,
         "values": [
-          {"nutrientCode": "ENERGY", "amountPerServing": 420.0000, "unitCode": "KCAL"},
-          {"nutrientCode": "PROTEIN", "amountPerServing": 24.0000, "unitCode": "G"}
+          {"nutrientCode": "ENERGY", "amountPerServing": 420.0000, "unitCode": "kcal"},
+          {"nutrientCode": "PROTEIN", "amountPerServing": 24.0000, "unitCode": "g"}
         ]
       }
     },
@@ -157,7 +157,7 @@
         {
           "ingredientPublicId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
           "quantity": 200.0000,
-          "unitCode": "G",
+          "unitCode": "g",
           "optional": false,
           "allowSubstitution": false
         }

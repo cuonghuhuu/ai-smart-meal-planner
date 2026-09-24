@@ -3,6 +3,7 @@ package com.smartmealplanner.mealplanning.contract.v1;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
@@ -40,6 +41,84 @@ class MealPlanningContractJsonTest {
                 .doesNotHaveDuplicates();
         assertThatThrownBy(() -> request.pantryLots().clear())
                 .isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
+    void acceptsCanonicalCatalogUnitsAndExactTwelvePlaceFactors() {
+        MealPlanGenerationRequest request = CONTRACT.readRequest(
+                fixture("valid_catalog_units_request.json"));
+        assertThat(request.unitDefinitions())
+                .extracting(MealPlanGenerationRequest.UnitDefinition::unitCode)
+                .containsExactly("g", "kg", "mg", "mcg", "ml", "l", "tbsp", "floz",
+                        "kcal", "kj", "piece");
+        assertThat(request.unitDefinitions().get(7).toBaseFactor())
+                .isEqualByComparingTo("29.573529562500");
+        assertThat(request.unitDefinitions().get(9).toBaseFactor())
+                .isEqualByComparingTo("0.239005736138");
+        assertThat(request.nutritionTargets().get(0).unitCode()).isEqualTo("kcal");
+        assertThat(request.pantryLots().get(0).unitCode()).isEqualTo("floz");
+        assertThat(request.recipeCandidates().get(0).ingredients().get(0).unitCode())
+                .isEqualTo("ml");
+        assertThat(request.recipeCandidates().get(0).nutrition().values().get(0).unitCode())
+                .isEqualTo("kj");
+        assertThat(CONTRACT.readRequest(CONTRACT.writeRequest(request))).isEqualTo(request);
+    }
+
+    @Test
+    void rejectsUppercaseUnitVariantsInEveryUnitField() throws Exception {
+        for (String variant : new String[] {"G", "ML", "KCAL", " g "}) {
+            ObjectNode request = catalogRequest();
+            ((ObjectNode) ((ArrayNode) request.get("unitDefinitions")).get(0))
+                    .put("unitCode", variant);
+            assertInvalidRequest(request);
+        }
+        ObjectNode request = catalogRequest();
+        ((ObjectNode) ((ArrayNode) request.get("nutritionTargets")).get(0))
+                .put("unitCode", "KCAL");
+        assertInvalidRequest(request);
+        request = catalogRequest();
+        ((ObjectNode) ((ArrayNode) request.get("unitDefinitions")).get(1))
+                .put("baseUnitCode", "G");
+        assertInvalidRequest(request);
+        request = catalogRequest();
+        ((ObjectNode) ((ArrayNode) request.get("pantryLots")).get(0))
+                .put("unitCode", "ML");
+        assertInvalidRequest(request);
+        request = catalogRequest();
+        ((ObjectNode) ((ArrayNode) ((ObjectNode) ((ArrayNode) request
+                .get("recipeCandidates")).get(0)).get("ingredients")).get(0))
+                .put("unitCode", "ML");
+        assertInvalidRequest(request);
+        request = catalogRequest();
+        ((ObjectNode) ((ArrayNode) ((ObjectNode) ((ArrayNode) request
+                .get("recipeCandidates")).get(0)).get("nutrition").get("values")).get(0))
+                .put("unitCode", "KCAL");
+        assertInvalidRequest(request);
+    }
+
+    @Test
+    void rejectsInvalidFactorPrecisionSignAndUnsafeUnitGraphs() throws Exception {
+        for (String factor : new String[] {"0", "-0.001", "0.1234567890123"}) {
+            ObjectNode request = catalogRequest();
+            ((ObjectNode) ((ArrayNode) request.get("unitDefinitions")).get(7))
+                    .put("toBaseFactor", new BigDecimal(factor));
+            assertInvalidRequest(request);
+        }
+        ObjectNode request = catalogRequest();
+        ((ObjectNode) ((ArrayNode) request.get("unitDefinitions")).get(7))
+                .put("baseUnitCode", "g");
+        assertInvalidRequest(request);
+        request = catalogRequest();
+        ((ArrayNode) request.get("unitDefinitions")).remove(4);
+        assertInvalidRequest(request);
+    }
+
+    @Test
+    void semanticReferenceCodesStillRejectLowercase() throws Exception {
+        ObjectNode request = (ObjectNode) JSON.readTree(fixture("valid_request.json"));
+        ((ObjectNode) ((ArrayNode) request.get("nutritionTargets")).get(0))
+                .put("nutrientCode", "energy");
+        assertInvalidRequest(request);
     }
 
     @Test
@@ -239,6 +318,15 @@ class MealPlanningContractJsonTest {
 
     private static ObjectNode succeededResponse() throws IOException {
         return (ObjectNode) JSON.readTree(fixture("valid_succeeded_response.json"));
+    }
+
+    private static ObjectNode catalogRequest() throws IOException {
+        return (ObjectNode) JSON.readTree(fixture("valid_catalog_units_request.json"));
+    }
+
+    private static void assertInvalidRequest(ObjectNode request) {
+        assertThatThrownBy(() -> CONTRACT.readRequest(request.toString()))
+                .isInstanceOf(MealPlanningContractValidationException.class);
     }
 
     private static ObjectNode firstEntry(ObjectNode response) {

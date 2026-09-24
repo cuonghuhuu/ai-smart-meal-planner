@@ -48,6 +48,7 @@ import static com.smartmealplanner.mealplanning.contract.v1.MealPlanningContract
 import static com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractLimits.MAX_REQUESTED_MEAL_SLOTS;
 import static com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractLimits.MAX_UNIT_DEFINITIONS;
 import static com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractLimits.REFERENCE_CODE_PATTERN;
+import static com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractLimits.UNIT_CODE_PATTERN;
 
 /** Strict, surrogate-ID-free request for internal meal-plan computation. */
 public record MealPlanGenerationRequest(
@@ -274,7 +275,7 @@ public record MealPlanGenerationRequest(
             boolean hardLimit,
 
             @NotNull
-            @Pattern(regexp = REFERENCE_CODE_PATTERN)
+            @Pattern(regexp = UNIT_CODE_PATTERN)
             String unitCode) {
 
         @JsonIgnore
@@ -298,19 +299,19 @@ public record MealPlanGenerationRequest(
 
     public record UnitDefinition(
             @NotNull
-            @Pattern(regexp = REFERENCE_CODE_PATTERN)
+            @Pattern(regexp = UNIT_CODE_PATTERN)
             String unitCode,
 
             @NotNull
             UnitDimension dimension,
 
             @NotNull
-            @Pattern(regexp = REFERENCE_CODE_PATTERN)
+            @Pattern(regexp = UNIT_CODE_PATTERN)
             String baseUnitCode,
 
             @NotNull
             @DecimalMin(value = "0", inclusive = false)
-            @Digits(integer = 10, fraction = 8)
+            @Digits(integer = 10, fraction = 12)
             BigDecimal toBaseFactor) {
     }
 
@@ -329,7 +330,7 @@ public record MealPlanGenerationRequest(
             BigDecimal quantityRemaining,
 
             @NotNull
-            @Pattern(regexp = REFERENCE_CODE_PATTERN)
+            @Pattern(regexp = UNIT_CODE_PATTERN)
             String unitCode,
 
             LocalDate expiryDate,
@@ -433,7 +434,7 @@ public record MealPlanGenerationRequest(
             @Digits(integer = 10, fraction = 4)
             BigDecimal quantity,
 
-            @Pattern(regexp = REFERENCE_CODE_PATTERN)
+            @Pattern(regexp = UNIT_CODE_PATTERN)
             String unitCode,
 
             boolean optional,
@@ -480,7 +481,7 @@ public record MealPlanGenerationRequest(
             BigDecimal amountPerServing,
 
             @NotNull
-            @Pattern(regexp = REFERENCE_CODE_PATTERN)
+            @Pattern(regexp = UNIT_CODE_PATTERN)
             String unitCode) {
     }
 

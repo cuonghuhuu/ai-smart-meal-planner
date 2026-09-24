@@ -20,7 +20,7 @@ from app.meal_planning.contracts import (
 from app.meal_planning.scoring import quantize_score, score_candidate
 from app.meal_planning.search import SearchBudgetExhausted, SearchConfig
 from app.meal_planning.service import generate_meal_plan
-from app.meal_planning.virtual_pantry import VirtualPantry
+from app.meal_planning.virtual_pantry import UnitCatalog, VirtualPantry
 
 FIXTURE = (
     Path(__file__).resolve().parents[2]
@@ -270,7 +270,7 @@ def test_earliest_usable_expiry_first_and_expired_lot_excluded() -> None:
 def test_same_dimension_conversion_and_no_mass_volume_guess() -> None:
     data = payload()
     data["pantryLots"][0]["quantityRemaining"] = 1
-    data["pantryLots"][0]["unitCode"] = "KG"
+    data["pantryLots"][0]["unitCode"] = "kg"
     snapshot = request(data)
     pantry = VirtualPantry.from_request(snapshot)
     requirement = (snapshot.recipe_candidates[0].ingredients[0],)
@@ -279,16 +279,50 @@ def test_same_dimension_conversion_and_no_mass_volume_guess() -> None:
     assert used.pantry.remaining_base[0] == Decimal("700")
 
     data["unitDefinitions"].append({
-        "unitCode": "ML", "dimension": "VOLUME", "baseUnitCode": "ML", "toBaseFactor": 1,
+        "unitCode": "ml", "dimension": "VOLUME", "baseUnitCode": "ml", "toBaseFactor": 1,
     })
-    data["pantryLots"][0]["unitCode"] = "ML"
+    data["pantryLots"][0]["unitCode"] = "ml"
     snapshot = request(data)
     pantry = VirtualPantry.from_request(snapshot)
-    assert not pantry.units.compatible("ML", "G")
+    assert not pantry.units.compatible("ml", "g")
     used = pantry.simulate((snapshot.recipe_candidates[0].ingredients[0],),
                            Decimal("1"), date(2026, 10, 1))
     assert used.coverage == 0
     assert used.uses == ()
+
+
+def test_catalog_factors_drive_exact_dimension_safe_immutable_conversions() -> None:
+    snapshot = MealPlanGenerationRequest.model_validate_json(
+        FIXTURE.with_name("valid_catalog_units_request.json").read_text(encoding="utf-8")
+    )
+    units = UnitCatalog.from_request(snapshot)
+    assert units.to_base(Decimal("1"), "kg") == Decimal("1000.000000000000")
+    assert units.to_base(Decimal("500"), "mg") == Decimal("0.500000000000")
+    assert units.to_base(Decimal("1000"), "mcg") == Decimal("0.001000000000")
+    assert units.to_base(Decimal("1.25"), "l") == Decimal("1250.00000000000000")
+    assert units.to_base(Decimal("2"), "tbsp") == Decimal("30.000000000000")
+    assert units.to_base(Decimal("2"), "floz") == Decimal("59.147059125000")
+    assert units.to_base(Decimal("400"), "kj") == Decimal("95.602294455200")
+    assert units.compatible("floz", "ml")
+    assert units.compatible("mg", "kg")
+    assert not units.compatible("piece", "g")
+    assert not units.compatible("g", "ml")
+    assert not units.compatible("kj", "piece")
+
+    original = VirtualPantry.from_request(snapshot)
+    first = original.simulate(
+        snapshot.recipe_candidates[0].ingredients, Decimal("1"),
+        snapshot.planning.start_date,
+    )
+    assert first.coverage == Decimal("1")
+    assert first.pantry.remaining_base[0] == Decimal("9.147059125000")
+    assert original.remaining_base[0] == Decimal("59.147059125000")
+    assert snapshot.pantry_lots[0].quantity_remaining == Decimal("2.0000")
+    assert original.simulate(
+        snapshot.recipe_candidates[0].ingredients, Decimal("1"),
+        snapshot.planning.start_date,
+    ) == first
+    assert generate_meal_plan(snapshot) == generate_meal_plan(snapshot)
 
 
 def test_all_seven_components_and_exact_decimal_total() -> None:
@@ -418,7 +452,7 @@ def test_fillable_negative_score_slot_is_not_left_empty_to_preserve_zero_score()
     data["planning"]["maxMinutesPerMeal"] = 25
     data["nutritionTargets"] = [{
         "nutrientCode": "ENERGY", "targetValue": 1, "minValue": None,
-        "maxValue": None, "hardLimit": False, "unitCode": "KCAL",
+        "maxValue": None, "hardLimit": False, "unitCode": "kcal",
     }]
     data["softPreferences"]["preferenceCodes"] = ["MEDITERRANEAN"]
     data["softPreferences"]["dislikeIngredientPublicIds"] = [

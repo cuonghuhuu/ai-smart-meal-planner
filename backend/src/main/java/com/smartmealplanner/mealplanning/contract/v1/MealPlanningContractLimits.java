@@ -40,6 +40,9 @@ public final class MealPlanningContractLimits {
     public static final int MAX_REFERENCE_CODE_LENGTH = 64;
     public static final String REFERENCE_CODE_PATTERN =
             "^[A-Z][A-Z0-9_]{0,63}$";
+    /** Case-sensitive identifiers from the authoritative measurement-unit catalog. */
+    public static final String UNIT_CODE_PATTERN =
+            "^[a-z][a-z0-9_]{0,63}$";
 
     private MealPlanningContractLimits() {
     }
