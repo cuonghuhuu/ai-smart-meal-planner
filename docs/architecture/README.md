@@ -55,6 +55,9 @@ call Python directly.
 - [Meal Planning internal contract V1](meal-planning-contract-v1.md) - P11-B
   Java/Python DTOs, bounds, outcomes, allergen safety, and internal service
   security.
+- [Meal Planning algorithm V1](meal-planning-algorithm-v1.md) - P11-C
+  fail-closed CSP filtering, Decimal scoring, Virtual Pantry, forward checking,
+  deterministic bounded Beam Search, and testable outcome semantics.
 - [Vietnamese Recipe offline import](vietnam-recipe-import.md) - P9C
   project-curated starter data, canonical SMILING Ingredient mappings,
   validation, idempotency, and explicit offline execution.

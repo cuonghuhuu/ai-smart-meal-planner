@@ -23,7 +23,7 @@ MAX_SCORE_COMPONENTS = 7
 MAX_EXPLANATION_LENGTH = 500
 MAX_REQUEST_BYTES = 5 * 1024 * 1024
 
-# Reserved for Gate C configuration validation. It is not a request field in v1.
+# Beam-width ceiling; deployment configuration is not a V1 request field.
 MAX_FUTURE_BEAM_WIDTH = 50
 
 MAX_MINUTES_PER_MEAL = 1_440

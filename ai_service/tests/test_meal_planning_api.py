@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import asyncio
+import json
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
@@ -9,6 +11,7 @@ from starlette.types import Message
 
 from app.main import create_app
 from app.meal_planning.contract_limits import MAX_REQUEST_BYTES
+from app.meal_planning.contracts import MealPlanGenerationResponse
 from app.request_size_limit import RequestSizeLimitMiddleware
 from app.settings import InternalServiceSettings
 
@@ -22,7 +25,7 @@ def fixture_bytes(name: str) -> bytes:
     return (FIXTURE_ROOT / name).read_bytes()
 
 
-def test_validated_request_reaches_temporary_not_implemented_boundary() -> None:
+def test_validated_request_returns_a_complete_algorithm_outcome() -> None:
     client = TestClient(
         create_app(InternalServiceSettings(service_token=SERVICE_TOKEN))
     )
@@ -36,13 +39,58 @@ def test_validated_request_reaches_temporary_not_implemented_boundary() -> None:
         },
     )
 
-    assert response.status_code == 501
+    assert response.status_code == 200
+    result = MealPlanGenerationResponse.model_validate_json(response.content)
+    assert result.status.value == "SUCCEEDED"
+    assert len(result.entries) == 2
+    assert not result.unfilled_slots
+    assert result.request_id.hex == "11111111111141118111111111111111"
+    numeric_json = json.loads(response.content, parse_float=Decimal)
+    assert isinstance(numeric_json["entries"][0]["totalScore"], Decimal)
+    assert isinstance(numeric_json["entries"][0]["scoreComponents"][0]["weight"], Decimal)
+
+
+def test_api_degraded_and_infeasible_are_http_200_outcomes() -> None:
+    client = TestClient(create_app(InternalServiceSettings(service_token=SERVICE_TOKEN)))
+    payload = json.loads(fixture_bytes("valid_request.json"))
+    headers = {"X-Internal-Service-Token": SERVICE_TOKEN}
+
+    payload["recipeCandidates"][0]["mealSlotCodes"] = ["BREAKFAST"]
+    degraded = client.post("/internal/v1/meal-plans/generate", json=payload, headers=headers)
+    assert degraded.status_code == 200
+    assert degraded.json()["status"] == "DEGRADED"
+    assert len(degraded.json()["entries"]) == 1
+    assert len(degraded.json()["unfilledSlots"]) == 1
+
+    payload["hardConstraints"]["allergenCodes"] = ["TREE_NUT"]
+    infeasible = client.post("/internal/v1/meal-plans/generate", json=payload, headers=headers)
+    assert infeasible.status_code == 200
+    assert infeasible.json()["status"] == "INFEASIBLE"
+    assert infeasible.json()["entries"] == []
+
+
+def test_budget_without_an_entry_is_a_technical_api_error_not_infeasible() -> None:
+    data = json.loads(fixture_bytes("valid_request.json"))
+    twin = json.loads(json.dumps(data["recipeCandidates"][0]))
+    twin["recipePublicId"] = "dddddddd-dddd-4ddd-8ddd-ddddddddddd3"
+    data["recipeCandidates"].append(twin)
+    client = TestClient(create_app(InternalServiceSettings(
+        service_token=SERVICE_TOKEN, max_search_expansions=1,
+    )))
+
+    response = client.post(
+        "/internal/v1/meal-plans/generate",
+        json=data,
+        headers={"X-Internal-Service-Token": SERVICE_TOKEN},
+    )
+
+    assert response.status_code == 503
     assert response.json() == {
-        "code": "MEAL_PLANNING_COMPUTATION_NOT_IMPLEMENTED",
-        "contractVersion": "1",
-        "requestId": "11111111-1111-4111-8111-111111111111",
-        "algorithmVersion": "HEURISTIC_MEAL_PLAN_V1",
+        "code": "AI_SEARCH_BUDGET_EXHAUSTED",
+        "requestId": data["requestId"],
+        "algorithmVersion": data["algorithmVersion"],
     }
+    assert "status" not in response.json()
 
 
 def test_openapi_exposes_the_versioned_response_contract() -> None:
@@ -56,14 +104,14 @@ def test_openapi_exposes_the_versioned_response_contract() -> None:
         "application/json"
     ]["schema"]
     assert success_schema["$ref"].endswith("/MealPlanGenerationResponse")
-    assert "501" in operation["responses"]
+    assert "501" not in operation["responses"]
 
 
 @pytest.mark.parametrize(
     "fixture_name",
     ["invalid_unknown_field_request.json", "invalid_plan_days_request.json"],
 )
-def test_invalid_contract_is_rejected_before_temporary_response(
+def test_invalid_contract_is_rejected_before_computation(
     fixture_name: str,
 ) -> None:
     client = TestClient(

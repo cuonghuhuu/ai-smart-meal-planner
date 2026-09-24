@@ -80,7 +80,7 @@ Meal-slot enums are the six V1 reference codes: `BREAKFAST`, `MORNING_SNACK`,
 | `exclusionaryDietaryCodes` | unique reference-code array | yes |
 | `avoidIngredientPublicIds` | unique UUID array | yes |
 
-Unsupported exclusionary rules are not ignored. Gate C must produce an
+Unsupported exclusionary rules are not ignored. The P11-C algorithm produces an
 unsupported/infeasible result when a requested rule cannot be enforced safely.
 
 ### Soft preferences
@@ -140,7 +140,7 @@ For every declared user allergen, only explicit `FREE_FROM` evidence is safe.
 `CONTAINS`, `MAY_CONTAIN`, and `UNKNOWN` are non-eligible. An absent
 ingredient fact or an absent allergen code inside a present fact resolves to
 `UNKNOWN`, never `FREE_FROM`. The contract provides this evidence lookup;
-Gate C will apply it during recipe eligibility filtering. Java must not invent
+The P11-C algorithm applies it during recipe eligibility filtering. Java must not invent
 facts while assembling the snapshot.
 
 ### Recipe candidate
@@ -199,8 +199,8 @@ Every component value is in `[0,1]`. Stored weights remain positive:
 | `EFFORT_FIT` | `0.05` | add |
 | `DISLIKE_PENALTY` | `0.20` | subtract |
 
-The total score range is `[-0.20,1.00]`. Gate B validates the components,
-weights and ranges but does not calculate the total.
+The total score range is `[-0.20,1.00]`. The contract layer validates components,
+weights and ranges; the P11-C algorithm calculates the total.
 
 An unfilled slot contains `planDate`, `mealSlotCode`, a stable reason enum, and
 an optional explanation of at most 500 characters. V1 reason codes are:
@@ -247,9 +247,9 @@ later integration gate.
 These values are versioned interoperability ceilings and therefore cannot be
 configured independently in Java and Python. The shared boundary fixtures and
 both language test suites are the drift detector. A deployment may lower the Python
-body limit with `AI_MAX_REQUEST_BYTES`, but never above 5 MiB. Gate C will add
-a configurable Beam width in the range `1..50`; it is deliberately not a V1
-request field in Gate B.
+body limit with `AI_MAX_REQUEST_BYTES`, but never above 5 MiB. P11-C configures
+Beam width in the range `1..50`; it is deliberately not a V1
+request field in V1.
 
 ## Internal service security
 
@@ -270,11 +270,14 @@ request field in Gate B.
   snapshots.
 - Java never forwards an end-user JWT to Python.
 
-Gate B returns HTTP 501 with
-`MEAL_PLANNING_COMPUTATION_NOT_IMPLEMENTED` after authentication and contract
-validation. It is a temporary technical placeholder, never an `INFEASIBLE`
-algorithm result. `INFEASIBLE` is a valid HTTP 200 algorithm response once
-computation exists. The 501 placeholder is replaced only in Gate C.
+P11-C returns HTTP 200 with a validated `SUCCEEDED`, `DEGRADED`, or
+`INFEASIBLE` algorithm outcome after authentication and contract validation.
+The former Gate-B HTTP 501 placeholder has been removed. A technical Python
+failure is not represented as `INFEASIBLE`. If the configured search budget is
+exhausted before any safe entry can be returned, Python sends HTTP 503 with
+stable code `AI_SEARCH_BUDGET_EXHAUSTED`; Java must treat it as a technical
+`FAILED` execution in its later integration gate. A safe nonempty partial
+result may instead be `DEGRADED` with `SEARCH_LIMIT_REACHED` unfilled slots.
 
 ## Shared fixtures
 
