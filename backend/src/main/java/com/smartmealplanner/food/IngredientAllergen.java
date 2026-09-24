@@ -34,6 +34,7 @@ class IngredientAllergen {
         this.ingredient = ingredient; this.allergenId = allergenId; this.presence = presence; this.note = note;
     }
     Long allergenId() { return allergenId == null ? id.allergenId() : allergenId; }
+    Long ingredientId() { return ingredient.internalId(); }
     IngredientAllergenPresence presence() { return presence; }
     String note() { return note; }
 }

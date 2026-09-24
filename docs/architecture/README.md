@@ -56,6 +56,7 @@ call Python directly.
   Java/Python DTOs, bounds, outcomes, allergen safety, and internal service
   security.
 - [Meal Planning algorithm V1](meal-planning-algorithm-v1.md) - P11-C
+- [Meal Planning Java–Python integration](meal-planning-java-integration-gate-d.md) - P11-D
   fail-closed CSP filtering, Decimal scoring, Virtual Pantry, forward checking,
   deterministic bounded Beam Search, and testable outcome semantics.
 - [Vietnamese Recipe offline import](vietnam-recipe-import.md) - P9C

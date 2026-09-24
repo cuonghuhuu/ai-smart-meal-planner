@@ -8,6 +8,12 @@ import org.springframework.data.repository.query.Param;
 
 interface RecipeNutritionSnapshotRepository
         extends JpaRepository<RecipeNutritionSnapshot, Long> {
+    @Query("""
+            select snapshot from RecipeNutritionSnapshot snapshot
+            where snapshot.recipeId in :recipeIds and snapshot.current = true
+            """)
+    java.util.List<RecipeNutritionSnapshot> findCurrentByRecipeIds(
+            @Param("recipeIds") java.util.Collection<Long> recipeIds);
 
     @Query("""
             select snapshot

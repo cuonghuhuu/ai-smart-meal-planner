@@ -11,6 +11,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 interface IngredientRepository extends JpaRepository<Ingredient, Long> {
+    @Query("select ingredient from Ingredient ingredient where ingredient.publicId in :publicIds")
+    List<Ingredient> findAllByPublicIdIn(
+            @Param("publicIds") Collection<byte[]> publicIds);
     Optional<Ingredient> findByCode(String code);
 
     List<Ingredient> findAllByCodeIn(Collection<String> codes);

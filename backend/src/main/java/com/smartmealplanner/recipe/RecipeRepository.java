@@ -15,6 +15,18 @@ import jakarta.persistence.LockModeType;
 
 interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
+    @Query(value = """
+            select r.* from recipes r
+            where r.status = 'PUBLISHED'
+              and (not exists (select 1 from recipe_meal_slot_types a where a.recipe_id = r.id)
+                   or exists (select 1 from recipe_meal_slot_types a
+                              join meal_slot_types s on s.id = a.meal_slot_type_id
+                              where a.recipe_id = r.id and s.code in (:slotCodes)))
+            order by r.published_at desc, r.public_id asc
+            """, nativeQuery = true)
+    List<Recipe> findRecommendationCandidates(
+            @Param("slotCodes") Collection<String> slotCodes, Pageable pageable);
+
     Optional<Recipe> findBySlug(String slug);
 
     List<Recipe> findAllBySlugIn(Collection<String> slugs);

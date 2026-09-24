@@ -8,6 +8,13 @@ import org.springframework.data.repository.query.Param;
 
 interface RecipeNutritionValueRepository
         extends JpaRepository<RecipeNutritionValue, RecipeNutritionValueId> {
+    @Query("""
+            select value from RecipeNutritionValue value
+            where value.snapshotId in :snapshotIds
+            order by value.snapshotId asc, value.nutrientId asc
+            """)
+    List<RecipeNutritionValue> findBySnapshotIds(
+            @Param("snapshotIds") java.util.Collection<Long> snapshotIds);
 
     @Query(value = """
             select nutrition_value.*
