@@ -28,6 +28,7 @@ import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractLimits;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractValidationException;
 
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /** One bounded HTTP call, no retry, no forwarded user credential. */
 @Service
@@ -39,8 +40,9 @@ public class HttpMealPlanningAiClient implements MealPlanningAiClient {
     private final ObjectMapper json;
     private final HttpClient http;
 
+    @Autowired
     public HttpMealPlanningAiClient(AiServiceProperties properties,
-            MealPlanningContractJson contract, ObjectMapper json) {
+                                    MealPlanningContractJson contract, ObjectMapper json) {
         this(properties, contract, json, HttpClient.newBuilder()
                 .connectTimeout(properties.connectTimeout())
                 .followRedirects(HttpClient.Redirect.NEVER).build());
