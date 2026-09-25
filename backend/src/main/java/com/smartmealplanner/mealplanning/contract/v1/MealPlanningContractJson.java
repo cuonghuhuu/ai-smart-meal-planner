@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.CoercionAction;
 import com.fasterxml.jackson.databind.cfg.CoercionInputShape;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -45,7 +46,8 @@ public final class MealPlanningContractJson {
                 .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
                 .enable(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES)
                 .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
-                .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
+                .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         strictMapper.coercionConfigFor(LogicalType.Float)
                 .setCoercion(CoercionInputShape.String, CoercionAction.Fail);
         SimpleModule contractDates = new SimpleModule("meal-planning-contract-v1-dates");

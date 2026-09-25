@@ -366,8 +366,33 @@ class MealPlanningContractJsonTest {
         MealPlanGenerationResponse response = CONTRACT.readResponse(
                 fixture("valid_degraded_response.json"));
 
-        assertThat(CONTRACT.readRequest(CONTRACT.writeRequest(request))).isEqualTo(request);
-        assertThat(CONTRACT.readResponse(CONTRACT.writeResponse(response))).isEqualTo(response);
+        String requestJson = CONTRACT.writeRequest(request);
+        JsonNode serializedRequest = parse(requestJson);
+        assertThat(serializedRequest.path("planning").path("startDate").isTextual()).isTrue();
+        assertThat(serializedRequest.path("planning").path("startDate").asText())
+                .isEqualTo("2026-10-01");
+        assertThat(serializedRequest.path("pantryLots").get(0).path("expiryDate").isTextual())
+                .isTrue();
+        assertThat(serializedRequest.path("pantryLots").get(0).path("expiryDate").asText())
+                .isEqualTo("2026-10-03");
+        assertThat(CONTRACT.readRequest(requestJson)).isEqualTo(request);
+
+        String responseJson = CONTRACT.writeResponse(response);
+        JsonNode serializedResponse = parse(responseJson);
+        assertThat(serializedResponse.path("entries").get(0).path("planDate").isTextual())
+                .isTrue();
+        assertThat(serializedResponse.path("entries").get(0).path("planDate").asText())
+                .isEqualTo("2026-10-01");
+        assertThat(serializedResponse.path("unfilledSlots").get(0).path("planDate").isTextual())
+                .isTrue();
+        assertThat(serializedResponse.path("unfilledSlots").get(0).path("planDate").asText())
+                .isEqualTo("2026-10-01");
+        assertThat(CONTRACT.readResponse(responseJson)).isEqualTo(response);
+    }
+
+    private static JsonNode parse(String json) {
+        try { return JSON.readTree(json); }
+        catch (IOException exception) { throw new IllegalStateException(exception); }
     }
 
     private static ObjectNode succeededResponse() throws IOException {
