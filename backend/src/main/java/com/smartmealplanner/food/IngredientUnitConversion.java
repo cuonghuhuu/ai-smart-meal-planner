@@ -46,6 +46,7 @@ class IngredientUnitConversion {
         this.ingredient = ingredient; this.fromUnit = fromUnit; this.fromQuantity = fromQuantity;
         this.toUnit = toUnit; this.toQuantity = toQuantity; this.confidence = confidence; this.sourceNote = sourceNote;
     }
+    Long ingredientId() { return ingredient == null ? null : ingredient.internalId(); }
     MeasurementUnit fromUnit() { return fromUnit; }
     BigDecimal fromQuantity() { return fromQuantity; }
     MeasurementUnit toUnit() { return toUnit; }

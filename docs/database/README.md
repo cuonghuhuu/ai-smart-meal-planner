@@ -14,6 +14,7 @@ Boot, Flutter, FastAPI, Maven or Gradle scaffolding is introduced here.
 | [Data model](data-model.md) | Domain-by-domain design, keys, normalization, lifecycle, time handling, naming conventions, and the index and constraint strategy. |
 | [Data dictionary](data-dictionary.md) | Table-by-table reference: purpose, key fields, constraints, relationships, ownership and lifecycle notes. |
 | [Database decisions](database-decisions.md) | Decision records (DB-ADR-001 and onwards) with context, decision, consequences and rejected alternatives. |
+| [P11 V002 decision](p11-v002-decision.md) | Gate B assessment of the `INFEASIBLE` status and degraded unfilled-slot persistence gaps; no migration has been created. |
 | [Validation report](validation-report.md) | What was executed against a real MySQL 8.4 server — including the behaviour probe that provokes each rule — and what was checked statically. |
 
 Related artifacts:

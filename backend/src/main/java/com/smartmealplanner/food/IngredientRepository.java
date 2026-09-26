@@ -11,7 +11,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 interface IngredientRepository extends JpaRepository<Ingredient, Long> {
+    @Query("select ingredient from Ingredient ingredient where ingredient.publicId in :publicIds")
+    List<Ingredient> findAllByPublicIdIn(
+            @Param("publicIds") Collection<byte[]> publicIds);
     Optional<Ingredient> findByCode(String code);
+
+    List<Ingredient> findAllByCodeIn(Collection<String> codes);
 
     Optional<Ingredient> findByPublicId(byte[] publicId);
 
@@ -55,4 +60,22 @@ interface IngredientRepository extends JpaRepository<Ingredient, Long> {
             where ingredient.active = true and ingredient.publicId in :publicIds
             """)
     List<Ingredient> findActiveByPublicIdIn(@Param("publicIds") Collection<byte[]> publicIds);
+
+    @Query("""
+            select ingredient
+            from Ingredient ingredient
+            where ingredient.active = true
+              and ingredient.publicId = :publicId
+            """)
+    Optional<Ingredient> findActiveByPublicId(
+            @Param("publicId") byte[] publicId);
+
+    @Query("""
+            select ingredient
+            from Ingredient ingredient
+            left join fetch ingredient.defaultFood
+            where ingredient.id in :ids
+            """)
+    List<Ingredient> findAllWithDefaultFoodByIdIn(
+            @Param("ids") Collection<Long> ids);
 }

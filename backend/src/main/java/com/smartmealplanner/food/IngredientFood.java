@@ -40,6 +40,8 @@ class IngredientFood {
         this.yieldFactor = yieldFactor; this.primary = primary;
     }
     Food food() { return food; }
+    Long ingredientId() { return ingredient == null ? null : ingredient.internalId(); }
+    Long foodId() { return food == null ? null : food.internalId(); }
     IngredientPreparationState preparationState() { return preparationState; }
     BigDecimal yieldFactor() { return yieldFactor; }
     boolean isPrimary() { return primary; }

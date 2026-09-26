@@ -24,7 +24,11 @@ service.
 - P4 authentication and authorization - complete
 - P5 user profile, preferences, and measurements - complete
 - P6 deterministic nutrition targets - complete
-- P7 food and ingredient catalog - current / in final verification
+- P7 food and ingredient catalog - complete
+- P8 Flutter catalog and ingredient preferences - complete
+- P9 Recipe core - complete (P9A/P9B Java catalog and nutrition; P9C offline
+  Vietnamese curated Recipe import)
+- P10 Pantry / Fridge backend - current
 
 P2 adds the relational design: documentation under `docs/database/`, the
 versioned MySQL schema and reference seed data under `database/`, and the entity

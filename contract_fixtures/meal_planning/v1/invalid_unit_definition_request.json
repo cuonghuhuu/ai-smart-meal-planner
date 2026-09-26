@@ -1,0 +1,33 @@
+{
+  "contractVersion": "1",
+  "requestId": "22222222-2222-4222-8222-222222222222",
+  "algorithmVersion": "HEURISTIC_MEAL_PLAN_V1",
+  "planning": {
+    "startDate": "2026-10-01",
+    "days": 1,
+    "requestedMealSlots": ["BREAKFAST"],
+    "defaultServings": 1.00,
+    "maxMinutesPerMeal": null
+  },
+  "hardConstraints": {
+    "allergenCodes": [],
+    "exclusionaryDietaryCodes": [],
+    "avoidIngredientPublicIds": []
+  },
+  "softPreferences": {
+    "dislikeIngredientPublicIds": [],
+    "preferenceCodes": []
+  },
+  "nutritionTargets": [],
+  "unitDefinitions": [
+    {
+      "unitCode": "kg",
+      "dimension": "MASS",
+      "baseUnitCode": "g",
+      "toBaseFactor": 1000.000000000000
+    }
+  ],
+  "pantryLots": [],
+  "ingredientFacts": [],
+  "recipeCandidates": []
+}

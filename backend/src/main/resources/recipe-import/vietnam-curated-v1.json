@@ -1,0 +1,301 @@
+{
+  "dataset": "AI Smart Meal Planner Vietnamese curated starter recipes",
+  "datasetVersion": "v1",
+  "recipes": [
+    {
+      "sourceIdentifier": "VN_CURATED_001",
+      "title": "Cơm gạo tẻ đơn giản",
+      "slug": "com-gao-te-don-gian",
+      "summary": "Món cơm nền dùng định lượng gạo tẻ theo một mẻ nhỏ.",
+      "servings": 2,
+      "prepMinutes": 5,
+      "cookMinutes": 25,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh lượng nước theo dụng cụ nấu đang dùng.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_VN_CURATED_V1:VN_CURATED_001",
+      "tags": ["VIETNAMESE", "MAIN_DISH", "BUDGET"],
+      "mealSlots": ["LUNCH", "DINNER"],
+      "ingredients": [
+        {"lineNumber": 1, "ingredientCode": "ING_SMILING_VN_1004", "quantity": 250, "unitCode": "g", "preparationNote": "Vo sạch trước khi nấu.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"}
+      ],
+      "steps": [
+        {"stepNumber": 1, "instruction": "Vo gạo nhẹ tay và để ráo.", "durationMinutes": 5},
+        {"stepNumber": 2, "instruction": "Nấu đến khi hạt gạo chín mềm, xới tơi rồi dùng nóng.", "durationMinutes": 25}
+      ]
+    },
+    {
+      "sourceIdentifier": "VN_CURATED_002",
+      "title": "Cháo thịt lợn",
+      "slug": "chao-thit-lon",
+      "summary": "Cháo gạo nếp nấu cùng thịt lợn và bí đao thái nhỏ.",
+      "servings": 2,
+      "prepMinutes": 10,
+      "cookMinutes": 30,
+      "difficulty": "EASY",
+      "instructionsNote": null,
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_VN_CURATED_V1:VN_CURATED_002",
+      "tags": ["VIETNAMESE", "SOUP", "MAIN_DISH"],
+      "mealSlots": ["BREAKFAST", "LUNCH"],
+      "ingredients": [
+        {"lineNumber": 1, "ingredientCode": "ING_SMILING_VN_1001", "quantity": 80, "unitCode": "g", "preparationNote": "Vo sạch.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 2, "ingredientCode": "ING_SMILING_VN_7017", "quantity": 80, "unitCode": "g", "preparationNote": "Băm nhỏ.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 3, "ingredientCode": "ING_SMILING_VN_4002", "quantity": 50, "unitCode": "g", "preparationNote": "Gọt vỏ và thái nhỏ.", "optional": false, "allowSubstitution": true, "sectionLabel": "Nguyên liệu"}
+      ],
+      "steps": [
+        {"stepNumber": 1, "instruction": "Nấu gạo với nước đến khi hạt bắt đầu nở.", "durationMinutes": 15},
+        {"stepNumber": 2, "instruction": "Cho thịt lợn và bí đao vào, khuấy đều.", "durationMinutes": 10},
+        {"stepNumber": 3, "instruction": "Nấu tiếp đến khi thịt chín và cháo sánh mềm.", "durationMinutes": 5}
+      ]
+    },
+    {
+      "sourceIdentifier": "VN_CURATED_003",
+      "title": "Trứng xào cà chua",
+      "slug": "trung-xao-ca-chua",
+      "summary": "Trứng đánh nhẹ, xào cùng cà chua chín và một lượng dầu nhỏ.",
+      "servings": 2,
+      "prepMinutes": 8,
+      "cookMinutes": 10,
+      "difficulty": "EASY",
+      "instructionsNote": null,
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_VN_CURATED_V1:VN_CURATED_003",
+      "tags": ["VIETNAMESE", "MAIN_DISH", "STIR_FRIED"],
+      "mealSlots": ["BREAKFAST", "LUNCH"],
+      "ingredients": [
+        {"lineNumber": 1, "ingredientCode": "ING_SMILING_VN_9001", "quantity": 100, "unitCode": "g", "preparationNote": "Đập và đánh tan.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 2, "ingredientCode": "ING_SMILING_VN_4005", "quantity": 150, "unitCode": "g", "preparationNote": "Cắt miếng vừa ăn.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 3, "ingredientCode": "ING_SMILING_VN_6002", "quantity": 10, "unitCode": "g", "preparationNote": null, "optional": false, "allowSubstitution": true, "sectionLabel": "Nguyên liệu"}
+      ],
+      "steps": [
+        {"stepNumber": 1, "instruction": "Làm nóng một phần dầu rồi xào cà chua đến khi mềm.", "durationMinutes": 5},
+        {"stepNumber": 2, "instruction": "Đổ trứng vào, đảo nhẹ đến khi trứng vừa chín.", "durationMinutes": 5}
+      ]
+    },
+    {
+      "sourceIdentifier": "VN_CURATED_004",
+      "title": "Đậu phụ sốt cà chua",
+      "slug": "dau-phu-sot-ca-chua",
+      "summary": "Đậu phụ áp nóng rồi om ngắn cùng cà chua để tạo món ăn mềm.",
+      "servings": 2,
+      "prepMinutes": 10,
+      "cookMinutes": 15,
+      "difficulty": "EASY",
+      "instructionsNote": null,
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_VN_CURATED_V1:VN_CURATED_004",
+      "tags": ["VIETNAMESE", "MAIN_DISH", "VEGAN", "STIR_FRIED"],
+      "mealSlots": ["LUNCH", "DINNER"],
+      "ingredients": [
+        {"lineNumber": 1, "ingredientCode": "ING_SMILING_VN_3025", "quantity": 200, "unitCode": "g", "preparationNote": "Cắt miếng dày.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 2, "ingredientCode": "ING_SMILING_VN_4005", "quantity": 180, "unitCode": "g", "preparationNote": "Băm nhỏ.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 3, "ingredientCode": "ING_SMILING_VN_6002", "quantity": 10, "unitCode": "g", "preparationNote": null, "optional": false, "allowSubstitution": true, "sectionLabel": "Nguyên liệu"}
+      ],
+      "steps": [
+        {"stepNumber": 1, "instruction": "Làm nóng dầu và áp các mặt đậu phụ cho hơi vàng.", "durationMinutes": 6},
+        {"stepNumber": 2, "instruction": "Cho cà chua vào, đảo và om đến khi phần sốt mềm.", "durationMinutes": 9}
+      ]
+    },
+    {
+      "sourceIdentifier": "VN_CURATED_005",
+      "title": "Rau muống xào tỏi",
+      "slug": "rau-muong-xao-toi",
+      "summary": "Rau muống đảo nhanh với tỏi và dầu để giữ độ giòn mềm.",
+      "servings": 2,
+      "prepMinutes": 10,
+      "cookMinutes": 8,
+      "difficulty": "EASY",
+      "instructionsNote": null,
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_VN_CURATED_V1:VN_CURATED_005",
+      "tags": ["VIETNAMESE", "SIDE_DISH", "VEGAN", "STIR_FRIED"],
+      "mealSlots": ["LUNCH", "DINNER"],
+      "ingredients": [
+        {"lineNumber": 1, "ingredientCode": "ING_SMILING_VN_4083", "quantity": 250, "unitCode": "g", "preparationNote": "Nhặt và rửa sạch.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 2, "ingredientCode": "ING_SMILING_VN_4103", "quantity": 10, "unitCode": "g", "preparationNote": "Băm nhỏ.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 3, "ingredientCode": "ING_SMILING_VN_6002", "quantity": 12, "unitCode": "g", "preparationNote": null, "optional": false, "allowSubstitution": true, "sectionLabel": "Nguyên liệu"}
+      ],
+      "steps": [
+        {"stepNumber": 1, "instruction": "Chần nhanh rau muống rồi để ráo.", "durationMinutes": 3},
+        {"stepNumber": 2, "instruction": "Phi tỏi với dầu, cho rau vào đảo nhanh và dùng nóng.", "durationMinutes": 5}
+      ]
+    },
+    {
+      "sourceIdentifier": "VN_CURATED_006",
+      "title": "Cải bắp xào thịt lợn",
+      "slug": "cai-bap-xao-thit-lon",
+      "summary": "Cải bắp thái sợi xào cùng thịt lợn nạc cho bữa cơm gia đình.",
+      "servings": 2,
+      "prepMinutes": 12,
+      "cookMinutes": 12,
+      "difficulty": "EASY",
+      "instructionsNote": null,
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_VN_CURATED_V1:VN_CURATED_006",
+      "tags": ["VIETNAMESE", "MAIN_DISH", "STIR_FRIED"],
+      "mealSlots": ["LUNCH", "DINNER"],
+      "ingredients": [
+        {"lineNumber": 1, "ingredientCode": "ING_SMILING_VN_4010", "quantity": 250, "unitCode": "g", "preparationNote": "Thái sợi.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 2, "ingredientCode": "ING_SMILING_VN_7017", "quantity": 150, "unitCode": "g", "preparationNote": "Thái mỏng.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 3, "ingredientCode": "ING_SMILING_VN_6002", "quantity": 12, "unitCode": "g", "preparationNote": null, "optional": false, "allowSubstitution": true, "sectionLabel": "Nguyên liệu"}
+      ],
+      "steps": [
+        {"stepNumber": 1, "instruction": "Làm nóng dầu và đảo thịt lợn đến khi đổi màu.", "durationMinutes": 5},
+        {"stepNumber": 2, "instruction": "Cho cải bắp vào xào đến khi vừa mềm nhưng còn độ giòn.", "durationMinutes": 7}
+      ]
+    },
+    {
+      "sourceIdentifier": "VN_CURATED_007",
+      "title": "Gà xào rau muống",
+      "slug": "ga-xao-rau-muong",
+      "summary": "Thịt gà thái mỏng kết hợp rau muống trong món xào nhanh.",
+      "servings": 2,
+      "prepMinutes": 12,
+      "cookMinutes": 15,
+      "difficulty": "EASY",
+      "instructionsNote": null,
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_VN_CURATED_V1:VN_CURATED_007",
+      "tags": ["VIETNAMESE", "MAIN_DISH", "STIR_FRIED"],
+      "mealSlots": ["LUNCH", "DINNER"],
+      "ingredients": [
+        {"lineNumber": 1, "ingredientCode": "ING_SMILING_VN_7013", "quantity": 180, "unitCode": "g", "preparationNote": "Thái lát mỏng.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 2, "ingredientCode": "ING_SMILING_VN_4083", "quantity": 220, "unitCode": "g", "preparationNote": "Nhặt và rửa sạch.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 3, "ingredientCode": "ING_SMILING_VN_6002", "quantity": 12, "unitCode": "g", "preparationNote": null, "optional": false, "allowSubstitution": true, "sectionLabel": "Nguyên liệu"}
+      ],
+      "steps": [
+        {"stepNumber": 1, "instruction": "Xào thịt gà với một phần dầu đến khi gần chín.", "durationMinutes": 8},
+        {"stepNumber": 2, "instruction": "Cho rau muống vào đảo cùng đến khi rau vừa chín.", "durationMinutes": 7}
+      ]
+    },
+    {
+      "sourceIdentifier": "VN_CURATED_008",
+      "title": "Cá chép hấp cà chua",
+      "slug": "ca-chep-hap-ca-chua",
+      "summary": "Cá chép hấp cùng cà chua để tạo món cá nhẹ và dễ chuẩn bị.",
+      "servings": 2,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "MEDIUM",
+      "instructionsNote": null,
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_VN_CURATED_V1:VN_CURATED_008",
+      "tags": ["VIETNAMESE", "MAIN_DISH", "STEAMED"],
+      "mealSlots": ["LUNCH", "DINNER"],
+      "ingredients": [
+        {"lineNumber": 1, "ingredientCode": "ING_SMILING_VN_8003", "quantity": 250, "unitCode": "g", "preparationNote": "Làm sạch.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 2, "ingredientCode": "ING_SMILING_VN_4005", "quantity": 120, "unitCode": "g", "preparationNote": "Cắt lát.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"}
+      ],
+      "steps": [
+        {"stepNumber": 1, "instruction": "Đặt cá và cà chua vào đĩa chịu nhiệt.", "durationMinutes": 5},
+        {"stepNumber": 2, "instruction": "Hấp đến khi thịt cá chín và cà chua mềm.", "durationMinutes": 15}
+      ]
+    },
+    {
+      "sourceIdentifier": "VN_CURATED_009",
+      "title": "Canh bí đao thịt lợn",
+      "slug": "canh-bi-dao-thit-lon",
+      "summary": "Bí đao nấu mềm trong nước dùng cùng thịt lợn băm.",
+      "servings": 2,
+      "prepMinutes": 10,
+      "cookMinutes": 18,
+      "difficulty": "EASY",
+      "instructionsNote": null,
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_VN_CURATED_V1:VN_CURATED_009",
+      "tags": ["VIETNAMESE", "SOUP", "MAIN_DISH"],
+      "mealSlots": ["LUNCH", "DINNER"],
+      "ingredients": [
+        {"lineNumber": 1, "ingredientCode": "ING_SMILING_VN_4002", "quantity": 300, "unitCode": "g", "preparationNote": "Gọt vỏ và thái miếng.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 2, "ingredientCode": "ING_SMILING_VN_7017", "quantity": 120, "unitCode": "g", "preparationNote": "Băm nhỏ.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"}
+      ],
+      "steps": [
+        {"stepNumber": 1, "instruction": "Đun nóng nước rồi cho thịt lợn vào khuấy tơi.", "durationMinutes": 8},
+        {"stepNumber": 2, "instruction": "Cho bí đao vào nấu đến khi trong và mềm.", "durationMinutes": 10}
+      ]
+    },
+    {
+      "sourceIdentifier": "VN_CURATED_010",
+      "title": "Khoai lang luộc và trứng",
+      "slug": "khoai-lang-luoc-va-trung",
+      "summary": "Bữa sáng đơn giản gồm khoai lang và trứng gà chuẩn bị riêng.",
+      "servings": 2,
+      "prepMinutes": 5,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": null,
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_VN_CURATED_V1:VN_CURATED_010",
+      "tags": ["VIETNAMESE", "MAIN_DISH", "BUDGET"],
+      "mealSlots": ["BREAKFAST"],
+      "ingredients": [
+        {"lineNumber": 1, "ingredientCode": "ING_SMILING_VN_2008", "quantity": 250, "unitCode": "g", "preparationNote": "Rửa sạch.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 2, "ingredientCode": "ING_SMILING_VN_9001", "quantity": 100, "unitCode": "g", "preparationNote": "Rửa vỏ.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"}
+      ],
+      "steps": [
+        {"stepNumber": 1, "instruction": "Luộc khoai lang đến khi có thể xiên mềm.", "durationMinutes": 15},
+        {"stepNumber": 2, "instruction": "Luộc trứng đến độ chín mong muốn, bóc vỏ và dùng cùng khoai.", "durationMinutes": 5}
+      ]
+    },
+    {
+      "sourceIdentifier": "VN_CURATED_011",
+      "title": "Bún thịt lợn",
+      "slug": "bun-thit-lon",
+      "summary": "Bún gạo kết hợp thịt lợn áp chảo và cà chua thái nhỏ.",
+      "servings": 2,
+      "prepMinutes": 12,
+      "cookMinutes": 18,
+      "difficulty": "MEDIUM",
+      "instructionsNote": null,
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_VN_CURATED_V1:VN_CURATED_011",
+      "tags": ["VIETNAMESE", "MAIN_DISH", "QUICK"],
+      "mealSlots": ["LUNCH", "DINNER"],
+      "ingredients": [
+        {"lineNumber": 1, "ingredientCode": "ING_SMILING_VN_1020", "quantity": 180, "unitCode": "g", "preparationNote": "Trụng nhanh và để ráo.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 2, "ingredientCode": "ING_SMILING_VN_7017", "quantity": 120, "unitCode": "g", "preparationNote": "Thái mỏng.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 3, "ingredientCode": "ING_SMILING_VN_4005", "quantity": 80, "unitCode": "g", "preparationNote": "Thái nhỏ.", "optional": false, "allowSubstitution": true, "sectionLabel": "Nguyên liệu"}
+      ],
+      "steps": [
+        {"stepNumber": 1, "instruction": "Trụng bún, rửa nhanh qua nước và để ráo.", "durationMinutes": 5},
+        {"stepNumber": 2, "instruction": "Áp chảo thịt lợn đến khi chín, sau đó cho cà chua vào đảo mềm.", "durationMinutes": 13}
+      ]
+    },
+    {
+      "sourceIdentifier": "VN_CURATED_012",
+      "title": "Salad đu đủ cà chua",
+      "slug": "salad-du-du-ca-chua",
+      "summary": "Đu đủ chín và cà chua trộn nhanh cho một phần ăn không cần nấu.",
+      "servings": 2,
+      "prepMinutes": 12,
+      "cookMinutes": 0,
+      "difficulty": "EASY",
+      "instructionsNote": "Rửa sạch nguyên liệu trước khi sơ chế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_VN_CURATED_V1:VN_CURATED_012",
+      "tags": ["VIETNAMESE", "SALAD", "NO_COOK", "VEGAN"],
+      "mealSlots": ["LUNCH", "AFTERNOON_SNACK"],
+      "ingredients": [
+        {"lineNumber": 1, "ingredientCode": "ING_SMILING_VN_5017", "quantity": 200, "unitCode": "g", "preparationNote": "Cắt miếng vừa ăn.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"},
+        {"lineNumber": 2, "ingredientCode": "ING_SMILING_VN_4005", "quantity": 120, "unitCode": "g", "preparationNote": "Cắt múi nhỏ.", "optional": false, "allowSubstitution": false, "sectionLabel": "Nguyên liệu"}
+      ],
+      "steps": [
+        {"stepNumber": 1, "instruction": "Sơ chế và để ráo đu đủ cùng cà chua.", "durationMinutes": 8},
+        {"stepNumber": 2, "instruction": "Trộn nhẹ hai nguyên liệu rồi dùng ngay.", "durationMinutes": 4}
+      ]
+    }
+  ]
+}

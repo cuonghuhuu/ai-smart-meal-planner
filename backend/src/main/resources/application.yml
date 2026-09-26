@@ -55,6 +55,12 @@ management:
       show-details: never
 
 app:
+  ai:
+    base-url: ${AI_BASE_URL:http://localhost:8000}
+    internal-service-token: ${AI_INTERNAL_SERVICE_TOKEN:}
+    connect-timeout: ${AI_CONNECT_TIMEOUT:2s}
+    response-timeout: ${AI_RESPONSE_TIMEOUT:20s}
+    max-response-bytes: ${AI_MAX_RESPONSE_BYTES:1048576}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:}
   web:
@@ -79,6 +85,19 @@ app:
     import:
       enabled: ${CATALOG_IMPORT_ENABLED:false}
       source-file: ${CATALOG_IMPORT_SOURCE_FILE:}
+
+---
+# Recipe import is an explicit offline operator task, never normal startup.
+spring:
+  config:
+    activate:
+      on-profile: recipe-import
+
+app:
+  recipe:
+    import:
+      enabled: ${RECIPE_IMPORT_ENABLED:false}
+      source-file: ${RECIPE_IMPORT_SOURCE_FILE:}
 
 ---
 # Profile documents keep non-secret defaults versioned without a private local file.

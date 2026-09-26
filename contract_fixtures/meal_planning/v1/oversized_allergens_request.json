@@ -1,0 +1,25 @@
+{
+  "contractVersion": "1",
+  "requestId": "22222222-2222-4222-8222-222222222222",
+  "algorithmVersion": "HEURISTIC_MEAL_PLAN_V1",
+  "planning": {"startDate": "2026-10-01", "days": 1, "requestedMealSlots": ["DINNER"], "defaultServings": 1.00, "maxMinutesPerMeal": null},
+  "hardConstraints": {
+    "allergenCodes": [
+      "ALLERGEN_01", "ALLERGEN_02", "ALLERGEN_03", "ALLERGEN_04", "ALLERGEN_05",
+      "ALLERGEN_06", "ALLERGEN_07", "ALLERGEN_08", "ALLERGEN_09", "ALLERGEN_10",
+      "ALLERGEN_11", "ALLERGEN_12", "ALLERGEN_13", "ALLERGEN_14", "ALLERGEN_15",
+      "ALLERGEN_16", "ALLERGEN_17", "ALLERGEN_18", "ALLERGEN_19", "ALLERGEN_20",
+      "ALLERGEN_21", "ALLERGEN_22", "ALLERGEN_23", "ALLERGEN_24", "ALLERGEN_25",
+      "ALLERGEN_26", "ALLERGEN_27", "ALLERGEN_28", "ALLERGEN_29", "ALLERGEN_30",
+      "ALLERGEN_31", "ALLERGEN_32", "ALLERGEN_33"
+    ],
+    "exclusionaryDietaryCodes": [],
+    "avoidIngredientPublicIds": []
+  },
+  "softPreferences": {"dislikeIngredientPublicIds": [], "preferenceCodes": []},
+  "nutritionTargets": [],
+  "unitDefinitions": [],
+  "pantryLots": [],
+  "ingredientFacts": [],
+  "recipeCandidates": []
+}

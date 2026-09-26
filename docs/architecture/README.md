@@ -44,6 +44,27 @@ call Python directly.
 - [Food & ingredient catalog core](food-ingredient-catalog.md) - P7 catalog
   ownership, normalized Food nutrition/servings, canonical Ingredients, search,
   authorization, and the implementation sequence.
+- [Recipe catalog core](recipe-catalog.md) - P9A Recipe persistence ownership,
+  published-only read API, cross-module reference boundaries, and nutrition
+  snapshot read behavior.
+- [Recipe nutrition calculation](recipe-nutrition.md) - P9B BigDecimal
+  calculation, conservative unit conversion, completeness, and immutable
+  nutrition snapshot replacement.
+- [Pantry architecture](pantry.md) - P10 lot-level inventory, immutable
+  availability snapshots, ownership, expiry semantics, and mutation history.
+- [Meal Planning internal contract V1](meal-planning-contract-v1.md) - P11-B
+  Java/Python DTOs, bounds, outcomes, allergen safety, and internal service
+  security.
+- [Meal Planning algorithm V1](meal-planning-algorithm-v1.md) - P11-C
+- [Meal Planning Java–Python integration](meal-planning-java-integration-gate-d.md) - P11-D
+  fail-closed CSP filtering, Decimal scoring, Virtual Pantry, forward checking,
+  deterministic bounded Beam Search, and testable outcome semantics.
+- [Vietnamese Recipe offline import](vietnam-recipe-import.md) - P9C
+  project-curated starter data, canonical SMILING Ingredient mappings,
+  validation, idempotency, and explicit offline execution.
+- [Vietnamese Recipe data validation](vietnam-recipe-data-validation.md) - P9C
+  source-controlled semantic review of the committed starter dataset and its
+  diet/allergen evidence limits.
 
 ## Diagrams
 
