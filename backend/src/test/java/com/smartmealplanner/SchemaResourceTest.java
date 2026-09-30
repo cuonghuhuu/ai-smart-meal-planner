@@ -8,7 +8,9 @@ import static org.assertj.core.api.Assertions.*;
 
 class SchemaResourceTest {
     @ParameterizedTest
-    @CsvSource({"schema,V001__initial_schema.sql", "seed,R001__reference_data.sql"})
+    @CsvSource({"schema,V001__initial_schema.sql",
+            "schema,V002__p11_meal_plan_persistence.sql",
+            "seed,R001__reference_data.sql"})
     void packagesAuthoritativeSqlByteForByte(String directory, String file) throws Exception {
         try (var resource = getClass().getResourceAsStream("/db/migration/" + file)) {
             assertThat(resource).isNotNull();

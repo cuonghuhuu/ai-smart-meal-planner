@@ -69,11 +69,13 @@ P2's filenames are retained exactly:
 - `V001__initial_schema.sql`
 - `R001__reference_data.sql`
 
+P11 Gate E adds `V002__p11_meal_plan_persistence.sql` under `database/schema/`.
+
 Flyway's default repeatable prefix would expect `R__description.sql`. P3 sets
 `spring.flyway.repeatable-sql-migration-prefix=R001` to adopt the actual P2 seed
 without renaming or editing it. `001` is part of this configured prefix, **not a
 repeatable migration version**. Future repeatables must use `R001__description.sql`
-under this configuration. Future schema migrations use `V002__...`, etc.
+under this configuration. Later schema migrations use `V003__...`, etc.
 
 Naming validation is enabled, automatic baselining is disabled, and Flyway clean
 is disabled. Hibernate uses `ddl-auto=validate`; SQL initialization is disabled.
