@@ -47,14 +47,23 @@ public class RecommendationResult {
 
     public RecommendationResult(RecommendationRequest request, short rankPosition,
             Long recipeId, Long foodId, BigDecimal totalScore) {
+        this(request, rankPosition, recipeId, foodId, totalScore, null);
+    }
+
+    public RecommendationResult(RecommendationRequest request, short rankPosition,
+            Long recipeId, Long foodId, BigDecimal totalScore, String explanation) {
         if (request == null || rankPosition < 1 || (recipeId == null) == (foodId == null)) {
             throw new IllegalArgumentException("Invalid recommendation result");
+        }
+        if (explanation != null && explanation.length() > 500) {
+            throw new IllegalArgumentException("Invalid explanation");
         }
         this.request = request;
         this.rankPosition = rankPosition;
         this.recipeId = recipeId;
         this.foodId = foodId;
         this.totalScore = totalScore;
+        this.explanation = explanation;
         this.userDecision = Decision.PENDING;
     }
 

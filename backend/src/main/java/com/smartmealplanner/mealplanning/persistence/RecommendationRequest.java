@@ -64,6 +64,21 @@ public class RecommendationRequest {
         this.status = Status.PENDING;
     }
 
+    public static RecommendationRequest beginMealPlan(Long userId, UUID publicId,
+            String algorithmVersion, String constraintsHash) {
+        if (algorithmVersion == null || algorithmVersion.isBlank()
+                || algorithmVersion.length() > 60
+                || constraintsHash == null || !constraintsHash.matches("[0-9a-fA-F]{64}")) {
+            throw new IllegalArgumentException("Invalid request metadata");
+        }
+        RecommendationRequest request = new RecommendationRequest(userId, Kind.MEAL_PLAN);
+        request.publicId = PublicIds.bytes(publicId);
+        request.correlationId = publicId.toString();
+        request.algorithmVersion = algorithmVersion;
+        request.constraintsHash = constraintsHash;
+        return request;
+    }
+
     public Long id() { return id; }
     public UUID publicId() { return PublicIds.uuid(publicId); }
     public Long userId() { return userId; }
@@ -81,12 +96,22 @@ public class RecommendationRequest {
     public String failureReason() { return failureReason; }
 
     public void finish(Status status, LocalDateTime completedAt, String failureReason) {
+        finish(status, completedAt, null, failureReason);
+    }
+
+    public void finish(Status status, LocalDateTime completedAt, Integer durationMs,
+            String failureReason) {
         if (status == null || status == Status.PENDING || completedAt == null
-                || (status == Status.FAILED) != (failureReason != null)) {
+                || this.status != Status.PENDING
+                || durationMs != null && durationMs < 0
+                || (status == Status.FAILED) != (failureReason != null)
+                || failureReason != null && (failureReason.isBlank()
+                || failureReason.length() > 255)) {
             throw new IllegalArgumentException("Invalid terminal request state");
         }
         this.status = status;
         this.completedAt = completedAt;
+        this.durationMs = durationMs;
         this.failureReason = failureReason;
     }
 }
