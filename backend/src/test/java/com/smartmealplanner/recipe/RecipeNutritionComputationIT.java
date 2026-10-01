@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,7 +157,7 @@ class RecipeNutritionComputationIT {
         assertThat(historicalValues.get(1).get("amount_per_serving"))
                 .isEqualTo(new BigDecimal("25.0000"));
 
-        mvc.perform(get("/api/v1/recipes/{publicId}", fixture.recipePublicId())
+        String responseBody = mvc.perform(get("/api/v1/recipes/{publicId}", fixture.recipePublicId())
                 .with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nutrition.completenessRatio")
@@ -165,8 +166,9 @@ class RecipeNutritionComputationIT {
                         .value("ENERGY"))
                 .andExpect(jsonPath("$.nutrition.values[0].amountPerServing")
                         .value(25.0))
-                .andExpect(jsonPath("$.nutrition.computedAt")
-                        .value(second.computedAt().toString()));
+                .andReturn().getResponse().getContentAsString();
+        String computedAt = JsonPath.read(responseBody, "$.nutrition.computedAt");
+        assertThat(LocalDateTime.parse(computedAt)).isEqualTo(second.computedAt());
     }
 
     @Test

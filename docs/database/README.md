@@ -4,6 +4,9 @@ This directory is the Phase P2 deliverable: the relational design for the AI
 Smart Meal Planner. It documents the model, the reasoning behind it, and the
 conventions the team follows when the schema evolves.
 
+The table and constraint totals below describe the V001 baseline. P11 Gate E
+adds a 54th table and a 126th check in V002; see the decision record above.
+
 P2 is a **design phase**. It contains SQL and documentation only. No Spring
 Boot, Flutter, FastAPI, Maven or Gradle scaffolding is introduced here.
 
@@ -14,7 +17,7 @@ Boot, Flutter, FastAPI, Maven or Gradle scaffolding is introduced here.
 | [Data model](data-model.md) | Domain-by-domain design, keys, normalization, lifecycle, time handling, naming conventions, and the index and constraint strategy. |
 | [Data dictionary](data-dictionary.md) | Table-by-table reference: purpose, key fields, constraints, relationships, ownership and lifecycle notes. |
 | [Database decisions](database-decisions.md) | Decision records (DB-ADR-001 and onwards) with context, decision, consequences and rejected alternatives. |
-| [P11 V002 decision](p11-v002-decision.md) | Gate B assessment of the `INFEASIBLE` status and degraded unfilled-slot persistence gaps; no migration has been created. |
+| [P11 V002 decision](p11-v002-decision.md) | Approved Gate E persistence decisions, V002 DDL, upgrade checks, and migration verification. |
 | [Validation report](validation-report.md) | What was executed against a real MySQL 8.4 server — including the behaviour probe that provokes each rule — and what was checked statically. |
 
 Related artifacts:
@@ -26,6 +29,7 @@ Related artifacts:
   [planning](../diagrams/database-erd-planning.mmd)) which together cover all 53
   tables at a size that stays legible in the report.
 - [Schema migration `V001__initial_schema.sql`](../../database/schema/V001__initial_schema.sql)
+- [P11 migration `V002__p11_meal_plan_persistence.sql`](../../database/schema/V002__p11_meal_plan_persistence.sql)
 - [Reference seed data](../../database/seed/README.md)
 - [Phase P1 system architecture](../architecture/system-architecture.md)
 - [Phase P1 architecture decisions](../architecture/architecture-decisions.md)

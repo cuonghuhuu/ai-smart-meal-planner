@@ -84,7 +84,7 @@ class BackendFoundationIT {
                 assertThat(before.queryForObject("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE()", Integer.class))
                         .as("empty MySQL database before Flyway").isZero();
                 var result = migration.migrate();
-                assertThat(result.migrationsExecuted).isEqualTo(2);
+                assertThat(result.migrationsExecuted).isEqualTo(3);
                 assertThat(result.success).isTrue();
                 for (String table : before.queryForList("SELECT table_name FROM information_schema.tables WHERE table_schema = DATABASE()", String.class)) {
                     FLYWAY_SCHEMA.put(table, before.queryForMap("SHOW CREATE TABLE `" + table + "`").get("Create Table").toString());
@@ -94,11 +94,13 @@ class BackendFoundationIT {
     }
 
     @Test
-    void contextFlywayAndHibernateValidateV001() {
+    void contextFlywayAndHibernateValidateCurrentSchema() {
         assertThat(MYSQL.isRunning()).isTrue();
         assertThat(jdbc.queryForObject("SELECT VERSION()", String.class)).startsWith("8.4.");
         assertThat(Arrays.stream(flyway.info().applied()).map(info -> info.getScript()).toList())
-                .containsExactly("V001__initial_schema.sql", "R001__reference_data.sql");
+                .containsExactly("V001__initial_schema.sql",
+                        "V002__p11_meal_plan_persistence.sql",
+                        "R001__reference_data.sql");
         assertThat(flyway.info().pending()).isEmpty();
         assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
         assertThat(flyway.migrate().migrationsExecuted).isZero();
@@ -109,8 +111,8 @@ class BackendFoundationIT {
                 jdbc.queryForMap("SHOW CREATE TABLE `" + table + "`").get("Create Table").toString()
                         .replaceAll(" AUTO_INCREMENT=\\d+", ""))
                 .isEqualTo(definition.replaceAll(" AUTO_INCREMENT=\\d+", "")));
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name <> 'flyway_schema_history'", Integer.class)).isEqualTo(53);
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM information_schema.table_constraints WHERE constraint_schema = DATABASE() AND constraint_type = 'CHECK'", Integer.class)).isEqualTo(125);
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name <> 'flyway_schema_history'", Integer.class)).isEqualTo(54);
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM information_schema.table_constraints WHERE constraint_schema = DATABASE() AND constraint_type = 'CHECK'", Integer.class)).isEqualTo(126);
         assertThat(jdbc.queryForObject("SELECT COUNT(DISTINCT table_name, index_name) FROM information_schema.statistics WHERE table_schema = DATABASE() AND index_type = 'FULLTEXT'", Integer.class)).isEqualTo(3);
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND extra LIKE '%STORED GENERATED%'", Integer.class)).isEqualTo(3);
     }
