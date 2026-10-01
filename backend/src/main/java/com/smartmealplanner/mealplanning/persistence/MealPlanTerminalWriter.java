@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractCodes.GenerationStatus;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractCodes.MealSlotCode;
@@ -55,7 +56,7 @@ public class MealPlanTerminalWriter {
 
     /** Persists SUCCEEDED or DEGRADED with the complete graph in one transaction. */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public Long persistGenerated(GeneratedPlan command) {
+    public StoredPlan persistGenerated(GeneratedPlan command) {
         validateGenerated(command);
         RecommendationRequest request = pendingRequest(command.requestId());
         requireEmptyGraph(command.requestId());
@@ -109,8 +110,11 @@ public class MealPlanTerminalWriter {
                 command.durationMs(), null) != 1) {
             throw failure(Reason.INVALID_TRANSITION);
         }
-        return plan.id();
+        return new StoredPlan(plan.id(), plan.publicId());
     }
+
+    /** Internal database identity and the stable public plan identity. */
+    public record StoredPlan(Long id, UUID publicId) { }
 
     /** Records an algorithm conclusion without creating a plan or result graph. */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
