@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import com.smartmealplanner.auth.application.CurrentUserService;
 import com.smartmealplanner.mealplanning.application.MealPlanGenerationCommand;
+import com.smartmealplanner.mealplanning.application.MealPlanGenerationInputValidator;
 import com.smartmealplanner.mealplanning.application.MealPlanGenerationIntegrationService;
 import com.smartmealplanner.mealplanning.application.MealPlanGenerationResult;
 import com.smartmealplanner.mealplanning.application.MealPlanningIntegrationException;
@@ -59,10 +60,7 @@ public class PersistedMealPlanGenerationService {
             throw new MealPlanningIntegrationException(
                     MealPlanningIntegrationFailure.TRANSACTION_BOUNDARY_VIOLATION);
         }
-        if (command == null) {
-            throw new MealPlanningIntegrationException(
-                    MealPlanningIntegrationFailure.INVALID_GENERATION_INPUT);
-        }
+        MealPlanGenerationInputValidator.validate(command);
         // Authentication lookup is a separate short read before TX1; failure creates no request.
         Long userId = users.getIdentity(authenticatedUserPublicId).internalId();
         UUID publicId = UUID.randomUUID();
@@ -77,9 +75,9 @@ public class PersistedMealPlanGenerationService {
                 terminals.markInfeasible(started.requestId(), durationMs);
                 return new Completed(publicId, GenerationStatus.INFEASIBLE, null);
             }
-            Long planId = terminals.persistGenerated(toCommand(started.requestId(), result,
+            var plan = terminals.persistGenerated(toCommand(started.requestId(), result,
                     durationMs));
-            return new Completed(publicId, result.response().status(), planId);
+            return new Completed(publicId, result.response().status(), plan.publicId());
         } catch (RuntimeException failure) {
             // A failed TX2 has rolled back before control returns here. FAILED uses another bean
             // and its own REQUIRES_NEW transaction, including after HTTP or validation failure.
@@ -140,5 +138,6 @@ public class PersistedMealPlanGenerationService {
         }
     }
 
-    public record Completed(UUID requestPublicId, GenerationStatus status, Long mealPlanId) { }
+    public record Completed(UUID requestPublicId, GenerationStatus status,
+            UUID mealPlanPublicId) { }
 }

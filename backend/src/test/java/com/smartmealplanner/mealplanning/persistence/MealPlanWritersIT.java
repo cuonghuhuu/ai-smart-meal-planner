@@ -95,7 +95,7 @@ class MealPlanWritersIT {
                 MealPlanPersistenceException.Reason.INVALID_COMMAND);
         assertThat(requests.findById(started.requestId()).orElseThrow().status())
                 .isEqualTo(RecommendationRequest.Status.PENDING);
-        Long planId = terminalWriter.persistGenerated(command);
+        Long planId = terminalWriter.persistGenerated(command).id();
         RecommendationRequest terminal = requests.findById(started.requestId()).orElseThrow();
         assertThat(terminal.status()).isEqualTo(RecommendationRequest.Status.SUCCEEDED);
         assertThat(terminal.failureReason()).isNull();

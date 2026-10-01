@@ -19,6 +19,7 @@ import com.smartmealplanner.mealplanning.contract.v1.MealPlanGenerationRequest;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanGenerationResponse;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractCodes.GenerationStatus;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractJson;
+import com.smartmealplanner.mealplanning.persistence.MealPlanRepository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,7 @@ class PersistedMealPlanGenerationIT {
     @Autowired PersistedMealPlanGenerationService service;
     @Autowired UserAccountRepository users;
     @Autowired JdbcTemplate jdbc;
+    @Autowired MealPlanRepository plans;
     @MockitoBean MealPlanningSnapshotAssembler snapshots;
     @MockitoBean MealPlanningAiClient ai;
 
@@ -91,7 +93,8 @@ class PersistedMealPlanGenerationIT {
         assertThat(completed.status()).isEqualTo(GenerationStatus.SUCCEEDED);
         Long requestId = requestId(completed.requestPublicId());
         assertTerminal(requestId, "SUCCEEDED", null, 2, 14, 1, 2, 0);
-        assertThat(completed.mealPlanId()).isNotNull();
+        assertThat(completed.mealPlanPublicId()).isEqualTo(
+                plans.findBySourceRequestId(requestId).orElseThrow().publicId());
         assertThat(jdbc.queryForList("""
                 SELECT slot.code FROM recommendation_results result
                 JOIN meal_plan_entries entry ON entry.source_result_id = result.id
@@ -131,7 +134,7 @@ class PersistedMealPlanGenerationIT {
         respond("valid_infeasible_response.json");
         var completed = service.generate(user, command(fixture));
         assertThat(completed.status()).isEqualTo(GenerationStatus.INFEASIBLE);
-        assertThat(completed.mealPlanId()).isNull();
+        assertThat(completed.mealPlanPublicId()).isNull();
         assertTerminal(requestId(completed.requestPublicId()), "INFEASIBLE", null,
                 0, 0, 0, 0, 0);
     }
