@@ -19,6 +19,8 @@ import 'package:smart_meal_planner/features/catalog/presentation/food_catalog_pa
 import 'package:smart_meal_planner/features/catalog/presentation/food_detail_page.dart';
 import 'package:smart_meal_planner/features/catalog/presentation/ingredient_catalog_page.dart';
 import 'package:smart_meal_planner/features/catalog/presentation/ingredient_detail_page.dart';
+import 'package:smart_meal_planner/features/meal_planning/application/meal_planning_controller.dart';
+import 'package:smart_meal_planner/features/meal_planning/presentation/meal_planning_page.dart';
 
 final class AppRouter {
   AppRouter(
@@ -29,6 +31,7 @@ final class AppRouter {
     MeasurementsController? measurementsController,
     FoodCatalogController? foodCatalogController,
     IngredientCatalogController? ingredientCatalogController,
+    MealPlanningController? mealPlanningController,
   }) : router = GoRouter(
          initialLocation: '/catalog/foods',
          refreshListenable: sessionController,
@@ -172,10 +175,10 @@ final class AppRouter {
                child: preferencesController == null
                    ? const _PreferencesUnavailablePage()
                    : PreferencesPage(
-                      sessionController: sessionController,
-                      preferencesController: preferencesController,
-                      dislikedIngredientsController:
-                          dislikedIngredientsController,
+                       sessionController: sessionController,
+                       preferencesController: preferencesController,
+                       dislikedIngredientsController:
+                           dislikedIngredientsController,
                      ),
              ),
            ),
@@ -188,6 +191,18 @@ final class AppRouter {
                    : MeasurementsPage(
                        sessionController: sessionController,
                        measurementsController: measurementsController,
+                     ),
+             ),
+           ),
+           GoRoute(
+             path: '/meal-planning',
+             builder: (context, state) => SessionRouteGate(
+               sessionController: sessionController,
+               child: mealPlanningController == null
+                   ? const _MealPlanningUnavailablePage()
+                   : MealPlanningPage(
+                       sessionController: sessionController,
+                       mealPlanningController: mealPlanningController,
                      ),
              ),
            ),
@@ -210,7 +225,8 @@ final class AppRouter {
         _isCatalogDetailPath(path, 'ingredients') ||
         path == '/profile' ||
         path == '/preferences' ||
-        path == '/measurements';
+        path == '/measurements' ||
+        path == '/meal-planning';
 
     if (session.status == SessionStatus.anonymous && isProtectedRoute) {
       return '/auth/login?from=${Uri.encodeComponent(state.uri.toString())}';
@@ -240,7 +256,8 @@ final class AppRouter {
                     _isValidPublicId(uri.path.split('/').last)) ||
                 uri.path == '/profile' ||
                 uri.path == '/preferences' ||
-                uri.path == '/measurements')
+                uri.path == '/measurements' ||
+                uri.path == '/meal-planning')
         ? uri.toString()
         : '/catalog/foods';
   }
@@ -282,6 +299,15 @@ class _MeasurementsUnavailablePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Scaffold(
     body: Center(child: Text(AppStrings.measurementsUnavailable)),
+  );
+}
+
+class _MealPlanningUnavailablePage extends StatelessWidget {
+  const _MealPlanningUnavailablePage();
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(
+    body: Center(child: Text(AppStrings.mealPlanRequestFailed)),
   );
 }
 
