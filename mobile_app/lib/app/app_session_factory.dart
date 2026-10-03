@@ -15,6 +15,7 @@ import 'package:smart_meal_planner/features/measurements/data/measurements_repos
 import 'package:smart_meal_planner/features/catalog/application/food_catalog_controller.dart';
 import 'package:smart_meal_planner/features/catalog/application/ingredient_catalog_controller.dart';
 import 'package:smart_meal_planner/features/catalog/data/catalog_repository.dart';
+import 'package:smart_meal_planner/features/meal_planning/data/meal_planning_repository.dart';
 
 final class AppSessionDependencies {
   const AppSessionDependencies({
@@ -25,6 +26,7 @@ final class AppSessionDependencies {
     required this.measurementsController,
     required this.foodCatalogController,
     required this.ingredientCatalogController,
+    required this.mealPlanningRepository,
   });
 
   final SessionController sessionController;
@@ -34,6 +36,7 @@ final class AppSessionDependencies {
   final MeasurementsController measurementsController;
   final FoodCatalogController foodCatalogController;
   final IngredientCatalogController ingredientCatalogController;
+  final MealPlanningRepository mealPlanningRepository;
 }
 
 final class AppSessionFactory {
@@ -41,8 +44,9 @@ final class AppSessionFactory {
 
   static AppSessionDependencies create() {
     final apiClient = ApiClient();
+    final authRepository = HttpAuthRepository(apiClient);
     final session = SessionController(
-      authRepository: HttpAuthRepository(apiClient),
+      authRepository: authRepository,
       refreshTokenStore: kIsWeb
           ? NoRefreshTokenStore()
           : FlutterSecureRefreshTokenStore(),
@@ -74,6 +78,10 @@ final class AppSessionFactory {
       ),
       ingredientCatalogController: IngredientCatalogController(
         repository: catalogRepository,
+      ),
+      mealPlanningRepository: HttpMealPlanningRepository(
+        apiClient,
+        csrfTokenProvider: kIsWeb ? authRepository.fetchCsrf : null,
       ),
     );
   }
