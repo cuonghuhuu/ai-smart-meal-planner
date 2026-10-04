@@ -11,7 +11,6 @@ import com.smartmealplanner.auth.application.CurrentUserService;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractCodes.GenerationStatus;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractCodes.MealSlotCode;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractCodes.UnfilledSlotReasonCode;
-import com.smartmealplanner.mealplanning.persistence.MealPlanReadRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -37,7 +36,7 @@ class PersistedMealPlanQueryServiceTest {
     private static final LocalDate DATE = LocalDate.of(2026, 10, 5);
 
     @Mock CurrentUserService users;
-    @Mock MealPlanReadRepository repository;
+    @Mock MealPlanReadPort repository;
     @InjectMocks PersistedMealPlanQueryService service;
 
     @Test
@@ -45,14 +44,14 @@ class PersistedMealPlanQueryServiceTest {
         when(users.getIdentity(USER)).thenReturn(new CurrentUserIdentity(
                 OWNER_ID, USER, "UTC"));
         when(repository.findOwnedPlan(PLAN, OWNER_ID)).thenReturn(Optional.of(
-                new MealPlanReadRepository.Header(42L, PLAN, REQUEST,
+                new MealPlanReadPort.Header(42L, PLAN, REQUEST,
                         GenerationStatus.DEGRADED, DATE, DATE.plusDays(1),
                         new BigDecimal("2.00"))));
         when(repository.findEntries(42L)).thenReturn(List.of(
-                new MealPlanReadRepository.Entry(DATE, MealSlotCode.BREAKFAST,
+                new MealPlanReadPort.Entry(DATE, MealSlotCode.BREAKFAST,
                         RECIPE, "Oatmeal", new BigDecimal("2.00"))));
         when(repository.findUnfilledSlots(42L)).thenReturn(List.of(
-                new MealPlanReadRepository.UnfilledSlot(DATE.plusDays(1),
+                new MealPlanReadPort.UnfilledSlot(DATE.plusDays(1),
                         MealSlotCode.DINNER,
                         UnfilledSlotReasonCode.NO_ELIGIBLE_RECIPE,
                         "No eligible dinner")));

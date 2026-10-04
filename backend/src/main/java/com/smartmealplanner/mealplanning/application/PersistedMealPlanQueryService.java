@@ -9,7 +9,6 @@ import com.smartmealplanner.auth.application.CurrentUserService;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractCodes.GenerationStatus;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractCodes.MealSlotCode;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractCodes.UnfilledSlotReasonCode;
-import com.smartmealplanner.mealplanning.persistence.MealPlanReadRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -20,10 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PersistedMealPlanQueryService {
     private final CurrentUserService currentUserService;
-    private final MealPlanReadRepository plans;
+    private final MealPlanReadPort plans;
 
     public PersistedMealPlanQueryService(CurrentUserService currentUserService,
-            MealPlanReadRepository plans) {
+            MealPlanReadPort plans) {
         this.currentUserService = currentUserService;
         this.plans = plans;
     }

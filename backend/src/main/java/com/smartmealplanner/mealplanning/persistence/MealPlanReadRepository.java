@@ -1,11 +1,14 @@
 package com.smartmealplanner.mealplanning.persistence;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.smartmealplanner.mealplanning.application.MealPlanReadPort;
+import com.smartmealplanner.mealplanning.application.MealPlanReadPort.Entry;
+import com.smartmealplanner.mealplanning.application.MealPlanReadPort.Header;
+import com.smartmealplanner.mealplanning.application.MealPlanReadPort.UnfilledSlot;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractCodes.GenerationStatus;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractCodes.MealSlotCode;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractCodes.UnfilledSlotReasonCode;
@@ -14,7 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class MealPlanReadRepository {
+public class MealPlanReadRepository implements MealPlanReadPort {
 
     private final JdbcTemplate jdbc;
 
@@ -22,6 +25,7 @@ public class MealPlanReadRepository {
         this.jdbc = jdbc;
     }
 
+    @Override
     public Optional<Header> findOwnedPlan(UUID mealPlanPublicId, Long userId) {
         if (mealPlanPublicId == null || userId == null) {
             return Optional.empty();
@@ -63,6 +67,7 @@ public class MealPlanReadRepository {
                 userId);
     }
 
+    @Override
     public List<Entry> findEntries(Long mealPlanId) {
         return jdbc.query("""
                 SELECT entry.plan_date,
@@ -91,6 +96,7 @@ public class MealPlanReadRepository {
                 mealPlanId);
     }
 
+    @Override
     public List<UnfilledSlot> findUnfilledSlots(Long mealPlanId) {
         return jdbc.query("""
                 SELECT gap.plan_date,
@@ -114,28 +120,4 @@ public class MealPlanReadRepository {
                 mealPlanId);
     }
 
-    public record Header(
-            Long internalId,
-            UUID mealPlanPublicId,
-            UUID requestPublicId,
-            GenerationStatus status,
-            LocalDate startDate,
-            LocalDate endDate,
-            BigDecimal defaultServings) {
-    }
-
-    public record Entry(
-            LocalDate planDate,
-            MealSlotCode mealSlotCode,
-            UUID recipePublicId,
-            String recipeTitle,
-            BigDecimal servings) {
-    }
-
-    public record UnfilledSlot(
-            LocalDate planDate,
-            MealSlotCode mealSlotCode,
-            UnfilledSlotReasonCode reasonCode,
-            String explanation) {
-    }
 }
