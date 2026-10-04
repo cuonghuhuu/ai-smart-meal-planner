@@ -91,8 +91,10 @@ public class ShoppingListQueryService {
                 throw inconsistent();
             }
         }
-        if (definitions.size() != referencedUnitCodes.size()) {
-            throw inconsistent();
+        for (String referencedCode : referencedUnitCodes) {
+            if (!definitions.containsKey(referencedCode)) {
+                throw inconsistent();
+            }
         }
 
         Map<ItemKey, IngredientMeta> metadata = new HashMap<>();
