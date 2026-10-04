@@ -21,6 +21,44 @@ final class AppStrings {
   static const loading = 'Đang tải...';
   static const loadingPreferences = 'Đang tải sở thích ăn uống…';
 
+  // Pantry and fridge read-only views.
+  static const pantry = 'Kho thực phẩm';
+  static const pantrySubtitle = 'Các lô nguyên liệu đang có trong kho.';
+  static const pantryIncludeClosed = 'Xem cả lô đã đóng';
+  static const pantryNoItems = 'Chưa có lô nguyên liệu nào.';
+  static const pantryLoadFailed =
+      'Không thể tải kho thực phẩm. Vui lòng thử lại.';
+  static const pantryDetailLoadFailed =
+      'Không thể tải thông tin lô nguyên liệu. Vui lòng thử lại.';
+  static const pantryNotFound = 'Không tìm thấy lô nguyên liệu này.';
+  static const pantryUnavailable = 'Kho thực phẩm hiện không khả dụng.';
+  static const pantryRemaining = 'Còn lại';
+  static const pantryInitial = 'Ban đầu';
+  static const pantryStorage = 'Nơi lưu trữ';
+  static const pantryStatus = 'Trạng thái';
+  static const pantryFood = 'Thực phẩm liên kết';
+  static const pantryAcquiredOn = 'Ngày nhận';
+  static const pantryExpiryDate = 'Ngày hết hạn';
+  static const pantryExpiryKind = 'Loại hạn dùng';
+  static const pantryExpiryConfidence = 'Độ tin cậy của hạn dùng';
+  static const pantryNote = 'Ghi chú';
+  static const pantryClosedAt = 'Đóng lúc';
+  static const pantryNotSet = 'Chưa có';
+  static const pantryStoragePantry = 'Tủ đồ khô';
+  static const pantryStorageFridge = 'Tủ lạnh';
+  static const pantryStorageFreezer = 'Tủ đông';
+  static const pantryStorageOther = 'Nơi khác';
+  static const pantryStatusAvailable = 'Đang có';
+  static const pantryStatusReserved = 'Đã dành riêng';
+  static const pantryStatusConsumed = 'Đã dùng hết';
+  static const pantryStatusDiscarded = 'Đã bỏ';
+  static const pantryStatusExpired = 'Đã hết hạn';
+  static const pantryExpiryUseBy = 'Dùng trước';
+  static const pantryExpiryBestBefore = 'Nên dùng trước';
+  static const pantryUnknown = 'Chưa xác định';
+  static const pantryConfidenceLabelled = 'Theo nhãn';
+  static const pantryConfidenceEstimated = 'Ước tính';
+
   // Meal planning.
   static const mealPlanning = 'Kế hoạch bữa ăn';
   static const mealPlanningSubtitle =
