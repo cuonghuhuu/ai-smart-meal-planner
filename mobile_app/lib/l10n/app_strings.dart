@@ -21,6 +21,52 @@ final class AppStrings {
   static const loading = 'Đang tải...';
   static const loadingPreferences = 'Đang tải sở thích ăn uống…';
 
+  // Meal planning.
+  static const mealPlanning = 'Kế hoạch bữa ăn';
+  static const mealPlanningSubtitle =
+      'Chọn ngày và các bữa ăn để tạo kế hoạch.';
+  static const mealPlanStartDate = 'Ngày bắt đầu';
+  static const mealPlanDays = 'Số ngày';
+  static const mealPlanSlots = 'Bữa ăn';
+  static const mealPlanSlotsRequired = 'Chọn ít nhất một bữa ăn.';
+  static const mealPlanServings = 'Số khẩu phần mỗi bữa';
+  static const mealPlanServingsInvalid =
+      'Nhập số lớn hơn 0, tối đa 50 và tối đa 2 chữ số thập phân.';
+  static const mealPlanMaxMinutes =
+      'Thời gian nấu tối đa mỗi bữa (phút, tùy chọn)';
+  static const mealPlanMaxMinutesInvalid = 'Nhập số phút từ 1 đến 1440.';
+  static const mealPlanGenerate = 'Tạo kế hoạch';
+  static const mealPlanGenerating = 'Đang tạo kế hoạch…';
+  static const mealPlanLoading = 'Đang tải kế hoạch đã lưu…';
+  static const mealPlanRetryLoading = 'Thử tải lại kế hoạch';
+  static const mealPlanReadFailed =
+      'Kế hoạch đã được tạo nhưng chưa tải được. Hãy thử tải lại.';
+  static const mealPlanRequestFailed =
+      'Không thể hoàn tất yêu cầu. Vui lòng thử lại.';
+  static const mealPlanInfeasible =
+      'Không thể tạo kế hoạch với các điều kiện đã chọn. Hãy điều chỉnh rồi thử lại.';
+  static const mealPlanSucceeded = 'Kế hoạch đã tạo';
+  static const mealPlanDegraded = 'Kế hoạch một phần';
+  static const mealPlanDegradedHint = 'Một số bữa ăn chưa được điền.';
+  static const mealPlanUnfilled = 'Bữa ăn chưa được điền';
+  static const mealPlanNoEligibleRecipe = 'Không tìm thấy công thức phù hợp.';
+  static const mealPlanHardConstraintConflict =
+      'Các điều kiện bắt buộc xung đột.';
+  static const mealPlanUnsupportedConstraint =
+      'Một điều kiện bắt buộc chưa được hỗ trợ.';
+  static const mealPlanPantryInfeasible =
+      'Nguyên liệu hiện có không đủ để đáp ứng điều kiện.';
+  static const mealPlanNutritionInfeasible =
+      'Không thể đáp ứng mục tiêu dinh dưỡng.';
+  static const mealPlanSearchLimit =
+      'Chưa tìm được công thức trong giới hạn tìm kiếm.';
+  static const mealPlanBreakfast = 'Bữa sáng';
+  static const mealPlanMorningSnack = 'Bữa phụ sáng';
+  static const mealPlanLunch = 'Bữa trưa';
+  static const mealPlanAfternoonSnack = 'Bữa phụ chiều';
+  static const mealPlanDinner = 'Bữa tối';
+  static const mealPlanEveningSnack = 'Bữa phụ tối';
+
   // Catalog.
   static const catalogFoodsSubtitle =
       'Tra cứu thành phần dinh dưỡng của các thực phẩm Việt Nam.';
@@ -33,8 +79,7 @@ final class AppStrings {
   static const catalogUnknownValue = 'Chưa xác định';
   static const catalogNoFoods = 'Không tìm thấy thực phẩm phù hợp.';
   static const catalogNoIngredients = 'Không tìm thấy nguyên liệu phù hợp.';
-  static const catalogLoadFailed =
-      'Không thể tải danh mục. Vui lòng thử lại.';
+  static const catalogLoadFailed = 'Không thể tải danh mục. Vui lòng thử lại.';
   static const catalogDetailLoadFailed =
       'Không thể tải thông tin chi tiết. Vui lòng thử lại.';
   static const catalogLoadMoreFailed =
@@ -147,7 +192,8 @@ final class AppStrings {
       'Đã đặt lại mật khẩu. Bạn có thể đăng nhập ngay.';
   static const email = 'Email';
   static const password = 'Mật khẩu'; // pragma: allowlist secret
-  static const confirmPassword = 'Xác nhận mật khẩu'; // pragma: allowlist secret
+  static const confirmPassword =
+      'Xác nhận mật khẩu'; // pragma: allowlist secret
   static const enterPassword = 'Nhập mật khẩu'; // pragma: allowlist secret
   static const signIn = 'Đăng nhập';
   static const forgotPassword = 'Quên mật khẩu?'; // pragma: allowlist secret
@@ -170,13 +216,15 @@ final class AppStrings {
   static const backToSignIn = 'Quay lại đăng nhập';
   static const verificationEmailSent =
       'Nếu tài khoản cần xác minh, email mới đã được gửi.';
-  static const resetYourPassword = 'Đặt lại mật khẩu'; // pragma: allowlist secret
+  static const resetYourPassword =
+      'Đặt lại mật khẩu'; // pragma: allowlist secret
   static const resetPasswordSubtitle =
       'Nhập email; nếu tài khoản phù hợp, chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu.';
   static const resetInstructionsSent =
       'Nếu email khớp với một tài khoản, hướng dẫn đặt lại mật khẩu đã được gửi.';
   static const sendResetInstructions = 'Gửi hướng dẫn đặt lại';
-  static const chooseNewPassword = 'Chọn mật khẩu mới'; // pragma: allowlist secret
+  static const chooseNewPassword =
+      'Chọn mật khẩu mới'; // pragma: allowlist secret
   static const passwordRequirements =
       'Mật khẩu phải có ít nhất 12 ký tự và không quá 72 byte UTF-8.';
   static const resetPassword = 'Đặt lại mật khẩu'; // pragma: allowlist secret
@@ -338,12 +386,15 @@ final class AppStrings {
   // Validation messages.
   static const enterEmail = 'Vui lòng nhập email.';
   static const validEmail = 'Vui lòng nhập email hợp lệ.';
-  static const enterPasswordError = 'Vui lòng nhập mật khẩu.'; // pragma: allowlist secret
+  static const enterPasswordError =
+      'Vui lòng nhập mật khẩu.'; // pragma: allowlist secret
   static const displayNameRequired = 'Vui lòng nhập tên hiển thị.';
   static const displayNameTooLong =
       'Tên hiển thị không được vượt quá 100 ký tự.';
-  static const passwordTooShort = 'Mật khẩu phải có ít nhất 12 ký tự.'; // pragma: allowlist secret
-  static const passwordTooLong = 'Mật khẩu không được vượt quá 72 byte UTF-8.'; // pragma: allowlist secret
+  static const passwordTooShort =
+      'Mật khẩu phải có ít nhất 12 ký tự.'; // pragma: allowlist secret
+  static const passwordTooLong =
+      'Mật khẩu không được vượt quá 72 byte UTF-8.'; // pragma: allowlist secret
   static const birthDateTooEarly = 'Ngày sinh phải sau 01/01/1900.';
   static const birthDateInFuture = 'Ngày sinh không được ở tương lai.';
   static const heightInvalid =

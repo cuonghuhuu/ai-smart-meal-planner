@@ -12,6 +12,7 @@ import 'package:smart_meal_planner/features/measurements/application/measurement
 import 'package:smart_meal_planner/features/profile/application/profile_controller.dart';
 import 'package:smart_meal_planner/features/catalog/application/food_catalog_controller.dart';
 import 'package:smart_meal_planner/features/catalog/application/ingredient_catalog_controller.dart';
+import 'package:smart_meal_planner/features/meal_planning/application/meal_planning_controller.dart';
 
 class SmartMealPlannerApp extends StatefulWidget {
   const SmartMealPlannerApp({
@@ -23,6 +24,7 @@ class SmartMealPlannerApp extends StatefulWidget {
     this.measurementsController,
     this.foodCatalogController,
     this.ingredientCatalogController,
+    this.mealPlanningController,
   });
 
   final SessionController? sessionController;
@@ -32,6 +34,7 @@ class SmartMealPlannerApp extends StatefulWidget {
   final MeasurementsController? measurementsController;
   final FoodCatalogController? foodCatalogController;
   final IngredientCatalogController? ingredientCatalogController;
+  final MealPlanningController? mealPlanningController;
 
   @override
   State<SmartMealPlannerApp> createState() => _SmartMealPlannerAppState();
@@ -45,6 +48,8 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
   late final MeasurementsController? _measurementsController;
   late final FoodCatalogController? _foodCatalogController;
   late final IngredientCatalogController? _ingredientCatalogController;
+  late final MealPlanningController? _mealPlanningController;
+  late final bool _ownsMealPlanningController;
   late final AppRouter _appRouter;
   late SessionStatus _observedSessionStatus;
   String? _observedAuthenticatedPublicId;
@@ -62,6 +67,10 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       _measurementsController = dependencies.measurementsController;
       _foodCatalogController = dependencies.foodCatalogController;
       _ingredientCatalogController = dependencies.ingredientCatalogController;
+      _mealPlanningController = MealPlanningController(
+        repository: dependencies.mealPlanningRepository,
+      );
+      _ownsMealPlanningController = true;
     } else {
       _sessionController = widget.sessionController!;
       _profileController = widget.profileController;
@@ -70,6 +79,8 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       _measurementsController = widget.measurementsController;
       _foodCatalogController = widget.foodCatalogController;
       _ingredientCatalogController = widget.ingredientCatalogController;
+      _mealPlanningController = widget.mealPlanningController;
+      _ownsMealPlanningController = false;
     }
     _appRouter = AppRouter(
       _sessionController,
@@ -79,6 +90,7 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       measurementsController: _measurementsController,
       foodCatalogController: _foodCatalogController,
       ingredientCatalogController: _ingredientCatalogController,
+      mealPlanningController: _mealPlanningController,
     );
     _observedSessionStatus = _sessionController.status;
     _observedAuthenticatedPublicId = _sessionController.identity?.publicId;
@@ -109,12 +121,14 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       _dislikedIngredientsController?.resetForSessionChange();
       _foodCatalogController?.resetForSessionChange();
       _ingredientCatalogController?.resetForSessionChange();
+      _mealPlanningController?.resetForSessionChange();
     }
   }
 
   @override
   void dispose() {
     _sessionController.removeListener(_handleSessionChanged);
+    if (_ownsMealPlanningController) _mealPlanningController?.dispose();
     super.dispose();
   }
 
