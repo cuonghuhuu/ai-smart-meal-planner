@@ -1,10 +1,11 @@
-# Pantry / Fridge Flutter foundation and read-only integration (P14-J2/J3)
+# Pantry / Fridge Flutter integration (P14-J2/J3/J4)
 
 P14-J2 adds the typed Pantry data contract, exact quantity validation, and an
-HTTP repository in `mobile_app/lib/features/pantry/`. P14-J3 adds a read-only
-controller and list/detail screens. A Pantry item represents one physical lot; the client neither
-aggregates lots nor assigns an owner ID. The backend derives ownership from the
-authenticated access token.
+HTTP repository in `mobile_app/lib/features/pantry/`. P14-J3 adds a controller
+and list/detail screens. P14-J4 adds lot creation, ingredient and mapped-food
+selection, and metadata-only editing. A Pantry item represents one physical
+lot; the client neither aggregates lots nor assigns an owner ID. The backend
+derives ownership from the authenticated access token.
 
 ## Backend API used by the repository
 
@@ -22,6 +23,8 @@ authenticated access token.
 There is no delete operation, list pagination, or server-side list filter beyond
 `includeClosed`. The repository preserves `ApiClient` HTTP/problem and transport
 exceptions. A malformed response raises `ApiResponseFormatException`.
+The Flutter UI currently uses list, detail, create, and metadata replacement;
+adjust, consume, and discard remain data-contract operations without UI flows.
 
 ## Models and requests
 
@@ -79,8 +82,21 @@ Notes are trimmed; blank text becomes null; normalized text is limited to 255
 UTF-16 code units, matching Java `String.length()`. Unit codes are trimmed on
 outbound requests and must be nonblank. Any nonblank backend unit code is
 accepted; server-returned unit code and display name remain unchanged. The
-data layer has no `g`/`kg`/`ml`/`piece` enum. A later UI may offer a small
-common-unit subset without changing this contract.
+create form prefers the selected ingredient's default unit, offers `g`, `kg`,
+`ml`, and `piece` as common suggestions, and accepts free-form nonblank unit
+codes. These suggestions are presentation policy, not the backend vocabulary.
+
+The create form searches ingredients through the existing `CatalogRepository`
+and exposes only the selected ingredient's mapped Foods from its detail data.
+Food is optional. Selecting another ingredient clears the previous selection.
+The lot quantity uses `PantryDecimal` for local four-place, upper-bound, and
+positive-value checks and is serialized as an exact JSON number from normalized
+decimal text. The form permits past expiry dates and future acquisition dates;
+clearing expiry resets expiry kind and confidence to UNKNOWN. Metadata editing
+exposes only storage location, acquisition/expiry dates and classification,
+and note. Its PUT always sends the full intended editable state, including nulls
+for fields the user clears, and never sends quantity, ingredient, food, unit,
+status, or version.
 
 ## Authentication and CSRF
 
@@ -88,40 +104,46 @@ Every repository call uses shared `ApiClient` with `authenticated: true`.
 `ApiClient` and `SessionController` own Bearer access tokens and refresh. Read
 operations do not call the CSRF callback. Every mutation calls the optional
 CSRF-token provider and sends its returned header when configured, matching
-`HttpMealPlanningRepository`. App composition wires the repository through the
-shared `ApiClient` and passes the same web CSRF callback as meal planning.
-J3 invokes only GET operations. The current Spring
-Security configuration does not exempt Pantry mutations from CSRF checks; the
-Android Bearer-only mutation path needs an end-to-end check before the later
-integration job selects its callback policy. This foundation does not modify
-auth infrastructure.
+`HttpMealPlanningRepository`. App composition passes the web CSRF callback to
+Pantry and meal planning; on native platforms the callback is null.
 
-## Read-only app integration (P14-J3)
+Pantry mutations require an authenticated Bearer access token. Spring OAuth2
+Resource Server exempts Bearer-token requests from CSRF, including requests
+that also carry the browser refresh cookie. This exemption does not grant
+authentication: invalid or missing access tokens cannot authorize Pantry
+operations. Flutter Web may still send a CSRF header on Pantry mutations; it
+is redundant for Bearer-authenticated requests but harmless. Pantry
+authorization does not rely on the refresh cookie. Browser refresh and logout
+operations that use the cookie remain CSRF-protected separately. Ordinary
+non-Bearer unsafe requests also remain subject to CSRF protection.
+
+## App composition, routes, and responsive UI (P14-J3/J4)
 
 `SmartMealPlannerApp` owns `PantryController` in production, resets it on
 logout or authenticated principal change, and disposes it with the app. The
-controller has independent list and detail state. Each new read increments its
-generation; reset and disposal invalidate both generations. A late response
-from another account, an older include-closed mode, or an older selected detail
-cannot restore stale data. List refresh and retries re-read the selected mode;
-detail retries re-read the selected public ID. No local persistence is used.
+controller has independent list, detail, and mutation state. Each new read
+increments its generation; reset and disposal invalidate list, detail, and
+mutation generations. A late response from another account, an older
+include-closed mode, an older selected detail, or a previous session mutation
+cannot restore stale data. Successful create/update responses are authoritative:
+the controller reconciles the corresponding row into the current list snapshot
+and invalidates in-flight list reads. Create adds a distinct lot and does not
+aggregate by ingredient. List refresh/retry re-reads the selected mode; detail
+retry re-reads the selected public ID. No local persistence is used.
 
-The protected `/pantry` and `/pantry/:publicId` routes use `SessionRouteGate`.
-Safe post-login destinations include `/pantry` and UUID-valid detail paths;
+The protected `/pantry`, `/pantry/new`, `/pantry/:publicId`, and
+`/pantry/:publicId/edit` routes use `SessionRouteGate`. Safe post-login
+destinations include the list, create route, and UUID-valid detail/edit paths;
 arbitrary external redirects remain excluded. Pantry is one destination in the
-authenticated drawer and navigation rail, selected on both routes. The
-read-only pages use `ResponsiveContent`, show loading, empty/error/retry states,
-and retain each backend lot as a separate row. Quantity display uses the exact
-`PantryDecimal` text; expiry dates are displayed as calendar dates and do not
-change backend lifecycle status. User labels are centralized in `AppStrings`
-and `PantryLocalizations`.
+authenticated drawer and navigation rail, selected on nested Pantry routes.
+The responsive list and detail pages show loading, empty/error/retry states and
+retain each backend lot as a separate row. Quantity display uses exact
+`PantryDecimal` text; expiry dates are calendar dates and do not change backend
+lifecycle status. User-facing copy is centralized in `AppStrings`, with backend
+code labels in `PantryLocalizations`.
 
 ## Deferred work
 
-Create/edit UI and forms, ingredient and food pickers, adjust, consume,
-discard, shopping-list invalidation, mutation end-to-end CSRF verification,
-and expiry filtering/polish remain deferred. Additional responsive and
-accessibility polish remains for later UI work. After successful
-Pantry mutations, later integration should invalidate the meal-planning
-shopping-list projection because its backend response depends on current
-AVAILABLE stock.
+Quantity adjust, consume, discard, shopping-list invalidation, Pantry
+ledger/history, and expiry filtering/polish remain deferred. Final
+accessibility and release regression work also remain.

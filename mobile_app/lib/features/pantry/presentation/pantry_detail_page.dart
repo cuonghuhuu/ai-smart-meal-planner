@@ -124,6 +124,16 @@ class _PantryDetailPageState extends State<PantryDetailPage> {
       style: Theme.of(context).textTheme.headlineMedium,
     ),
     const SizedBox(height: 16),
+    Align(
+      alignment: Alignment.centerLeft,
+      child: OutlinedButton.icon(
+        key: const ValueKey('pantry-edit'),
+        onPressed: () => context.go('/pantry/${item.publicId}/edit'),
+        icon: const Icon(Icons.edit_outlined),
+        label: const Text(AppStrings.pantryEditMetadata),
+      ),
+    ),
+    const SizedBox(height: 12),
     _line(AppStrings.pantryFood, item.foodName),
     _line(
       AppStrings.pantryRemaining,

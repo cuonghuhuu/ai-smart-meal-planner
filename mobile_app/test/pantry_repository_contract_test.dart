@@ -82,6 +82,36 @@ void main() {
   });
 
   group('Pantry mutations', () {
+    test('native-style Bearer create and PUT omit CSRF when no callback is configured', () async {
+      final sent = <http.Request>[];
+      final repository = _repository(sent);
+      await repository.create(
+        const CreatePantryItemRequest(
+          ingredientPublicId: _ingredientId,
+          quantity: '0.0001',
+          unitCode: 'tbsp',
+          storageLocation: PantryStorageLocation.fridge,
+        ),
+      );
+      await repository.updateMetadata(
+        _itemId,
+        const UpdatePantryMetadataRequest(
+          storageLocation: PantryStorageLocation.freezer,
+        ),
+      );
+      expect(sent.map((request) => request.method), ['POST', 'PUT']);
+      expect(sent.every(_isAuthenticated), isTrue);
+      expect(
+        sent.every((request) => !request.headers.containsKey('x-csrf-token')),
+        isTrue,
+      );
+      expect(jsonDecode(sent.first.body)['quantity'], 0.0001);
+      expect(
+        (jsonDecode(sent.last.body) as Map).containsKey('quantity'),
+        isFalse,
+      );
+    });
+
     test('create sends complete JSON, auth and mutation CSRF', () async {
       final sent = <http.Request>[];
       var csrfCalls = 0;

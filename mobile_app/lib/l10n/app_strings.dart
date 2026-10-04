@@ -21,7 +21,7 @@ final class AppStrings {
   static const loading = 'Đang tải...';
   static const loadingPreferences = 'Đang tải sở thích ăn uống…';
 
-  // Pantry and fridge read-only views.
+  // Pantry and fridge views and forms.
   static const pantry = 'Kho thực phẩm';
   static const pantrySubtitle = 'Các lô nguyên liệu đang có trong kho.';
   static const pantryIncludeClosed = 'Xem cả lô đã đóng';
@@ -58,6 +58,43 @@ final class AppStrings {
   static const pantryUnknown = 'Chưa xác định';
   static const pantryConfidenceLabelled = 'Theo nhãn';
   static const pantryConfidenceEstimated = 'Ước tính';
+  static const pantryCreate = 'Thêm lô thực phẩm';
+  static const pantryCreateSucceeded =
+      '\u{0110}\u{00E3} th\u{00EA}m l\u{00F4} v\u{00E0}o kho.';
+  static const pantryMetadataUpdated =
+      '\u{0110}\u{00E3} c\u{1EAD}p nh\u{1EAD}t th\u{00F4}ng tin l\u{00F4}.';
+  static const pantryEditMetadata = 'Sửa thông tin lô';
+  static const pantrySelectIngredient = 'Chọn nguyên liệu';
+  static const pantryIngredientRequired = 'Vui lòng chọn nguyên liệu.';
+  static const pantryIngredientSearch = 'Tìm nguyên liệu';
+  static const pantryIngredientNoResults = 'Không tìm thấy nguyên liệu.';
+  static const pantryIngredientSearchFailed = 'Không thể tìm nguyên liệu.';
+  static const pantryIngredientMappingsFailed =
+      'Không thể tải thực phẩm liên kết.';
+  static const pantryIngredientNotFound = 'Nguyên liệu này không còn khả dụng.';
+  static const pantryFoodNotMapped =
+      'Thực phẩm không còn liên kết với nguyên liệu.';
+  static const pantryFoodNone = 'Không chọn thực phẩm';
+  static const pantryUnitNotFound = 'Đơn vị này không khả dụng.';
+  static const pantryQuantity = 'Số lượng';
+  static const pantryQuantityInvalid =
+      'Nhập số lớn hơn 0, tối đa 99.999.999,9999 và tối đa 4 chữ số thập phân.';
+  static const pantryUnit = 'Đơn vị';
+  static const pantryUnitRequired = 'Vui lòng nhập đơn vị.';
+  static const pantryStorageRequired = 'Vui lòng chọn nơi lưu trữ.';
+  static const pantryCommonUnits = 'Đơn vị thường dùng';
+  static const pantryPickDate = 'Chọn ngày';
+  static const pantryClearDate = 'Xóa ngày';
+  static const pantryExpiryInvalid = 'Kiểm tra ngày và thông tin hạn dùng.';
+  static const pantryNoteTooLong = 'Ghi chú không được vượt quá 255 ký tự.';
+  static const pantrySaveFailed =
+      'Không thể lưu lô thực phẩm. Vui lòng thử lại.';
+  static const pantryInvalidRequest =
+      'Thông tin lô không hợp lệ. Vui lòng kiểm tra lại.';
+  static const pantryItemNotOpen = 'Lô này không còn ở trạng thái có thể sửa.';
+  static const pantryConflict = 'Lô đã thay đổi. Vui lòng tải lại và thử lại.';
+  static const pantryAccessFailed =
+      'Phiên truy cập không còn hợp lệ. Vui lòng thử lại.';
 
   // Meal planning.
   static const mealPlanning = 'Kế hoạch bữa ăn';

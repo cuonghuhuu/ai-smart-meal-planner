@@ -10,11 +10,13 @@ PantryItem pantryItem({
   String unitCode = 'bag',
   String unitDisplayName = 'bao',
   PantryItemStatus status = PantryItemStatus.available,
+  PantryStorageLocation storageLocation = PantryStorageLocation.fridge,
   DateTime? expiryDate,
   DateTime? closedAt,
   String? foodName,
   String? note,
   bool acquiredOnPresent = true,
+  DateTime? acquiredOnOverride,
 }) => PantryItem(
   publicId: publicId,
   ingredientPublicId: '00000000-0000-4000-8000-000000000101',
@@ -29,8 +31,10 @@ PantryItem pantryItem({
   quantityRemaining: PantryDecimal.parse('0.0001'),
   unitCode: unitCode,
   unitDisplayName: unitDisplayName,
-  storageLocation: PantryStorageLocation.fridge,
-  acquiredOn: acquiredOnPresent ? DateTime(2026, 1, 1) : null,
+  storageLocation: storageLocation,
+  acquiredOn: acquiredOnPresent
+      ? (acquiredOnOverride ?? DateTime(2026, 1, 1))
+      : null,
   expiryDate: expiryDate,
   expiryKind: expiryDate == null
       ? PantryExpiryKind.unknown
@@ -53,6 +57,16 @@ final class FakePantryRepository implements PantryRepository {
   Object? detailError;
   Future<List<PantryItem>> Function(bool includeClosed)? onList;
   Future<PantryItem> Function(String publicId)? onDetail;
+  Future<PantryItem> Function(CreatePantryItemRequest request)? onCreate;
+  Future<PantryItem> Function(
+    String publicId,
+    UpdatePantryMetadataRequest request,
+  )?
+  onUpdateMetadata;
+  Object? createError;
+  Object? updateError;
+  final createRequests = <CreatePantryItemRequest>[];
+  final updateRequests = <(String, UpdatePantryMetadataRequest)>[];
   final listRequests = <bool>[];
   final detailRequests = <String>[];
 
@@ -73,14 +87,23 @@ final class FakePantryRepository implements PantryRepository {
   }
 
   @override
-  Future<PantryItem> create(CreatePantryItemRequest request) =>
-      throw UnimplementedError('Read-only fake');
+  Future<PantryItem> create(CreatePantryItemRequest request) {
+    createRequests.add(request);
+    if (onCreate != null) return onCreate!(request);
+    if (createError != null) return Future.error(createError!);
+    return Future.value(pantryItem(publicId: testPantryIdTwo));
+  }
 
   @override
   Future<PantryItem> updateMetadata(
     String publicId,
     UpdatePantryMetadataRequest request,
-  ) => throw UnimplementedError('Read-only fake');
+  ) {
+    updateRequests.add((publicId, request));
+    if (onUpdateMetadata != null) return onUpdateMetadata!(publicId, request);
+    if (updateError != null) return Future.error(updateError!);
+    return Future.value(detail ?? items.first);
+  }
 
   @override
   Future<PantryItem> adjust(String publicId, AdjustPantryItemRequest request) =>

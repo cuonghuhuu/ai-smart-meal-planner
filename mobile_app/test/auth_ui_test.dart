@@ -267,7 +267,12 @@ void main() {
     final router = await _authenticatedRouter();
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     const id = '00000000-0000-4000-8000-000000000201';
-    for (final target in ['/pantry', '/pantry/$id']) {
+    for (final target in [
+      '/pantry',
+      '/pantry/$id',
+      '/pantry/new',
+      '/pantry/$id/edit',
+    ]) {
       router.go('/auth/login?from=${Uri.encodeComponent(target)}');
       await tester.pumpAndSettle();
       expect(router.routerDelegate.currentConfiguration.uri.path, target);
@@ -284,7 +289,12 @@ void main() {
     final router = AppRouter(session).router;
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     const id = '00000000-0000-4000-8000-000000000201';
-    for (final target in ['/pantry', '/pantry/$id']) {
+    for (final target in [
+      '/pantry',
+      '/pantry/$id',
+      '/pantry/new',
+      '/pantry/$id/edit',
+    ]) {
       router.go(target);
       await tester.pumpAndSettle();
       final location = router.routerDelegate.currentConfiguration.uri;
@@ -311,6 +321,8 @@ void main() {
       '//evil.example/pantry',
       '/pantry/not-a-uuid',
       '/pantry/00000000-0000-4000-8000-000000000201/extra',
+      '/pantry/not-a-uuid/edit',
+      'https://evil.example/pantry/new',
     ];
 
     for (final intended in rejected) {

@@ -29,6 +29,7 @@ final class AppSessionDependencies {
     required this.ingredientCatalogController,
     required this.mealPlanningRepository,
     required this.pantryRepository,
+    required this.catalogRepository,
   });
 
   final SessionController sessionController;
@@ -40,6 +41,7 @@ final class AppSessionDependencies {
   final IngredientCatalogController ingredientCatalogController;
   final MealPlanningRepository mealPlanningRepository;
   final PantryRepository pantryRepository;
+  final CatalogRepository catalogRepository;
 }
 
 final class AppSessionFactory {
@@ -90,6 +92,7 @@ final class AppSessionFactory {
         apiClient,
         csrfTokenProvider: kIsWeb ? authRepository.fetchCsrf : null,
       ),
+      catalogRepository: catalogRepository,
     );
   }
 }

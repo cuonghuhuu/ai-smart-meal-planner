@@ -81,6 +81,16 @@ class _PantryPageState extends State<PantryPage> {
               const SizedBox(height: 8),
               const Text(AppStrings.pantrySubtitle),
               const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: FilledButton.icon(
+                  key: const ValueKey('pantry-add'),
+                  onPressed: () => context.go('/pantry/new'),
+                  icon: const Icon(Icons.add),
+                  label: const Text(AppStrings.pantryCreate),
+                ),
+              ),
+              const SizedBox(height: 8),
               SwitchListTile(
                 key: const ValueKey('pantry-include-closed'),
                 title: const Text(AppStrings.pantryIncludeClosed),

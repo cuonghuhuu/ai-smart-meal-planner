@@ -155,6 +155,10 @@ void main() {
       '{"quantity":0.0001}',
     );
     expect(
+      jsonEncode({'quantity': PantryDecimal.parse('1.2345').toJsonNumber()}),
+      '{"quantity":1.2345}',
+    );
+    expect(
       jsonEncode({
         'quantity': PantryDecimal.parse('99999999.9999').toJsonNumber(),
       }),

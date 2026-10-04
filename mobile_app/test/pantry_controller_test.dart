@@ -138,4 +138,194 @@ void main() {
     await read;
     expect(controller.detailState.item, isNull);
   });
+
+  group('create', () {
+    const request = CreatePantryItemRequest(
+      ingredientPublicId: '00000000-0000-4000-8000-000000000101',
+      quantity: '1.2345',
+      unitCode: 'bag',
+      storageLocation: PantryStorageLocation.fridge,
+    );
+
+    test('adopts response as a distinct lot in the current list', () async {
+      await controller.loadInitial();
+      final result = await controller.createItem(request);
+      expect(result?.publicId, testPantryIdTwo);
+      expect(controller.mutationState.status, PantryMutationStatus.succeeded);
+      expect(controller.listState.items.map((item) => item.publicId).toSet(), {
+        testPantryId,
+        testPantryIdTwo,
+      });
+      expect(repository.createRequests, [request]);
+    });
+
+    test('failure leaves list unchanged and supports retry', () async {
+      await controller.loadInitial();
+      repository.createError = const ApiHttpException(
+        400,
+        problem: ApiProblem(status: 400, code: 'UNIT_NOT_FOUND', detail: null),
+      );
+      expect(await controller.createItem(request), isNull);
+      expect(
+        controller.mutationState.errorMessage,
+        AppStrings.pantryUnitNotFound,
+      );
+      expect(controller.listState.items.single.publicId, testPantryId);
+      repository.createError = null;
+      expect((await controller.createItem(request))?.publicId, testPantryIdTwo);
+    });
+
+    test('duplicate submission is blocked while pending', () async {
+      final pending = Completer<PantryItem>();
+      repository.onCreate = (_) => pending.future;
+      final first = controller.createItem(request);
+      expect(controller.mutationState.status, PantryMutationStatus.submitting);
+      expect(await controller.createItem(request), isNull);
+      expect(repository.createRequests, hasLength(1));
+      pending.complete(pantryItem(publicId: testPantryIdTwo));
+      await first;
+    });
+
+    test('old list refresh cannot erase successful create', () async {
+      await controller.loadInitial();
+      final pending = Completer<List<PantryItem>>();
+      repository.onList = (_) => pending.future;
+      final refresh = controller.refreshList();
+      await controller.createItem(request);
+      pending.complete([pantryItem()]);
+      await refresh;
+      expect(
+        controller.listState.items.map((item) => item.publicId),
+        contains(testPantryIdTwo),
+      );
+    });
+
+    test(
+      'create during history-mode load triggers a fresh history read',
+      () async {
+        await controller.loadInitial();
+        final pendingHistory = Completer<List<PantryItem>>();
+        repository.onList = (includeClosed) => includeClosed
+            ? pendingHistory.future
+            : Future.value(repository.items);
+        final oldHistoryRead = controller.setIncludeClosed(true);
+        expect(controller.listState.items, isEmpty);
+        await controller.createItem(request);
+        expect(controller.listState.status, PantryLoadStatus.initial);
+        expect(controller.listState.includeClosed, isTrue);
+
+        repository.onList = (_) async => [
+          pantryItem(),
+          pantryItem(publicId: testPantryIdTwo),
+        ];
+        await controller.loadInitial();
+        pendingHistory.complete([pantryItem()]);
+        await oldHistoryRead;
+        expect(controller.listState.includeClosed, isTrue);
+        expect(
+          controller.listState.items.map((item) => item.publicId),
+          contains(testPantryIdTwo),
+        );
+      },
+    );
+
+    test('logout or account reset invalidates pending create', () async {
+      final pending = Completer<PantryItem>();
+      repository.onCreate = (_) => pending.future;
+      final oldCreate = controller.createItem(request);
+      controller.resetForSessionChange();
+      repository.items = [pantryItem(publicId: testPantryIdTwo)];
+      await controller.loadInitial();
+      pending.complete(pantryItem());
+      expect(await oldCreate, isNull);
+      expect(controller.listState.items.single.publicId, testPantryIdTwo);
+      expect(controller.mutationState.status, PantryMutationStatus.idle);
+    });
+  });
+
+  group('metadata update', () {
+    const request = UpdatePantryMetadataRequest(
+      storageLocation: PantryStorageLocation.freezer,
+      acquiredOn: null,
+      expiryDate: null,
+      note: null,
+    );
+
+    test('returned item replaces detail and list row', () async {
+      await controller.loadInitial();
+      await controller.loadDetail(testPantryId);
+      repository.onUpdateMetadata = (_, _) async => pantryItem(
+        storageLocation: PantryStorageLocation.freezer,
+        note: null,
+      );
+      final item = await controller.updateMetadata(testPantryId, request);
+      expect(item?.storageLocation, PantryStorageLocation.freezer);
+      expect(controller.detailState.item, same(item));
+      expect(controller.listState.items.single, same(item));
+      expect(repository.updateRequests.single.$2.toJson(), {
+        'storageLocation': 'FREEZER',
+        'acquiredOn': null,
+        'expiryDate': null,
+        'expiryKind': 'UNKNOWN',
+        'expiryConfidence': 'UNKNOWN',
+        'note': null,
+      });
+    });
+
+    test('failure retains prior detail and reports safe message', () async {
+      await controller.loadDetail(testPantryId);
+      repository.updateError = const ApiHttpException(
+        409,
+        problem: ApiProblem(status: 409, code: 'CONFLICT', detail: 'private'),
+      );
+      expect(await controller.updateMetadata(testPantryId, request), isNull);
+      expect(controller.detailState.item?.publicId, testPantryId);
+      expect(controller.mutationState.errorMessage, AppStrings.pantryConflict);
+    });
+
+    test('detail switch invalidates update for prior lot', () async {
+      await controller.loadDetail(testPantryId);
+      final pending = Completer<PantryItem>();
+      repository.onUpdateMetadata = (_, _) => pending.future;
+      final update = controller.updateMetadata(testPantryId, request);
+      repository.detail = pantryItem(publicId: testPantryIdTwo);
+      await controller.loadDetail(testPantryIdTwo);
+      pending.complete(
+        pantryItem(storageLocation: PantryStorageLocation.freezer),
+      );
+      expect(await update, isNull);
+      expect(controller.detailState.item?.publicId, testPantryIdTwo);
+    });
+
+    test('session reset invalidates pending update', () async {
+      await controller.loadDetail(testPantryId);
+      final pending = Completer<PantryItem>();
+      repository.onUpdateMetadata = (_, _) => pending.future;
+      final update = controller.updateMetadata(testPantryId, request);
+      controller.resetForSessionChange();
+      pending.complete(
+        pantryItem(storageLocation: PantryStorageLocation.freezer),
+      );
+      expect(await update, isNull);
+      expect(controller.detailState.item, isNull);
+      expect(controller.mutationState.status, PantryMutationStatus.idle);
+    });
+
+    test('old list refresh cannot erase updated row', () async {
+      await controller.loadInitial();
+      await controller.loadDetail(testPantryId);
+      final pending = Completer<List<PantryItem>>();
+      repository.onList = (_) => pending.future;
+      final refresh = controller.refreshList();
+      repository.onUpdateMetadata = (_, _) async =>
+          pantryItem(storageLocation: PantryStorageLocation.freezer);
+      await controller.updateMetadata(testPantryId, request);
+      pending.complete([pantryItem()]);
+      await refresh;
+      expect(
+        controller.listState.items.single.storageLocation,
+        PantryStorageLocation.freezer,
+      );
+    });
+  });
 }
