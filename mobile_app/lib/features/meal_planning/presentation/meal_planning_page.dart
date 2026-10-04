@@ -277,7 +277,14 @@ class _MealPlanningPageState extends State<MealPlanningPage> {
               )
             : null,
       ),
-      MealPlanningStatus.loaded => _PlanResult(plan: state.plan!),
+      MealPlanningStatus.loaded => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _PlanResult(plan: state.plan!),
+          const SizedBox(height: 24),
+          _ShoppingListSection(state: state, controller: _controller),
+        ],
+      ),
     };
   }
 }
@@ -414,6 +421,134 @@ class _PlanResult extends StatelessWidget {
     );
   }
 }
+
+class _ShoppingListSection extends StatelessWidget {
+  const _ShoppingListSection({required this.state, required this.controller});
+
+  final MealPlanningState state;
+  final MealPlanningController controller;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    key: state.shoppingListStatus == ShoppingListLoadStatus.loaded
+        ? const ValueKey('shopping-list-result')
+        : null,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Text(
+        AppStrings.shoppingListTitle,
+        style: Theme.of(context).textTheme.titleLarge,
+      ),
+      if (state.plan!.status == MealPlanGenerationStatus.degraded)
+        const Padding(
+          padding: EdgeInsets.only(top: 8),
+          child: Text(AppStrings.shoppingListDegradedHint),
+        ),
+      const SizedBox(height: 12),
+      switch (state.shoppingListStatus) {
+        ShoppingListLoadStatus.idle => Align(
+          alignment: Alignment.centerLeft,
+          child: FilledButton.icon(
+            key: const ValueKey('shopping-list-load'),
+            onPressed: controller.loadShoppingList,
+            icon: const Icon(Icons.shopping_cart_outlined),
+            label: const Text(AppStrings.shoppingListLoad),
+          ),
+        ),
+        ShoppingListLoadStatus.loading => Row(
+          key: const ValueKey('shopping-list-loading'),
+          children: const [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 12),
+            Flexible(child: Text(AppStrings.shoppingListLoading)),
+          ],
+        ),
+        ShoppingListLoadStatus.error => _MessageCard(
+          key: const ValueKey('shopping-list-error'),
+          message: AppStrings.shoppingListLoadFailed,
+          detail: state.shoppingListErrorMessage,
+          action: FilledButton(
+            key: const ValueKey('shopping-list-retry'),
+            onPressed: controller.retryShoppingList,
+            child: const Text(AppStrings.shoppingListRetry),
+          ),
+        ),
+        ShoppingListLoadStatus.loaded => _ShoppingListItems(
+          shoppingList: state.shoppingList!,
+        ),
+      },
+    ],
+  );
+}
+
+class _ShoppingListItems extends StatelessWidget {
+  const _ShoppingListItems({required this.shoppingList});
+
+  final MealPlanShoppingList shoppingList;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      if (shoppingList.items.isEmpty)
+        const Text(AppStrings.shoppingListNoQuantifiedItems),
+      for (final item in shoppingList.items)
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.ingredientDisplayName,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${AppStrings.shoppingListRequired}: '
+                  '${_shoppingQuantity(item.requiredQuantity, item.unitCode)}',
+                ),
+                Text(
+                  '${AppStrings.shoppingListPantryCovered}: '
+                  '${_shoppingQuantity(item.pantryCoveredQuantity, item.unitCode)}',
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${AppStrings.shoppingListToBuy}: '
+                  '${_shoppingQuantity(item.quantityToBuy, item.unitCode)}',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      if (shoppingList.unquantifiedItems.isNotEmpty) ...[
+        const SizedBox(height: 16),
+        Text(
+          AppStrings.shoppingListUnquantifiedTitle,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        for (final item in shoppingList.unquantifiedItems)
+          Card(
+            child: ListTile(
+              title: Text(item.ingredientDisplayName),
+              subtitle: const Text(AppStrings.shoppingListAsNeeded),
+            ),
+          ),
+      ],
+    ],
+  );
+}
+
+String _shoppingQuantity(double value, String unitCode) =>
+    '${value.toStringAsFixed(4).replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '')} $unitCode';
 
 String _servingsLabel(double value) => value == value.roundToDouble()
     ? value.toStringAsFixed(0)

@@ -301,6 +301,183 @@ void main() {
     expect(repository.requests, isEmpty);
   });
 
+  testWidgets('shopping list loads only on tap and shows quantities', (
+    tester,
+  ) async {
+    final repository = FakeMealPlanningRepository();
+    await _showPage(tester, repository);
+    await _tapGenerate(tester);
+
+    expect(find.byKey(const ValueKey('shopping-list-load')), findsOneWidget);
+    expect(repository.shoppingListReadIds, isEmpty);
+
+    await _tapShoppingListLoad(tester);
+
+    expect(repository.shoppingListReadIds, [planId]);
+    expect(repository.requests, hasLength(1));
+    expect(find.byKey(const ValueKey('meal-plan-result')), findsOneWidget);
+    expect(find.byKey(const ValueKey('shopping-list-result')), findsOneWidget);
+    expect(find.text(AppStrings.shoppingListTitle), findsOneWidget);
+    expect(find.text('Chicken'), findsOneWidget);
+    expect(
+      find.text('${AppStrings.shoppingListRequired}: 800 g'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('${AppStrings.shoppingListPantryCovered}: 550 g'),
+      findsOneWidget,
+    );
+    expect(find.text('${AppStrings.shoppingListToBuy}: 250 g'), findsOneWidget);
+    expect(find.text('Salt'), findsOneWidget);
+    expect(find.text(AppStrings.shoppingListUnquantifiedTitle), findsOneWidget);
+    expect(find.text(AppStrings.shoppingListAsNeeded), findsOneWidget);
+    expect(find.textContaining('800.0 g'), findsNothing);
+    expect(find.textContaining('550.0000 g'), findsNothing);
+    expect(find.textContaining(chickenId), findsNothing);
+    expect(find.textContaining(saltId), findsNothing);
+  });
+
+  testWidgets('shopping-list loading keeps the plan visible', (tester) async {
+    final pending = Completer<MealPlanShoppingList>();
+    final repository = FakeMealPlanningRepository()
+      ..onGetShoppingList = (_) => pending.future;
+    await _showPage(tester, repository);
+    await _tapGenerate(tester);
+
+    await _tapShoppingListLoad(tester, waitForResult: false);
+
+    expect(repository.shoppingListReadIds, [planId]);
+    expect(find.byKey(const ValueKey('meal-plan-result')), findsOneWidget);
+    expect(find.text('Oatmeal with Banana'), findsOneWidget);
+    expect(find.byKey(const ValueKey('shopping-list-loading')), findsOneWidget);
+    expect(find.text(AppStrings.shoppingListLoading), findsOneWidget);
+    expect(find.byKey(const ValueKey('shopping-list-load')), findsNothing);
+
+    pending.complete(shoppingList());
+    await _pumpAsync(tester);
+    expect(find.byKey(const ValueKey('shopping-list-result')), findsOneWidget);
+    expect(repository.shoppingListReadIds, [planId]);
+  });
+
+  testWidgets('shopping-list error keeps the plan and retry reads only list', (
+    tester,
+  ) async {
+    var reads = 0;
+    final repository = FakeMealPlanningRepository()
+      ..onGetShoppingList = (_) async {
+        reads++;
+        if (reads == 1) {
+          throw const ApiHttpException(
+            503,
+            problem: ApiProblem(
+              status: 503,
+              code: 'SHOPPING_LIST_FAILED',
+              detail: 'private backend detail',
+            ),
+          );
+        }
+        return shoppingList();
+      };
+    await _showPage(tester, repository);
+    await _tapGenerate(tester);
+    await _tapShoppingListLoad(tester);
+
+    expect(find.byKey(const ValueKey('meal-plan-result')), findsOneWidget);
+    expect(find.text('Oatmeal with Banana'), findsOneWidget);
+    expect(find.byKey(const ValueKey('shopping-list-error')), findsOneWidget);
+    expect(find.text(AppStrings.shoppingListLoadFailed), findsOneWidget);
+    expect(find.textContaining('private backend detail'), findsNothing);
+
+    final retry = find.byKey(const ValueKey('shopping-list-retry'));
+    expect(retry, findsOneWidget);
+    await tester.ensureVisible(retry);
+    await tester.tap(retry);
+    await _pumpAsync(tester);
+
+    expect(repository.shoppingListReadIds, [planId, planId]);
+    expect(repository.requests, hasLength(1));
+    expect(repository.readIds, [planId]);
+    expect(find.byKey(const ValueKey('meal-plan-result')), findsOneWidget);
+    expect(find.byKey(const ValueKey('shopping-list-result')), findsOneWidget);
+  });
+
+  testWidgets('DEGRADED plan shows the shopping-list coverage hint', (
+    tester,
+  ) async {
+    final repository = FakeMealPlanningRepository();
+    repository.onGenerate = (_) async =>
+        generated(status: MealPlanGenerationStatus.degraded);
+    repository.onGetPlan = (_) async =>
+        persistedPlan(status: MealPlanGenerationStatus.degraded);
+    repository.onGetShoppingList = (_) async =>
+        shoppingList(status: MealPlanGenerationStatus.degraded);
+    await _showPage(tester, repository);
+    await _tapGenerate(tester);
+    await _tapShoppingListLoad(tester);
+
+    expect(repository.shoppingListReadIds, [planId]);
+    expect(find.byKey(const ValueKey('shopping-list-result')), findsOneWidget);
+    expect(find.text(AppStrings.shoppingListDegradedHint), findsOneWidget);
+    expect(find.text('Chicken'), findsOneWidget);
+  });
+
+  testWidgets('empty shopping list shows a meaningful result', (tester) async {
+    final repository = FakeMealPlanningRepository()
+      ..onGetShoppingList = (_) async => MealPlanShoppingList(
+        mealPlanPublicId: planId,
+        status: MealPlanGenerationStatus.succeeded,
+        items: const [],
+        unquantifiedItems: const [],
+      );
+    await _showPage(tester, repository);
+    await _tapGenerate(tester);
+    await _tapShoppingListLoad(tester);
+
+    expect(find.byKey(const ValueKey('shopping-list-result')), findsOneWidget);
+    expect(find.text(AppStrings.shoppingListTitle), findsOneWidget);
+    expect(find.text(AppStrings.shoppingListNoQuantifiedItems), findsOneWidget);
+    expect(find.byKey(const ValueKey('meal-plan-result')), findsOneWidget);
+  });
+
+  testWidgets('fractional shopping quantities omit trailing zeroes', (
+    tester,
+  ) async {
+    final repository = FakeMealPlanningRepository()
+      ..onGetShoppingList = (_) async => MealPlanShoppingList(
+        mealPlanPublicId: planId,
+        status: MealPlanGenerationStatus.succeeded,
+        items: const [
+          ShoppingListItem(
+            ingredientPublicId: chickenId,
+            ingredientCode: 'chicken',
+            ingredientDisplayName: 'Chicken',
+            requiredQuantity: 12.34,
+            pantryCoveredQuantity: 0.25,
+            quantityToBuy: 12.09,
+            unitCode: 'g',
+          ),
+        ],
+        unquantifiedItems: const [],
+      );
+    await _showPage(tester, repository);
+    await _tapGenerate(tester);
+    await _tapShoppingListLoad(tester);
+
+    expect(
+      find.text('${AppStrings.shoppingListRequired}: 12.34 g'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('${AppStrings.shoppingListPantryCovered}: 0.25 g'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('${AppStrings.shoppingListToBuy}: 12.09 g'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('12.3400 g'), findsNothing);
+  });
+
   testWidgets('slot and reason codes have readable labels', (tester) async {
     for (final slot in MealSlotCode.values) {
       expect(mealSlotLabel(slot), isNot(slot.wireValue));
@@ -337,6 +514,20 @@ Future<void> _tapGenerate(
   final generate = find.byKey(const ValueKey('meal-plan-generate'));
   await tester.ensureVisible(generate);
   await tester.tap(generate);
+  if (waitForResult) {
+    await _pumpAsync(tester);
+  } else {
+    await tester.pump();
+  }
+}
+
+Future<void> _tapShoppingListLoad(
+  WidgetTester tester, {
+  bool waitForResult = true,
+}) async {
+  final load = find.byKey(const ValueKey('shopping-list-load'));
+  await tester.ensureVisible(load);
+  await tester.tap(load);
   if (waitForResult) {
     await _pumpAsync(tester);
   } else {

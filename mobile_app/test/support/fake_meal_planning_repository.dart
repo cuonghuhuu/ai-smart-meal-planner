@@ -4,13 +4,17 @@ import 'package:smart_meal_planner/features/meal_planning/data/meal_planning_rep
 const requestId = '11111111-1111-4111-8111-111111111111';
 const planId = '22222222-2222-4222-8222-222222222222';
 const recipeId = '33333333-3333-4333-8333-333333333333';
+const chickenId = '44444444-4444-4444-8444-444444444444';
+const saltId = '55555555-5555-4555-8555-555555555555';
 
 class FakeMealPlanningRepository implements MealPlanningRepository {
   Future<MealPlanGenerationResponse> Function(MealPlanGenerationRequest)?
   onGenerate;
   Future<PersistedMealPlan> Function(String)? onGetPlan;
+  Future<MealPlanShoppingList> Function(String)? onGetShoppingList;
   final requests = <MealPlanGenerationRequest>[];
   final readIds = <String>[];
+  final shoppingListReadIds = <String>[];
 
   @override
   Future<MealPlanGenerationResponse> generate(
@@ -26,6 +30,14 @@ class FakeMealPlanningRepository implements MealPlanningRepository {
     return onGetPlan == null
         ? persistedPlan()
         : await onGetPlan!(mealPlanPublicId);
+  }
+
+  @override
+  Future<MealPlanShoppingList> getShoppingList(String mealPlanPublicId) async {
+    shoppingListReadIds.add(mealPlanPublicId);
+    return onGetShoppingList == null
+        ? shoppingList()
+        : await onGetShoppingList!(mealPlanPublicId);
   }
 }
 
@@ -76,4 +88,29 @@ PersistedMealPlan persistedPlan({
           ),
         ]
       : const [],
+);
+
+MealPlanShoppingList shoppingList({
+  MealPlanGenerationStatus status = MealPlanGenerationStatus.succeeded,
+}) => MealPlanShoppingList(
+  mealPlanPublicId: planId,
+  status: status,
+  items: const [
+    ShoppingListItem(
+      ingredientPublicId: chickenId,
+      ingredientCode: 'chicken',
+      ingredientDisplayName: 'Chicken',
+      requiredQuantity: 800,
+      pantryCoveredQuantity: 550,
+      quantityToBuy: 250,
+      unitCode: 'g',
+    ),
+  ],
+  unquantifiedItems: const [
+    ShoppingListUnquantifiedItem(
+      ingredientPublicId: saltId,
+      ingredientCode: 'salt',
+      ingredientDisplayName: 'Salt',
+    ),
+  ],
 );

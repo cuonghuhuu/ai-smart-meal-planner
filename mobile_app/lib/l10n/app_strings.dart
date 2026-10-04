@@ -67,6 +67,22 @@ final class AppStrings {
   static const mealPlanDinner = 'Bữa tối';
   static const mealPlanEveningSnack = 'Bữa phụ tối';
 
+  // Shopping list for a persisted meal plan.
+  static const shoppingListTitle = 'Danh sách mua sắm';
+  static const shoppingListLoad = 'Xem danh sách mua sắm';
+  static const shoppingListLoading = 'Đang tính danh sách mua sắm…';
+  static const shoppingListLoadFailed = 'Không thể tải danh sách mua sắm.';
+  static const shoppingListRetry = 'Thử tải lại danh sách mua sắm';
+  static const shoppingListRequired = 'Cần';
+  static const shoppingListPantryCovered = 'Có trong kho';
+  static const shoppingListToBuy = 'Cần mua';
+  static const shoppingListAsNeeded = 'Theo nhu cầu';
+  static const shoppingListNoQuantifiedItems =
+      'Không cần mua thêm nguyên liệu định lượng.';
+  static const shoppingListUnquantifiedTitle = 'Nguyên liệu không định lượng';
+  static const shoppingListDegradedHint =
+      'Danh sách chỉ tính từ các bữa ăn đã được điền.';
+
   // Catalog.
   static const catalogFoodsSubtitle =
       'Tra cứu thành phần dinh dưỡng của các thực phẩm Việt Nam.';
