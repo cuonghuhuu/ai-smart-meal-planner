@@ -37,7 +37,6 @@ class RecipeRequirementQueryServiceTest {
         when(recipe.internalId()).thenReturn(11L);
         when(recipe.publicId()).thenReturn(RECIPE_ID);
         when(recipe.servings()).thenReturn((short) 4);
-        when(recipe.status()).thenReturn(RecipeStatus.ARCHIVED);
         when(recipes.findAllByPublicIdIn(any())).thenReturn(List.of(recipe));
 
         RecipeIngredient line = mock(RecipeIngredient.class);
