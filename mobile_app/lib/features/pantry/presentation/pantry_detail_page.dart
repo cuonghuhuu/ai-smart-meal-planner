@@ -4,8 +4,10 @@ import 'package:smart_meal_planner/core/ui/responsive_content.dart';
 import 'package:smart_meal_planner/features/auth/application/session_controller.dart';
 import 'package:smart_meal_planner/features/auth/presentation/authenticated_shell.dart';
 import 'package:smart_meal_planner/features/pantry/application/pantry_controller.dart';
+import 'package:smart_meal_planner/features/pantry/application/pantry_validation.dart';
 import 'package:smart_meal_planner/features/pantry/data/pantry_models.dart';
 import 'package:smart_meal_planner/features/pantry/presentation/pantry_localizations.dart';
+import 'package:smart_meal_planner/features/pantry/presentation/pantry_quantity_action_dialog.dart';
 import 'package:smart_meal_planner/l10n/app_strings.dart';
 
 class PantryDetailPage extends StatefulWidget {
@@ -65,6 +67,37 @@ class _PantryDetailPageState extends State<PantryDetailPage> {
           _controller.loadDetail(widget.publicId);
         }
       });
+    }
+  }
+
+  Future<void> _showQuantityAction(
+    PantryItem item,
+    PantryQuantityAction action,
+  ) async {
+    final result = await showDialog<PantryItem>(
+      context: context,
+      builder: (_) => PantryQuantityActionDialog(
+        controller: _controller,
+        item: item,
+        action: action,
+      ),
+    );
+    if (mounted && result != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(AppStrings.pantryActionSucceeded)),
+      );
+    }
+  }
+
+  Future<void> _showDiscard(PantryItem item) async {
+    final result = await showDialog<PantryItem>(
+      context: context,
+      builder: (_) => PantryDiscardDialog(controller: _controller, item: item),
+    );
+    if (mounted && result != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(AppStrings.pantryActionSucceeded)),
+      );
     }
   }
 
@@ -134,6 +167,37 @@ class _PantryDetailPageState extends State<PantryDetailPage> {
       ),
     ),
     const SizedBox(height: 12),
+    if (PantryValidation.canDiscard(item.status)) ...[
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          if (item.status == PantryItemStatus.available) ...[
+            OutlinedButton.icon(
+              key: const ValueKey('pantry-adjust'),
+              onPressed: () =>
+                  _showQuantityAction(item, PantryQuantityAction.adjust),
+              icon: const Icon(Icons.tune),
+              label: const Text(AppStrings.pantryAdjust),
+            ),
+            OutlinedButton.icon(
+              key: const ValueKey('pantry-consume'),
+              onPressed: () =>
+                  _showQuantityAction(item, PantryQuantityAction.consume),
+              icon: const Icon(Icons.restaurant_outlined),
+              label: const Text(AppStrings.pantryConsume),
+            ),
+          ],
+          FilledButton.tonalIcon(
+            key: const ValueKey('pantry-discard'),
+            onPressed: () => _showDiscard(item),
+            icon: const Icon(Icons.delete_outline),
+            label: const Text(AppStrings.pantryDiscard),
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+    ],
     _line(AppStrings.pantryFood, item.foodName),
     _line(
       AppStrings.pantryRemaining,

@@ -314,4 +314,61 @@ void main() {
     expect(controller.state.shoppingList, isNull);
     expect(controller.state.shoppingListErrorMessage, isNotEmpty);
   });
+
+  test(
+    'inventory invalidation clears only shopping list and permits reload',
+    () async {
+      final repository = FakeMealPlanningRepository();
+      final controller = MealPlanningController(repository: repository);
+      addTearDown(controller.dispose);
+      await controller.generate(generationRequest());
+      await controller.loadShoppingList();
+      final plan = controller.state.plan;
+      expect(
+        controller.state.shoppingListStatus,
+        ShoppingListLoadStatus.loaded,
+      );
+
+      controller.invalidateShoppingList();
+      expect(controller.state.status, MealPlanningStatus.loaded);
+      expect(controller.state.plan, same(plan));
+      expect(controller.state.shoppingListStatus, ShoppingListLoadStatus.idle);
+      expect(controller.state.shoppingList, isNull);
+      expect(controller.state.shoppingListErrorMessage, isNull);
+
+      controller.invalidateShoppingList();
+      await controller.loadShoppingList();
+      expect(repository.shoppingListReadIds, [planId, planId]);
+      expect(
+        controller.state.shoppingListStatus,
+        ShoppingListLoadStatus.loaded,
+      );
+    },
+  );
+
+  test('invalidation ignores a pending stale shopping-list result', () async {
+    final repository = FakeMealPlanningRepository();
+    final controller = MealPlanningController(repository: repository);
+    addTearDown(controller.dispose);
+    await controller.generate(generationRequest());
+    final plan = controller.state.plan;
+    final pending = Completer<MealPlanShoppingList>();
+    repository.onGetShoppingList = (_) => pending.future;
+    final oldLoad = controller.loadShoppingList();
+    expect(controller.state.shoppingListStatus, ShoppingListLoadStatus.loading);
+
+    controller.invalidateShoppingList();
+    expect(controller.state.plan, same(plan));
+    expect(controller.state.shoppingListStatus, ShoppingListLoadStatus.idle);
+    repository.onGetShoppingList = (_) async => shoppingList();
+    await controller.loadShoppingList();
+    pending.complete(shoppingList(status: MealPlanGenerationStatus.degraded));
+    await oldLoad;
+    expect(repository.shoppingListReadIds, [planId, planId]);
+    expect(controller.state.shoppingListStatus, ShoppingListLoadStatus.loaded);
+    expect(
+      controller.state.shoppingList?.status,
+      MealPlanGenerationStatus.succeeded,
+    );
+  });
 }

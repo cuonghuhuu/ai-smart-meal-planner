@@ -96,6 +96,22 @@ final class AppStrings {
   static const pantryAccessFailed =
       'Phiên truy cập không còn hợp lệ. Vui lòng thử lại.';
 
+  static const pantryAdjust = 'Điều chỉnh số lượng';
+  static const pantryConsume = 'Sử dụng';
+  static const pantryDiscard = 'Bỏ toàn bộ';
+  static const pantryActionNote = 'Ghi chú cho thao tác';
+  static const pantryAdjustmentDelta = 'Mức tăng (1) hoặc giảm (-1)';
+  static const pantryAdjustmentHint =
+      'Điều chỉnh sai lệch tồn kho: tăng không vượt số lượng ban đầu, giảm phải còn trên 0. Để thêm hàng, tạo lô mới.';
+  static const pantryAdjustmentInvalid =
+      'Mức điều chỉnh phải khác 0 và để lại số lượng từ trên 0 đến tối đa ban đầu.';
+  static const pantryConsumeInvalid =
+      'Số lượng sử dụng phải lớn hơn 0 và không vượt số lượng còn lại.';
+  static const pantryDiscardWarning =
+      'Toàn bộ số lượng còn lại sẽ bị bỏ. Bạn có chắc chắn?';
+  static const pantryConfirmDiscard = 'Xác nhận bỏ toàn bộ';
+  static const pantryActionSucceeded = 'Đã cập nhật lô thực phẩm.';
+
   // Meal planning.
   static const mealPlanning = 'Kế hoạch bữa ăn';
   static const mealPlanningSubtitle =

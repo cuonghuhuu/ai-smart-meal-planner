@@ -82,6 +82,7 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       _ownsMealPlanningController = true;
       _pantryController = PantryController(
         repository: dependencies.pantryRepository,
+        onInventoryChanged: _mealPlanningController?.invalidateShoppingList,
       );
       _ownsPantryController = true;
       _pantryCatalogRepository = dependencies.catalogRepository;

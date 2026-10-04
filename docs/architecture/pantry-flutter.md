@@ -1,4 +1,4 @@
-# Pantry / Fridge Flutter integration (P14-J2/J3/J4)
+# Pantry / Fridge Flutter integration (P14-J2/J3/J4/J5)
 
 P14-J2 adds the typed Pantry data contract, exact quantity validation, and an
 HTTP repository in `mobile_app/lib/features/pantry/`. P14-J3 adds a controller
@@ -117,7 +117,7 @@ authorization does not rely on the refresh cookie. Browser refresh and logout
 operations that use the cookie remain CSRF-protected separately. Ordinary
 non-Bearer unsafe requests also remain subject to CSRF protection.
 
-## App composition, routes, and responsive UI (P14-J3/J4)
+## App composition, routes, and responsive UI (P14-J3/J4/J5)
 
 `SmartMealPlannerApp` owns `PantryController` in production, resets it on
 logout or authenticated principal change, and disposes it with the app. The
@@ -142,8 +142,44 @@ retain each backend lot as a separate row. Quantity display uses exact
 lifecycle status. User-facing copy is centralized in `AppStrings`, with backend
 code labels in `PantryLocalizations`.
 
+## Quantity lifecycle actions (P14-J5)
+
+The detail page offers Adjust and Consume for AVAILABLE lots and Discard for
+AVAILABLE or RESERVED lots. CONSUMED, DISCARDED, and EXPIRED lots have no
+quantity actions. This matrix follows backend lifecycle status, not expiry
+date. No action reopens a lot or adds stock beyond its initial quantity.
+
+Adjust is an inventory correction with a signed decimal delta. Positive text
+has no `+` prefix; a negative correction uses `-`. Fixed-scale validation
+requires a nonzero delta, a resulting remaining quantity above zero, and a
+result no greater than the initial quantity. To add more stock, users create
+another lot. Consume requires a positive amount no greater than remaining;
+the backend response determines whether the lot becomes CONSUMED. Discard
+requires explicit confirmation and removes all remaining quantity; it has no
+partial-discard field. Each action accepts an optional trimmed note of at most
+255 characters. Action notes are event notes and do not replace lot metadata
+notes.
+
+The controller serializes one active Pantry mutation, ignores responses after
+session reset or a newer detail selection, and adopts successful backend
+items as authoritative. It invalidates older list reads before reconciling a
+row. Closed lots leave the open-only snapshot and remain in the include-closed
+snapshot. A conflict or ITEM_NOT_OPEN response shows safe localized feedback
+and re-reads the detail to refresh action availability.
+
+Production app composition supplies `PantryController.onInventoryChanged` as
+a callback to `MealPlanningController.invalidateShoppingList`. Successful
+create, adjust, consume, and discard call it; metadata-only updates and failed
+or stale mutations do not. Invalidation increments only the shopping-list
+request generation and clears only its derived projection. The persisted
+meal plan and unrelated meal-planning state remain intact. A pending older
+shopping-list response is ignored, and the next access fetches a fresh one.
+Bearer-authenticated action requests follow the same Resource Server CSRF
+model described above; no backend security behavior changes in J5.
+
 ## Deferred work
 
-Quantity adjust, consume, discard, shopping-list invalidation, Pantry
-ledger/history, and expiry filtering/polish remain deferred. Final
-accessibility and release regression work also remain.
+Restock/replenish, reservation/release, partial discard, manual EXPIRED
+transition, Pantry ledger/history UI, bulk actions, expiry filtering/polish,
+notifications, and server-side Pantry search/pagination remain deferred. Final
+responsive/accessibility and release regression work also remain.

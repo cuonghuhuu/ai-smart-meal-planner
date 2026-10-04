@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:smart_meal_planner/core/api/api_exception.dart';
 import 'package:smart_meal_planner/features/pantry/application/pantry_error_messages.dart';
+import 'package:smart_meal_planner/features/pantry/application/pantry_validation.dart';
 import 'package:smart_meal_planner/features/pantry/data/pantry_models.dart';
 import 'package:smart_meal_planner/features/pantry/data/pantry_repository.dart';
+import 'package:smart_meal_planner/l10n/app_strings.dart';
 
 enum PantryLoadStatus { initial, loading, loaded, error }
 
@@ -52,9 +56,10 @@ final class PantryDetailState {
 
 /// Holds only the current session's Pantry reads. Reset invalidates pending work.
 final class PantryController extends ChangeNotifier {
-  PantryController({required this.repository});
+  PantryController({required this.repository, this.onInventoryChanged});
 
   final PantryRepository repository;
+  final VoidCallback? onInventoryChanged;
   PantryListState _listState = const PantryListState();
   PantryDetailState _detailState = const PantryDetailState();
   PantryMutationState _mutationState = const PantryMutationState();
@@ -186,6 +191,7 @@ final class PantryController extends ChangeNotifier {
         item: item,
       );
       notifyListeners();
+      onInventoryChanged?.call();
       return item;
     } on Object catch (error) {
       if (!_isMutationCurrent(generation)) return null;
@@ -247,6 +253,153 @@ final class PantryController extends ChangeNotifier {
       return null;
     }
   }
+
+  Future<PantryItem?> adjustItem(
+    String publicId,
+    AdjustPantryItemRequest request,
+  ) {
+    if (_disposed || _mutationState.status == PantryMutationStatus.submitting) {
+      return Future.value();
+    }
+    final item = _detailItem(publicId);
+    if (item == null || item.status != PantryItemStatus.available) {
+      return _rejectAction(AppStrings.pantryItemNotOpen);
+    }
+    if (!PantryValidation.canAdjust(
+      initial: item.quantityInitial,
+      remaining: item.quantityRemaining,
+      quantityDelta: request.quantityDelta,
+      status: item.status,
+    )) {
+      return _rejectAction(AppStrings.pantryAdjustmentInvalid);
+    }
+    if (!PantryValidation.isValidNote(request.note)) {
+      return _rejectAction(AppStrings.pantryNoteTooLong);
+    }
+    return _runQuantityMutation(
+      publicId,
+      () => repository.adjust(publicId, request),
+    );
+  }
+
+  Future<PantryItem?> consumeItem(
+    String publicId,
+    ConsumePantryItemRequest request,
+  ) {
+    if (_disposed || _mutationState.status == PantryMutationStatus.submitting) {
+      return Future.value();
+    }
+    final item = _detailItem(publicId);
+    if (item == null || item.status != PantryItemStatus.available) {
+      return _rejectAction(AppStrings.pantryItemNotOpen);
+    }
+    if (!PantryValidation.canConsume(
+      remaining: item.quantityRemaining,
+      quantity: request.quantity,
+      status: item.status,
+    )) {
+      return _rejectAction(AppStrings.pantryConsumeInvalid);
+    }
+    if (!PantryValidation.isValidNote(request.note)) {
+      return _rejectAction(AppStrings.pantryNoteTooLong);
+    }
+    return _runQuantityMutation(
+      publicId,
+      () => repository.consume(publicId, request),
+    );
+  }
+
+  Future<PantryItem?> discardItem(
+    String publicId,
+    DiscardPantryItemRequest request,
+  ) {
+    if (_disposed || _mutationState.status == PantryMutationStatus.submitting) {
+      return Future.value();
+    }
+    final item = _detailItem(publicId);
+    if (item == null || !PantryValidation.canDiscard(item.status)) {
+      return _rejectAction(AppStrings.pantryItemNotOpen);
+    }
+    if (!PantryValidation.isValidNote(request.note)) {
+      return _rejectAction(AppStrings.pantryNoteTooLong);
+    }
+    return _runQuantityMutation(
+      publicId,
+      () => repository.discard(publicId, request),
+    );
+  }
+
+  PantryItem? _detailItem(String publicId) =>
+      _detailState.status == PantryLoadStatus.loaded &&
+          _detailState.publicId == publicId
+      ? _detailState.item
+      : null;
+
+  Future<PantryItem?> _rejectAction(String message) {
+    _mutationState = PantryMutationState(
+      status: PantryMutationStatus.error,
+      errorMessage: message,
+    );
+    notifyListeners();
+    return Future.value();
+  }
+
+  Future<PantryItem?> _runQuantityMutation(
+    String publicId,
+    Future<PantryItem> Function() operation,
+  ) async {
+    final generation = ++_mutationGeneration;
+    final detailGeneration = _detailGeneration;
+    _mutationTargetPublicId = publicId;
+    _mutationState = const PantryMutationState(
+      status: PantryMutationStatus.submitting,
+    );
+    notifyListeners();
+    try {
+      final item = await operation();
+      if (!_isCurrentAction(generation, detailGeneration, publicId)) {
+        return null;
+      }
+      _detailState = PantryDetailState(
+        status: PantryLoadStatus.loaded,
+        publicId: publicId,
+        item: item,
+      );
+      _reconcileList(item);
+      _mutationTargetPublicId = null;
+      _mutationState = PantryMutationState(
+        status: PantryMutationStatus.succeeded,
+        item: item,
+      );
+      notifyListeners();
+      onInventoryChanged?.call();
+      return item;
+    } on Object catch (error) {
+      if (!_isCurrentAction(generation, detailGeneration, publicId)) {
+        return null;
+      }
+      _mutationTargetPublicId = null;
+      _mutationState = PantryMutationState(
+        status: PantryMutationStatus.error,
+        errorMessage: pantryMutationErrorMessage(error),
+      );
+      notifyListeners();
+      if (error is ApiHttpException &&
+          (error.statusCode == 409 || error.problem?.code == 'ITEM_NOT_OPEN')) {
+        unawaited(loadDetail(publicId));
+      }
+      return null;
+    }
+  }
+
+  bool _isCurrentAction(
+    int generation,
+    int detailGeneration,
+    String publicId,
+  ) =>
+      _isMutationCurrent(generation) &&
+      detailGeneration == _detailGeneration &&
+      _detailState.publicId == publicId;
 
   void _reconcileList(PantryItem item) {
     _listGeneration++;
