@@ -13,18 +13,26 @@ enum MealPlanningStatus {
   error,
 }
 
+enum ShoppingListLoadStatus { idle, loading, loaded, error }
+
 final class MealPlanningState {
   const MealPlanningState({
     required this.status,
     this.plan,
     this.pendingMealPlanPublicId,
     this.errorMessage,
+    this.shoppingListStatus = ShoppingListLoadStatus.idle,
+    this.shoppingList,
+    this.shoppingListErrorMessage,
   });
 
   final MealPlanningStatus status;
   final PersistedMealPlan? plan;
   final String? pendingMealPlanPublicId;
   final String? errorMessage;
+  final ShoppingListLoadStatus shoppingListStatus;
+  final MealPlanShoppingList? shoppingList;
+  final String? shoppingListErrorMessage;
 
   bool get isBusy =>
       status == MealPlanningStatus.generating ||
@@ -32,6 +40,19 @@ final class MealPlanningState {
 
   bool get canRetryLoad =>
       status == MealPlanningStatus.error && pendingMealPlanPublicId != null;
+
+  bool get isShoppingListBusy =>
+      shoppingListStatus == ShoppingListLoadStatus.loading;
+
+  bool get canLoadShoppingList =>
+      status == MealPlanningStatus.loaded &&
+      plan != null &&
+      shoppingListStatus == ShoppingListLoadStatus.idle;
+
+  bool get canRetryShoppingList =>
+      status == MealPlanningStatus.loaded &&
+      plan != null &&
+      shoppingListStatus == ShoppingListLoadStatus.error;
 }
 
 final class MealPlanningController extends ChangeNotifier {
@@ -74,6 +95,59 @@ final class MealPlanningController extends ChangeNotifier {
     if (!_state.canRetryLoad || _state.isBusy) return;
     await _loadPlan(_state.pendingMealPlanPublicId!, _sessionRevision);
   }
+
+  Future<void> loadShoppingList() async {
+    if (!_state.canLoadShoppingList) return;
+    await _loadShoppingList(_state.plan!, _sessionRevision);
+  }
+
+  Future<void> retryShoppingList() async {
+    if (!_state.canRetryShoppingList) return;
+    await _loadShoppingList(_state.plan!, _sessionRevision);
+  }
+
+  Future<void> _loadShoppingList(PersistedMealPlan plan, int revision) async {
+    _setState(
+      MealPlanningState(
+        status: MealPlanningStatus.loaded,
+        plan: plan,
+        shoppingListStatus: ShoppingListLoadStatus.loading,
+      ),
+    );
+    try {
+      final shoppingList = await repository.getShoppingList(
+        plan.mealPlanPublicId,
+      );
+      if (!_isCurrentShoppingListLoad(plan, revision)) return;
+      if (shoppingList.mealPlanPublicId != plan.mealPlanPublicId) {
+        throw const ApiResponseFormatException();
+      }
+      _setState(
+        MealPlanningState(
+          status: MealPlanningStatus.loaded,
+          plan: plan,
+          shoppingListStatus: ShoppingListLoadStatus.loaded,
+          shoppingList: shoppingList,
+        ),
+      );
+    } on Object catch (error) {
+      if (!_isCurrentShoppingListLoad(plan, revision)) return;
+      _setState(
+        MealPlanningState(
+          status: MealPlanningStatus.loaded,
+          plan: plan,
+          shoppingListStatus: ShoppingListLoadStatus.error,
+          shoppingListErrorMessage: mealPlanningErrorMessage(error),
+        ),
+      );
+    }
+  }
+
+  bool _isCurrentShoppingListLoad(PersistedMealPlan plan, int revision) =>
+      revision == _sessionRevision &&
+      _state.status == MealPlanningStatus.loaded &&
+      identical(_state.plan, plan) &&
+      _state.isShoppingListBusy;
 
   Future<void> _loadPlan(String publicId, int revision) async {
     _setState(

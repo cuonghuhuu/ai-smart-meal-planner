@@ -12,6 +12,8 @@ import 'package:smart_meal_planner/features/meal_planning/data/meal_planning_rep
 const _requestId = '11111111-1111-4111-8111-111111111111';
 const _planId = '22222222-2222-4222-8222-222222222222';
 const _recipeId = '33333333-3333-4333-8333-333333333333';
+const _chickenId = '44444444-4444-4444-8444-444444444444';
+const _saltId = '55555555-5555-4555-8555-555555555555';
 
 void main() {
   test(
@@ -60,6 +62,125 @@ void main() {
     expect(
       plan.unfilledSlots.single.reasonCode,
       UnfilledSlotReasonCode.noEligibleRecipe,
+    );
+  });
+
+  for (final status in ['SUCCEEDED', 'DEGRADED']) {
+    test('shopping-list GET parses $status response', () async {
+      late http.Request sent;
+      final repository = HttpMealPlanningRepository(
+        _api((request) async {
+          sent = request;
+          return http.Response(
+            jsonEncode({..._shoppingListJson, 'status': status}),
+            200,
+          );
+        }),
+        csrfTokenProvider: () async =>
+            throw StateError('GET must not request a CSRF token'),
+      );
+
+      final list = await repository.getShoppingList(_planId);
+
+      expect(sent.method, 'GET');
+      expect(sent.url.path, '/api/v1/me/meal-plans/$_planId/shopping-list');
+      expect(sent.headers['authorization'], 'Bearer access');
+      expect(sent.headers.containsKey('x-xsrf-token'), isFalse);
+      expect(list.mealPlanPublicId, _planId);
+      expect(list.status.wireValue, status);
+      expect(list.items, hasLength(1));
+      final item = list.items.single;
+      expect(item.ingredientPublicId, _chickenId);
+      expect(item.ingredientCode, 'chicken');
+      expect(item.ingredientDisplayName, 'Chicken');
+      expect(item.requiredQuantity, 800);
+      expect(item.pantryCoveredQuantity, 550);
+      expect(item.quantityToBuy, 250);
+      expect(item.unitCode, 'g');
+      expect(list.unquantifiedItems, hasLength(1));
+      expect(list.unquantifiedItems.single.ingredientPublicId, _saltId);
+      expect(list.unquantifiedItems.single.ingredientCode, 'salt');
+      expect(list.unquantifiedItems.single.ingredientDisplayName, 'Salt');
+      expect(() => list.items.clear(), throwsUnsupportedError);
+      expect(() => list.unquantifiedItems.clear(), throwsUnsupportedError);
+    });
+  }
+
+  test('malformed shopping-list payload throws format exception', () async {
+    final malformed = <Map<String, Object?>>[
+      {..._shoppingListJson, 'mealPlanPublicId': 'not-a-uuid'},
+      {..._shoppingListJson, 'items': null},
+      {..._shoppingListJson, 'unquantifiedItems': null},
+      {
+        ..._shoppingListJson,
+        'items': [
+          {..._quantifiedItemJson, 'ingredientPublicId': 'not-a-uuid'},
+        ],
+      },
+      {
+        ..._shoppingListJson,
+        'items': [
+          {..._quantifiedItemJson, 'ingredientCode': ''},
+        ],
+      },
+      {
+        ..._shoppingListJson,
+        'items': [
+          {..._quantifiedItemJson, 'requiredQuantity': 0},
+        ],
+      },
+      {
+        ..._shoppingListJson,
+        'items': [
+          {..._quantifiedItemJson, 'pantryCoveredQuantity': -1},
+        ],
+      },
+      {
+        ..._shoppingListJson,
+        'items': [
+          {..._quantifiedItemJson, 'quantityToBuy': -1},
+        ],
+      },
+      {
+        ..._shoppingListJson,
+        'unquantifiedItems': [
+          {..._unquantifiedItemJson, 'ingredientDisplayName': ''},
+        ],
+      },
+    ];
+    for (final payload in malformed) {
+      final repository = HttpMealPlanningRepository(
+        _api((_) async => http.Response(jsonEncode(payload), 200)),
+      );
+      await expectLater(
+        repository.getShoppingList(_planId),
+        throwsA(isA<ApiResponseFormatException>()),
+      );
+    }
+    expect(
+      () => MealPlanShoppingList.fromJson({
+        ..._shoppingListJson,
+        'items': [
+          {..._quantifiedItemJson, 'quantityToBuy': double.infinity},
+        ],
+      }),
+      throwsA(isA<ApiResponseFormatException>()),
+    );
+  });
+
+  test('INFEASIBLE shopping-list status is rejected', () async {
+    final repository = HttpMealPlanningRepository(
+      _api(
+        (_) async => http.Response(
+          jsonEncode({..._shoppingListJson, 'status': 'INFEASIBLE'}),
+          200,
+        ),
+      ),
+    );
+
+    await expectLater(
+      repository.getShoppingList(_planId),
+      throwsA(isA<ApiResponseFormatException>()),
     );
   });
 
@@ -176,3 +297,26 @@ final _persistedJson = jsonEncode({
     },
   ],
 });
+
+const _quantifiedItemJson = <String, Object?>{
+  'ingredientPublicId': _chickenId,
+  'ingredientCode': 'chicken',
+  'ingredientDisplayName': 'Chicken',
+  'requiredQuantity': 800.0,
+  'pantryCoveredQuantity': 550.0,
+  'quantityToBuy': 250.0,
+  'unitCode': 'g',
+};
+
+const _unquantifiedItemJson = <String, Object?>{
+  'ingredientPublicId': _saltId,
+  'ingredientCode': 'salt',
+  'ingredientDisplayName': 'Salt',
+};
+
+const _shoppingListJson = <String, Object?>{
+  'mealPlanPublicId': _planId,
+  'status': 'SUCCEEDED',
+  'items': [_quantifiedItemJson],
+  'unquantifiedItems': [_unquantifiedItemJson],
+};

@@ -221,6 +221,93 @@ final class MealPlanUnfilledSlot {
   final String? explanation;
 }
 
+/// Quantified and unquantified ingredients needed for a persisted meal plan.
+final class MealPlanShoppingList {
+  MealPlanShoppingList({
+    required this.mealPlanPublicId,
+    required this.status,
+    required List<ShoppingListItem> items,
+    required List<ShoppingListUnquantifiedItem> unquantifiedItems,
+  }) : items = List.unmodifiable(items),
+       unquantifiedItems = List.unmodifiable(unquantifiedItems);
+
+  factory MealPlanShoppingList.fromJson(Object? value) {
+    final json = _object(value);
+    final status = MealPlanGenerationStatus.fromWireValue(json['status']);
+    if (status == MealPlanGenerationStatus.infeasible) {
+      throw const ApiResponseFormatException();
+    }
+    return MealPlanShoppingList(
+      mealPlanPublicId: _publicId(json['mealPlanPublicId']),
+      status: status,
+      items: _list(json['items'], ShoppingListItem.fromJson),
+      unquantifiedItems: _list(
+        json['unquantifiedItems'],
+        ShoppingListUnquantifiedItem.fromJson,
+      ),
+    );
+  }
+
+  final String mealPlanPublicId;
+  final MealPlanGenerationStatus status;
+  final List<ShoppingListItem> items;
+  final List<ShoppingListUnquantifiedItem> unquantifiedItems;
+}
+
+final class ShoppingListItem {
+  const ShoppingListItem({
+    required this.ingredientPublicId,
+    required this.ingredientCode,
+    required this.ingredientDisplayName,
+    required this.requiredQuantity,
+    required this.pantryCoveredQuantity,
+    required this.quantityToBuy,
+    required this.unitCode,
+  });
+
+  factory ShoppingListItem.fromJson(Object? value) {
+    final json = _object(value);
+    return ShoppingListItem(
+      ingredientPublicId: _publicId(json['ingredientPublicId']),
+      ingredientCode: _requiredString(json['ingredientCode']),
+      ingredientDisplayName: _requiredString(json['ingredientDisplayName']),
+      requiredQuantity: _positiveNumber(json['requiredQuantity']),
+      pantryCoveredQuantity: _nonNegativeNumber(json['pantryCoveredQuantity']),
+      quantityToBuy: _nonNegativeNumber(json['quantityToBuy']),
+      unitCode: _requiredString(json['unitCode']),
+    );
+  }
+
+  final String ingredientPublicId;
+  final String ingredientCode;
+  final String ingredientDisplayName;
+  final double requiredQuantity;
+  final double pantryCoveredQuantity;
+  final double quantityToBuy;
+  final String unitCode;
+}
+
+final class ShoppingListUnquantifiedItem {
+  const ShoppingListUnquantifiedItem({
+    required this.ingredientPublicId,
+    required this.ingredientCode,
+    required this.ingredientDisplayName,
+  });
+
+  factory ShoppingListUnquantifiedItem.fromJson(Object? value) {
+    final json = _object(value);
+    return ShoppingListUnquantifiedItem(
+      ingredientPublicId: _publicId(json['ingredientPublicId']),
+      ingredientCode: _requiredString(json['ingredientCode']),
+      ingredientDisplayName: _requiredString(json['ingredientDisplayName']),
+    );
+  }
+
+  final String ingredientPublicId;
+  final String ingredientCode;
+  final String ingredientDisplayName;
+}
+
 String formatMealPlanDate(DateTime value) =>
     '${value.year.toString().padLeft(4, '0')}-'
     '${value.month.toString().padLeft(2, '0')}-'
@@ -258,6 +345,11 @@ String _publicId(Object? value) {
 
 double _positiveNumber(Object? value) {
   if (value is num && value.isFinite && value > 0) return value.toDouble();
+  throw const ApiResponseFormatException();
+}
+
+double _nonNegativeNumber(Object? value) {
+  if (value is num && value.isFinite && value >= 0) return value.toDouble();
   throw const ApiResponseFormatException();
 }
 
