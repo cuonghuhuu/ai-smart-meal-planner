@@ -33,6 +33,9 @@ interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
     List<Recipe> findAllBySourceReferenceIn(Collection<String> sourceReferences);
 
+    /** Historical-capable lookup used by persisted-plan projections. */
+    List<Recipe> findAllByPublicIdIn(Collection<byte[]> publicIds);
+
     @Query(value = """
             select r.*
             from recipes r
