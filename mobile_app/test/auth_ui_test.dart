@@ -261,6 +261,48 @@ void main() {
     );
   });
 
+  testWidgets('Pantry list and UUID detail are safe post-login destinations', (
+    tester,
+  ) async {
+    final router = await _authenticatedRouter();
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    const id = '00000000-0000-4000-8000-000000000201';
+    for (final target in [
+      '/pantry',
+      '/pantry/$id',
+      '/pantry/new',
+      '/pantry/$id/edit',
+    ]) {
+      router.go('/auth/login?from=${Uri.encodeComponent(target)}');
+      await tester.pumpAndSettle();
+      expect(router.routerDelegate.currentConfiguration.uri.path, target);
+    }
+  });
+
+  testWidgets('anonymous Pantry routes go through login with intended route', (
+    tester,
+  ) async {
+    final session = _session(
+      FakeAuthRepository(refreshError: const ApiHttpException(401)),
+    );
+    await session.bootstrap();
+    final router = AppRouter(session).router;
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    const id = '00000000-0000-4000-8000-000000000201';
+    for (final target in [
+      '/pantry',
+      '/pantry/$id',
+      '/pantry/new',
+      '/pantry/$id/edit',
+    ]) {
+      router.go(target);
+      await tester.pumpAndSettle();
+      final location = router.routerDelegate.currentConfiguration.uri;
+      expect(location.path, '/auth/login');
+      expect(location.queryParameters['from'], target);
+    }
+  });
+
   testWidgets('rejects non-relative or unrelated intended routes', (
     tester,
   ) async {
@@ -275,6 +317,12 @@ void main() {
       'javascript:whatever',
       '/auth/login',
       '/catalog/unknown',
+      'https://evil.example/pantry',
+      '//evil.example/pantry',
+      '/pantry/not-a-uuid',
+      '/pantry/00000000-0000-4000-8000-000000000201/extra',
+      '/pantry/not-a-uuid/edit',
+      'https://evil.example/pantry/new',
     ];
 
     for (final intended in rejected) {

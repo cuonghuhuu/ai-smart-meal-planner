@@ -63,6 +63,7 @@ final class MealPlanningController extends ChangeNotifier {
     status: MealPlanningStatus.idle,
   );
   int _sessionRevision = 0;
+  int _shoppingListRevision = 0;
 
   MealPlanningState get state => _state;
 
@@ -106,7 +107,26 @@ final class MealPlanningController extends ChangeNotifier {
     await _loadShoppingList(_state.plan!, _sessionRevision);
   }
 
+  /// Drops only the derived shopping-list projection after inventory changes.
+  void invalidateShoppingList() {
+    _shoppingListRevision++;
+    if (_state.shoppingListStatus == ShoppingListLoadStatus.idle &&
+        _state.shoppingList == null &&
+        _state.shoppingListErrorMessage == null) {
+      return;
+    }
+    _setState(
+      MealPlanningState(
+        status: _state.status,
+        plan: _state.plan,
+        pendingMealPlanPublicId: _state.pendingMealPlanPublicId,
+        errorMessage: _state.errorMessage,
+      ),
+    );
+  }
+
   Future<void> _loadShoppingList(PersistedMealPlan plan, int revision) async {
+    final shoppingListRevision = _shoppingListRevision;
     _setState(
       MealPlanningState(
         status: MealPlanningStatus.loaded,
@@ -118,7 +138,9 @@ final class MealPlanningController extends ChangeNotifier {
       final shoppingList = await repository.getShoppingList(
         plan.mealPlanPublicId,
       );
-      if (!_isCurrentShoppingListLoad(plan, revision)) return;
+      if (!_isCurrentShoppingListLoad(plan, revision, shoppingListRevision)) {
+        return;
+      }
       if (shoppingList.mealPlanPublicId != plan.mealPlanPublicId) {
         throw const ApiResponseFormatException();
       }
@@ -131,7 +153,9 @@ final class MealPlanningController extends ChangeNotifier {
         ),
       );
     } on Object catch (error) {
-      if (!_isCurrentShoppingListLoad(plan, revision)) return;
+      if (!_isCurrentShoppingListLoad(plan, revision, shoppingListRevision)) {
+        return;
+      }
       _setState(
         MealPlanningState(
           status: MealPlanningStatus.loaded,
@@ -143,8 +167,13 @@ final class MealPlanningController extends ChangeNotifier {
     }
   }
 
-  bool _isCurrentShoppingListLoad(PersistedMealPlan plan, int revision) =>
+  bool _isCurrentShoppingListLoad(
+    PersistedMealPlan plan,
+    int revision,
+    int shoppingListRevision,
+  ) =>
       revision == _sessionRevision &&
+      shoppingListRevision == _shoppingListRevision &&
       _state.status == MealPlanningStatus.loaded &&
       identical(_state.plan, plan) &&
       _state.isShoppingListBusy;
@@ -176,6 +205,7 @@ final class MealPlanningController extends ChangeNotifier {
 
   void resetForSessionChange() {
     _sessionRevision++;
+    _shoppingListRevision++;
     _setState(const MealPlanningState(status: MealPlanningStatus.idle));
   }
 

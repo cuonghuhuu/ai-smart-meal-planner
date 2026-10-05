@@ -15,12 +15,17 @@ import 'package:smart_meal_planner/features/profile/application/profile_controll
 import 'package:smart_meal_planner/features/profile/presentation/profile_page.dart';
 import 'package:smart_meal_planner/features/catalog/application/food_catalog_controller.dart';
 import 'package:smart_meal_planner/features/catalog/application/ingredient_catalog_controller.dart';
+import 'package:smart_meal_planner/features/catalog/data/catalog_repository.dart';
 import 'package:smart_meal_planner/features/catalog/presentation/food_catalog_page.dart';
 import 'package:smart_meal_planner/features/catalog/presentation/food_detail_page.dart';
 import 'package:smart_meal_planner/features/catalog/presentation/ingredient_catalog_page.dart';
 import 'package:smart_meal_planner/features/catalog/presentation/ingredient_detail_page.dart';
 import 'package:smart_meal_planner/features/meal_planning/application/meal_planning_controller.dart';
 import 'package:smart_meal_planner/features/meal_planning/presentation/meal_planning_page.dart';
+import 'package:smart_meal_planner/features/pantry/application/pantry_controller.dart';
+import 'package:smart_meal_planner/features/pantry/presentation/pantry_page.dart';
+import 'package:smart_meal_planner/features/pantry/presentation/pantry_detail_page.dart';
+import 'package:smart_meal_planner/features/pantry/presentation/pantry_item_form.dart';
 
 final class AppRouter {
   AppRouter(
@@ -32,6 +37,8 @@ final class AppRouter {
     FoodCatalogController? foodCatalogController,
     IngredientCatalogController? ingredientCatalogController,
     MealPlanningController? mealPlanningController,
+    PantryController? pantryController,
+    CatalogRepository? pantryCatalogRepository,
   }) : router = GoRouter(
          initialLocation: '/catalog/foods',
          refreshListenable: sessionController,
@@ -206,6 +213,68 @@ final class AppRouter {
                      ),
              ),
            ),
+           GoRoute(
+             path: '/pantry',
+             builder: (context, state) => SessionRouteGate(
+               sessionController: sessionController,
+               child: pantryController == null
+                   ? const _PantryUnavailablePage()
+                   : PantryPage(
+                       sessionController: sessionController,
+                       controller: pantryController,
+                     ),
+             ),
+           ),
+           GoRoute(
+             path: '/pantry/new',
+             builder: (context, state) => SessionRouteGate(
+               sessionController: sessionController,
+               child:
+                   pantryController == null || pantryCatalogRepository == null
+                   ? const _PantryUnavailablePage()
+                   : PantryItemForm(
+                       sessionController: sessionController,
+                       controller: pantryController,
+                       catalogRepository: pantryCatalogRepository,
+                     ),
+             ),
+           ),
+           GoRoute(
+             path: '/pantry/:publicId/edit',
+             builder: (context, state) {
+               final publicId = state.pathParameters['publicId'] ?? '';
+               return SessionRouteGate(
+                 sessionController: sessionController,
+                 child: !_isValidPublicId(publicId)
+                     ? const _NotFoundPage()
+                     : pantryController == null
+                     ? const _PantryUnavailablePage()
+                     : PantryItemForm(
+                         sessionController: sessionController,
+                         controller: pantryController,
+                         publicId: publicId,
+                       ),
+               );
+             },
+           ),
+           GoRoute(
+             path: '/pantry/:publicId',
+             builder: (context, state) {
+               final publicId = state.pathParameters['publicId'] ?? '';
+               return SessionRouteGate(
+                 sessionController: sessionController,
+                 child: !_isValidPublicId(publicId)
+                     ? const _NotFoundPage()
+                     : pantryController == null
+                     ? const _PantryUnavailablePage()
+                     : PantryDetailPage(
+                         sessionController: sessionController,
+                         controller: pantryController,
+                         publicId: publicId,
+                       ),
+               );
+             },
+           ),
          ],
          errorBuilder: (context, state) => const _NotFoundPage(),
        );
@@ -226,7 +295,11 @@ final class AppRouter {
         path == '/profile' ||
         path == '/preferences' ||
         path == '/measurements' ||
-        path == '/meal-planning';
+        path == '/meal-planning' ||
+        path == '/pantry' ||
+        path == '/pantry/new' ||
+        _isPantryEditPath(path) ||
+        _isPantryDetailPath(path);
 
     if (session.status == SessionStatus.anonymous && isProtectedRoute) {
       return '/auth/login?from=${Uri.encodeComponent(state.uri.toString())}';
@@ -257,7 +330,13 @@ final class AppRouter {
                 uri.path == '/profile' ||
                 uri.path == '/preferences' ||
                 uri.path == '/measurements' ||
-                uri.path == '/meal-planning')
+                uri.path == '/meal-planning' ||
+                uri.path == '/pantry' ||
+                uri.path == '/pantry/new' ||
+                (_isPantryEditPath(uri.path) &&
+                    _isValidPublicId(uri.path.split('/')[2])) ||
+                (_isPantryDetailPath(uri.path) &&
+                    _isValidPublicId(uri.path.split('/').last)))
         ? uri.toString()
         : '/catalog/foods';
   }
@@ -269,6 +348,22 @@ final class AppRouter {
     }
     final segment = path.substring(prefix.length);
     return segment.isNotEmpty && !segment.contains('/');
+  }
+
+  static bool _isPantryDetailPath(String path) {
+    const prefix = '/pantry/';
+    if (!path.startsWith(prefix)) return false;
+    final segment = path.substring(prefix.length);
+    return segment.isNotEmpty && !segment.contains('/');
+  }
+
+  static bool _isPantryEditPath(String path) {
+    final segments = path.split('/');
+    return segments.length == 4 &&
+        segments[0].isEmpty &&
+        segments[1] == 'pantry' &&
+        segments[2].isNotEmpty &&
+        segments[3] == 'edit';
   }
 
   static bool _isValidPublicId(String value) => RegExp(
@@ -309,6 +404,14 @@ class _MealPlanningUnavailablePage extends StatelessWidget {
   Widget build(BuildContext context) => const Scaffold(
     body: Center(child: Text(AppStrings.mealPlanRequestFailed)),
   );
+}
+
+class _PantryUnavailablePage extends StatelessWidget {
+  const _PantryUnavailablePage();
+
+  @override
+  Widget build(BuildContext context) =>
+      const Scaffold(body: Center(child: Text(AppStrings.pantryUnavailable)));
 }
 
 class _NotFoundPage extends StatelessWidget {

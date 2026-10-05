@@ -1,17 +1,34 @@
-# smart_meal_planner
+# Smart Meal Planner mobile app
 
-A new Flutter project.
+Flutter client for Android and Web. It includes authentication, food and
+ingredient catalogs, profile and preferences, measurements, meal planning, and
+Pantry/Fridge inventory.
 
-## Getting Started
+## Run locally
 
-This project is a starting point for a Flutter application.
+Start the backend separately, then from `mobile_app/` run:
 
-A few resources to get you started if this is your first Flutter project:
+```sh
+flutter pub get
+flutter run -d chrome --dart-define=APP_ENV=development --dart-define=API_BASE_URL=http://localhost:8080
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+For Android, use a backend URL reachable by the emulator or device:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```sh
+flutter run --dart-define=APP_ENV=development --dart-define=API_BASE_URL=https://your-backend-host
+```
+
+`APP_ENV` defaults to `development`, and `API_BASE_URL` defaults to
+`http://localhost:8080`. The Android emulator sees the host at `10.0.2.2`,
+but this app does not currently declare a cleartext HTTP exception. Use an
+HTTPS backend URL for Android unless its development network policy is
+configured separately.
+See `lib/app/config/app_config.dart` for the compile-time configuration.
+
+## Checks
+
+```sh
+flutter analyze
+flutter test
+```

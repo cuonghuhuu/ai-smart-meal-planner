@@ -16,6 +16,7 @@ import 'package:smart_meal_planner/features/catalog/application/food_catalog_con
 import 'package:smart_meal_planner/features/catalog/application/ingredient_catalog_controller.dart';
 import 'package:smart_meal_planner/features/catalog/data/catalog_repository.dart';
 import 'package:smart_meal_planner/features/meal_planning/data/meal_planning_repository.dart';
+import 'package:smart_meal_planner/features/pantry/data/pantry_repository.dart';
 
 final class AppSessionDependencies {
   const AppSessionDependencies({
@@ -27,6 +28,8 @@ final class AppSessionDependencies {
     required this.foodCatalogController,
     required this.ingredientCatalogController,
     required this.mealPlanningRepository,
+    required this.pantryRepository,
+    required this.catalogRepository,
   });
 
   final SessionController sessionController;
@@ -37,6 +40,8 @@ final class AppSessionDependencies {
   final FoodCatalogController foodCatalogController;
   final IngredientCatalogController ingredientCatalogController;
   final MealPlanningRepository mealPlanningRepository;
+  final PantryRepository pantryRepository;
+  final CatalogRepository catalogRepository;
 }
 
 final class AppSessionFactory {
@@ -83,6 +88,11 @@ final class AppSessionFactory {
         apiClient,
         csrfTokenProvider: kIsWeb ? authRepository.fetchCsrf : null,
       ),
+      pantryRepository: HttpPantryRepository(
+        apiClient,
+        csrfTokenProvider: kIsWeb ? authRepository.fetchCsrf : null,
+      ),
+      catalogRepository: catalogRepository,
     );
   }
 }
