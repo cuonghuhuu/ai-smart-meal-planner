@@ -61,7 +61,15 @@ void main() {
     await tester.pumpWidget(fixture.app);
     fixture.router.go('/pantry');
     await _pump(tester);
+    expect(find.text(AppStrings.pantryNoOpenItems), findsOneWidget);
+    expect(find.text(AppStrings.pantrySubtitle), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pantry-include-closed')));
+    await _pump(tester);
     expect(find.text(AppStrings.pantryNoItems), findsOneWidget);
+    expect(find.text(AppStrings.pantryHistorySubtitle), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pantry-include-closed')));
+    await _pump(tester);
+    expect(find.text(AppStrings.pantryNoOpenItems), findsOneWidget);
     repository.listError = const ApiTransportException(
       ApiTransportFailureKind.network,
     );
@@ -80,6 +88,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('pantry-include-closed')));
     await _pump(tester);
     expect(repository.listRequests.last, isTrue);
+    expect(find.text(AppStrings.pantryHistorySubtitle), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('pantry-refresh')));
     await _pump(tester);
     expect(repository.listRequests.last, isTrue);

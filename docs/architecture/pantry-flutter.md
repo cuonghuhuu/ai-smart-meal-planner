@@ -1,11 +1,11 @@
-# Pantry / Fridge Flutter integration (P14-J2/J3/J4/J5)
+# Pantry / Fridge Flutter integration
 
-P14-J2 adds the typed Pantry data contract, exact quantity validation, and an
-HTTP repository in `mobile_app/lib/features/pantry/`. P14-J3 adds a controller
-and list/detail screens. P14-J4 adds lot creation, ingredient and mapped-food
-selection, and metadata-only editing. A Pantry item represents one physical
-lot; the client neither aggregates lots nor assigns an owner ID. The backend
-derives ownership from the authenticated access token.
+The Pantry module in `mobile_app/lib/features/pantry/` contains typed data
+models, fixed-scale validation, an HTTP repository, a session-scoped
+`ChangeNotifier` controller, and responsive list, detail, and form views. A
+Pantry item represents one physical lot; the client neither aggregates lots
+nor assigns an owner ID. The backend derives ownership from the authenticated
+access token.
 
 ## Backend API used by the repository
 
@@ -23,8 +23,8 @@ derives ownership from the authenticated access token.
 There is no delete operation, list pagination, or server-side list filter beyond
 `includeClosed`. The repository preserves `ApiClient` HTTP/problem and transport
 exceptions. A malformed response raises `ApiResponseFormatException`.
-The Flutter UI currently uses list, detail, create, and metadata replacement;
-adjust, consume, and discard remain data-contract operations without UI flows.
+The Flutter UI uses these read and mutation operations, including the three
+quantity actions.
 
 ## Models and requests
 
@@ -117,7 +117,7 @@ authorization does not rely on the refresh cookie. Browser refresh and logout
 operations that use the cookie remain CSRF-protected separately. Ordinary
 non-Bearer unsafe requests also remain subject to CSRF protection.
 
-## App composition, routes, and responsive UI (P14-J3/J4/J5)
+## App composition, routes, and responsive UI
 
 `SmartMealPlannerApp` owns `PantryController` in production, resets it on
 logout or authenticated principal change, and disposes it with the app. The
@@ -142,7 +142,7 @@ retain each backend lot as a separate row. Quantity display uses exact
 lifecycle status. User-facing copy is centralized in `AppStrings`, with backend
 code labels in `PantryLocalizations`.
 
-## Quantity lifecycle actions (P14-J5)
+## Quantity lifecycle actions
 
 The detail page offers Adjust and Consume for AVAILABLE lots and Discard for
 AVAILABLE or RESERVED lots. CONSUMED, DISCARDED, and EXPIRED lots have no
@@ -175,11 +175,12 @@ request generation and clears only its derived projection. The persisted
 meal plan and unrelated meal-planning state remain intact. A pending older
 shopping-list response is ignored, and the next access fetches a fresh one.
 Bearer-authenticated action requests follow the same Resource Server CSRF
-model described above; no backend security behavior changes in J5.
+model described above. P14 adds no backend production security change.
 
 ## Deferred work
 
 Restock/replenish, reservation/release, partial discard, manual EXPIRED
-transition, Pantry ledger/history UI, bulk actions, expiry filtering/polish,
-notifications, and server-side Pantry search/pagination remain deferred. Final
-responsive/accessibility and release regression work also remain.
+transition, Pantry event ledger UI, bulk actions, expiry filtering and
+notifications, and server-side Pantry search/pagination remain deferred. The
+include-closed lot list is available; individual inventory events are not
+shown in the UI.

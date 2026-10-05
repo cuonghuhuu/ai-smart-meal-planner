@@ -24,8 +24,10 @@ final class AppStrings {
   // Pantry and fridge views and forms.
   static const pantry = 'Kho thực phẩm';
   static const pantrySubtitle = 'Các lô nguyên liệu đang có trong kho.';
+  static const pantryHistorySubtitle = 'Các lô đang mở và đã đóng.';
   static const pantryIncludeClosed = 'Xem cả lô đã đóng';
   static const pantryNoItems = 'Chưa có lô nguyên liệu nào.';
+  static const pantryNoOpenItems = 'Không có lô nguyên liệu đang mở.';
   static const pantryLoadFailed =
       'Không thể tải kho thực phẩm. Vui lòng thử lại.';
   static const pantryDetailLoadFailed =

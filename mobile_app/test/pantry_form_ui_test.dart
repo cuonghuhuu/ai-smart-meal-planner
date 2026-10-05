@@ -314,11 +314,15 @@ void main() {
   testWidgets('create form renders at compact and wide sizes', (tester) async {
     final fixture = await _fixture();
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.binding.setSurfaceSize(const Size(390, 844));
+    await tester.binding.setSurfaceSize(const Size(320, 640));
     await tester.pumpWidget(fixture.app);
     fixture.router.go('/pantry/new');
     await _pump(tester);
     expect(find.byKey(const ValueKey('pantry-create-form')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
     await tester.binding.setSurfaceSize(const Size(1280, 900));

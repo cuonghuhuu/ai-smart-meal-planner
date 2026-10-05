@@ -79,7 +79,11 @@ class _PantryPageState extends State<PantryPage> {
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 8),
-              const Text(AppStrings.pantrySubtitle),
+              Text(
+                state.includeClosed
+                    ? AppStrings.pantryHistorySubtitle
+                    : AppStrings.pantrySubtitle,
+              ),
               const SizedBox(height: 16),
               Align(
                 alignment: Alignment.centerLeft,
@@ -137,7 +141,15 @@ class _PantryPageState extends State<PantryPage> {
       ];
     }
     if (state.items.isEmpty) {
-      return const [Center(child: Text(AppStrings.pantryNoItems))];
+      return [
+        Center(
+          child: Text(
+            state.includeClosed
+                ? AppStrings.pantryNoItems
+                : AppStrings.pantryNoOpenItems,
+          ),
+        ),
+      ];
     }
     return [for (final item in state.items) _itemTile(item)];
   }
