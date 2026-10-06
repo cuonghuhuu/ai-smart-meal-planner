@@ -28,7 +28,12 @@ service.
 - P8 Flutter catalog and ingredient preferences - complete
 - P9 Recipe core - complete (P9A/P9B Java catalog and nutrition; P9C offline
   Vietnamese curated Recipe import)
-- P10 Pantry / Fridge backend - current
+- P10 Pantry / Fridge backend - complete
+- P11 AI meal planning foundation and Java integration - complete
+- P12 Flutter meal planning UX - complete
+- P13 Shopping List projection - complete
+- P14 Flutter Pantry / Fridge inventory flows - complete
+- P15 Flutter Recipe Catalog - implemented on the current feature branch
 
 P2 adds the relational design: documentation under `docs/database/`, the
 versioned MySQL schema and reference seed data under `database/`, and the entity

@@ -236,7 +236,10 @@ void main() {
 Future<void> _tapAfterScroll(WidgetTester tester, Finder target) async {
   expect(target, findsOneWidget);
 
-  final scrollView = find.byType(SingleChildScrollView);
+  final scrollView = find.ancestor(
+    of: target,
+    matching: find.byType(SingleChildScrollView),
+  );
   expect(scrollView, findsOneWidget);
 
   await tester.dragUntilVisible(target, scrollView, const Offset(0, -200));
