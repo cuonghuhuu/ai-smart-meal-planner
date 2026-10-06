@@ -57,6 +57,12 @@ call Python directly.
 - [Meal Planning internal contract V1](meal-planning-contract-v1.md) - P11-B
   Java/Python DTOs, bounds, outcomes, allergen safety, and internal service
   security.
+- [Personalized Recipe Recommendation contract V1](recipe-recommendation-contract-v1.md) - P16 J1
+  public and Java/Python ranking boundaries, limits, outcomes, safety rules,
+  persistence semantics, and shared fixtures.
+- [Personalized Recipe Ranking algorithm V1](recipe-recommendation-algorithm-v1.md) - P16 J1
+  deterministic hard filtering, Pantry-aware scoring, nutrition slot shares,
+  recent-history variety, explanations, and top-K ordering.
 - [Meal Planning algorithm V1](meal-planning-algorithm-v1.md) - P11-C
 - [Meal Planning Java–Python integration](meal-planning-java-integration-gate-d.md) - P11-D
   fail-closed CSP filtering, Decimal scoring, Virtual Pantry, forward checking,
