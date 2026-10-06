@@ -68,6 +68,9 @@ public class SecurityConfiguration {
     private static final String LOGOUT_ALL_PATH =
             "/api/v1/auth/logout-all";
 
+    private static final String INGREDIENT_RECOGNITION_PATH =
+            "/api/v1/food-recognition/ingredients:detect";
+
     @Bean
     SecurityFilterChain securityFilterChain(
             HttpSecurity http,
@@ -88,6 +91,14 @@ public class SecurityConfiguration {
                         matchesPostPath(
                                 request,
                                 LOGOUT_ALL_PATH);
+
+        RequestMatcher bearerIngredientRecognitionMatcher =
+                request ->
+                        matchesPostPath(
+                                request,
+                                INGREDIENT_RECOGNITION_PATH)
+                                && hasBearerAuthorization(
+                                request);
 
         http
                 .cors(Customizer.withDefaults())
@@ -124,7 +135,8 @@ public class SecurityConfiguration {
                          * not rely on cookie authentication.
                          */
                         .ignoringRequestMatchers(
-                                bearerLogoutAllMatcher))
+                                bearerLogoutAllMatcher,
+                                bearerIngredientRecognitionMatcher))
 
                 .authorizeHttpRequests(routes -> routes
 
@@ -338,6 +350,22 @@ public class SecurityConfiguration {
         }
 
         return requestUri;
+    }
+
+    private static boolean hasBearerAuthorization(
+            HttpServletRequest request) {
+
+        String authorization =
+                request.getHeader("Authorization");
+
+        return authorization != null
+                && authorization.regionMatches(
+                true,
+                0,
+                "Bearer ",
+                0,
+                7)
+                && authorization.substring(7).trim().length() > 0;
     }
 
     private static boolean hasRefreshCookie(
