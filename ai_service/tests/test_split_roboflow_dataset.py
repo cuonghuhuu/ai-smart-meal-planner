@@ -41,3 +41,39 @@ def test_split_groups_never_leaks_source_group_across_splits() -> None:
     assert group_sets["train"].isdisjoint(group_sets["test"])
     assert group_sets["val"].isdisjoint(group_sets["test"])
     assert sum(len(items) for items in split.values()) == len(records)
+
+
+def test_split_groups_keeps_single_source_class_in_train() -> None:
+    records = [
+        _record("rare_jpg.rf.a.jpg", {9}),
+        _record("common1_jpg.rf.a.jpg", {0}),
+        _record("common2_jpg.rf.a.jpg", {0}),
+        _record("common3_jpg.rf.a.jpg", {0}),
+        _record("common4_jpg.rf.a.jpg", {0}),
+        _record("common5_jpg.rf.a.jpg", {0}),
+    ]
+
+    split = split_groups(records, seed=42)
+
+    assert any(9 in record.classes for record in split["train"])
+    assert all(9 not in record.classes for record in split["val"])
+    assert all(9 not in record.classes for record in split["test"])
+
+
+def test_split_groups_spreads_class_across_all_splits_when_three_groups_exist() -> None:
+    records = [
+        _record("rare1_jpg.rf.a.jpg", {7}),
+        _record("rare2_jpg.rf.a.jpg", {7}),
+        _record("rare3_jpg.rf.a.jpg", {7}),
+        _record("common1_jpg.rf.a.jpg", {0}),
+        _record("common2_jpg.rf.a.jpg", {0}),
+        _record("common3_jpg.rf.a.jpg", {0}),
+        _record("common4_jpg.rf.a.jpg", {0}),
+        _record("common5_jpg.rf.a.jpg", {0}),
+        _record("common6_jpg.rf.a.jpg", {0}),
+    ]
+
+    split = split_groups(records, seed=42)
+
+    for split_name in ("train", "val", "test"):
+        assert any(7 in record.classes for record in split[split_name])
