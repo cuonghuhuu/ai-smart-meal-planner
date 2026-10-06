@@ -15,6 +15,7 @@ import 'package:smart_meal_planner/features/measurements/data/measurements_repos
 import 'package:smart_meal_planner/features/catalog/application/food_catalog_controller.dart';
 import 'package:smart_meal_planner/features/catalog/application/ingredient_catalog_controller.dart';
 import 'package:smart_meal_planner/features/catalog/data/catalog_repository.dart';
+import 'package:smart_meal_planner/features/catalog/data/ingredient_recognition_repository.dart';
 import 'package:smart_meal_planner/features/meal_planning/data/meal_planning_repository.dart';
 import 'package:smart_meal_planner/features/pantry/data/pantry_repository.dart';
 import 'package:smart_meal_planner/features/recipes/data/recipe_repository.dart';
@@ -86,6 +87,7 @@ final class AppSessionFactory {
       ),
       ingredientCatalogController: IngredientCatalogController(
         repository: catalogRepository,
+        recognitionRepository: HttpIngredientRecognitionRepository(apiClient),
       ),
       mealPlanningRepository: HttpMealPlanningRepository(
         apiClient,
