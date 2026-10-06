@@ -38,6 +38,19 @@ class RecipeRankingContractJsonTest {
                 .isInstanceOf(RecipeRankingContractValidationException.class);
     }
 
+    @Test
+    void scorePrecisionIsLockedToFourDecimalPlaces() {
+        String payload = fixture("valid_succeeded_response.json")
+                .replace("0.7417", "0.741701");
+        assertThatThrownBy(() -> json.readResponse(payload))
+                .isInstanceOf(RecipeRankingContractValidationException.class);
+
+        payload = fixture("valid_succeeded_response.json")
+                .replace("\"value\": 0.5", "\"value\": 0.500001");
+        assertThatThrownBy(() -> json.readResponse(payload))
+                .isInstanceOf(RecipeRankingContractValidationException.class);
+    }
+
     private static String fixture(String name) {
         String path = "/contract-fixtures/recipe_recommendation/v1/" + name;
         try (InputStream input = RecipeRankingContractJsonTest.class.getResourceAsStream(path)) {

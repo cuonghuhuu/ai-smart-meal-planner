@@ -74,7 +74,7 @@ public record RecipeRankingResponse(
             @Min(1) @Max(MAX_RESULT_LIMIT) int rank,
             @NotNull UUID recipePublicId,
             @NotNull @DecimalMin("-0.20") @DecimalMax("1.00")
-            @Digits(integer = 1, fraction = 6) BigDecimal totalScore,
+            @Digits(integer = 1, fraction = 4) BigDecimal totalScore,
             @NotNull @Size(min = MAX_SCORE_COMPONENTS, max = MAX_SCORE_COMPONENTS)
             List<@NotNull @Valid ScoreComponent> scoreComponents,
             @NotBlank @Size(max = MAX_EXPLANATION_LENGTH) String explanation) {
@@ -106,7 +106,7 @@ public record RecipeRankingResponse(
     public record ScoreComponent(
             @NotNull ScoreComponentCode componentCode,
             @NotNull @DecimalMin("0") @DecimalMax("1")
-            @Digits(integer = 1, fraction = 6) BigDecimal value,
+            @Digits(integer = 1, fraction = 4) BigDecimal value,
             @NotNull @DecimalMin(value = "0", inclusive = false) @DecimalMax("1")
             @Digits(integer = 1, fraction = 4) BigDecimal weight) {
     }
