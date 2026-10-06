@@ -223,16 +223,24 @@ def split_groups(
             if split_group_count[name] < target_groups[name]
         ] or list(split_names)
 
-        def score(split: str) -> tuple[float, float, str]:
+        def score(
+            split: str,
+            group_classes: frozenset[int] = classes,
+            group_key: str = key,
+        ) -> tuple[float, float, str]:
             class_need = 0.0
-            for class_id in classes:
+            for class_id in group_classes:
                 target = target_class_groups[split][class_id]
                 if target > 0:
                     deficit = max(target - split_class_groups[split][class_id], 0.0)
                     class_need += deficit / target
             size_target = target_groups[split]
             size_need = max(size_target - split_group_count[split], 0) / size_target
-            return (class_need + 0.35 * size_need, size_need, tie_value(f"{key}:{split}"))
+            return (
+                class_need + 0.35 * size_need,
+                size_need,
+                tie_value(f"{group_key}:{split}"),
+            )
 
         chosen = max(candidates, key=score)
         assignments[key] = chosen
