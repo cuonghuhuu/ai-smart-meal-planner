@@ -63,6 +63,7 @@ class ApiClient {
     bool authenticated = false,
     bool allowAuthenticationRetry = true,
     Duration? requestTimeout,
+    Map<String, String> headers = const {},
   }) => _requestBytesJson(
     path,
     bytes: bytes,
@@ -70,6 +71,7 @@ class ApiClient {
     authenticated: authenticated,
     allowAuthenticationRetry: allowAuthenticationRetry,
     requestTimeout: requestTimeout ?? timeout,
+    headers: headers,
     retried: false,
   );
 
@@ -80,11 +82,13 @@ class ApiClient {
     required bool authenticated,
     required bool allowAuthenticationRetry,
     required Duration requestTimeout,
+    required Map<String, String> headers,
     required bool retried,
   }) async {
     final requestHeaders = <String, String>{
       'Accept': 'application/json, application/problem+json',
       'Content-Type': contentType,
+      ...headers,
     };
 
     if (authenticated) {
@@ -121,6 +125,7 @@ class ApiClient {
         authenticated: authenticated,
         allowAuthenticationRetry: false,
         requestTimeout: requestTimeout,
+        headers: headers,
         retried: true,
       );
     }
