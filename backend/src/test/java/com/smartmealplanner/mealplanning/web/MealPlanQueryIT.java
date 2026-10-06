@@ -184,7 +184,8 @@ class MealPlanQueryIT {
                         RecommendationRequest.Kind.MEAL_PLAN));
         Long requestId = request.id();
         new TransactionTemplate(transactions).executeWithoutResult(ignored ->
-                assertThat(requests.completePending(requestId, status.name(), null, null))
+                assertThat(requests.completePending(requestId, RecommendationRequest.Kind.MEAL_PLAN.name(),
+                        status.name(), null, null))
                         .isEqualTo(1));
         request = requests.findById(requestId).orElseThrow();
         return plans.saveAndFlush(new MealPlan(owner.internalId(), DATE,
