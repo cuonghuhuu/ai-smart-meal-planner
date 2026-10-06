@@ -21,6 +21,52 @@ final class AppStrings {
   static const loading = 'Đang tải...';
   static const loadingPreferences = 'Đang tải sở thích ăn uống…';
 
+  // Recipe browse.
+  static const recipes = 'Công thức';
+  static const recipeBrowseSubtitle = 'Khám phá công thức phù hợp với bạn.';
+  static const recipeSearchHint = 'Tìm công thức';
+  static const recipeMealSlot = 'Bữa ăn';
+  static const recipeAllMealSlots = 'Tất cả bữa ăn';
+  static const recipeTag = 'Nhãn';
+  static const recipeAllTags = 'Tất cả nhãn';
+  static const recipeMaxTime = 'Thời gian tối đa';
+  static const recipeAnyTime = 'Mọi thời lượng';
+  static const recipeMinutes = 'phút';
+  static const recipeClearFilters = 'Xóa bộ lọc';
+  static const recipeNoResults = 'Không tìm thấy công thức phù hợp.';
+  static const recipeTagsLoading = 'Đang tải nhãn công thức…';
+  static const recipeMealSlotsLoading = 'Đang tải loại bữa ăn…';
+  static const recipeServings = 'khẩu phần';
+  static const recipePrep = 'Chuẩn bị';
+  static const recipeCook = 'Nấu';
+  static const recipeTotalTime = 'Tổng';
+  static const recipeDifficultyEasy = 'Dễ';
+  static const recipeDifficultyMedium = 'Trung bình';
+  static const recipeDifficultyHard = 'Khó';
+  static const recipeOpen = 'Xem công thức';
+  static const recipeImageUnavailable = 'Chưa có ảnh';
+
+  // Recipe detail.
+  static const recipeDetailLoadFailed =
+      'Không thể tải công thức. Vui lòng thử lại.';
+  static const recipeIngredients = 'Nguyên liệu';
+  static const recipeNoIngredients = 'Chưa có danh sách nguyên liệu.';
+  static const recipeSteps = 'Các bước thực hiện';
+  static const recipeNoSteps = 'Chưa có hướng dẫn thực hiện.';
+  static const recipeInstructionsNote = 'Lưu ý khi thực hiện';
+  static const recipePreparationNote = 'Sơ chế';
+  static const recipeOptional = 'Tùy chọn';
+  static const recipeStepDuration = 'Thời gian bước';
+  static const recipeNutrition = 'Dinh dưỡng';
+  static const recipeNutritionPerServing = 'Giá trị cho mỗi khẩu phần';
+  static const recipeNutritionUnavailable = 'Chưa có thông tin dinh dưỡng.';
+  static const recipeNutritionNoValues = 'Chưa có giá trị dinh dưỡng.';
+  static const recipeNutritionCompleteness = 'Mức độ đầy đủ';
+  static const recipeNutritionComputedAt = 'Tính lúc';
+  static const recipeNutritionNote = 'Lưu ý dinh dưỡng';
+  static const recipeDifficulty = 'Độ khó';
+  static const recipeServingsLabel = 'Khẩu phần';
+
   // Pantry and fridge views and forms.
   static const pantry = 'Kho thực phẩm';
   static const pantrySubtitle = 'Các lô nguyên liệu đang có trong kho.';

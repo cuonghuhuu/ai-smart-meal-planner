@@ -75,6 +75,8 @@ flushed. See [Vietnamese Recipe offline import](vietnam-recipe-import.md).
 
 ## Persistence authority and future phases
 
+The P15 Flutter consumer is documented in [Flutter Recipe catalog](recipe-flutter.md).
+
 The Java backend is authoritative for Recipe persistence and API validation.
 P9A does not add user recipe CRUD, connect Pantry or Recommendation workflows,
 or call the Python AI service. Those responsibilities remain future phases.

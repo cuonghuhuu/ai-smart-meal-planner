@@ -26,6 +26,9 @@ import 'package:smart_meal_planner/features/pantry/application/pantry_controller
 import 'package:smart_meal_planner/features/pantry/presentation/pantry_page.dart';
 import 'package:smart_meal_planner/features/pantry/presentation/pantry_detail_page.dart';
 import 'package:smart_meal_planner/features/pantry/presentation/pantry_item_form.dart';
+import 'package:smart_meal_planner/features/recipes/application/recipe_controller.dart';
+import 'package:smart_meal_planner/features/recipes/presentation/recipe_browse_page.dart';
+import 'package:smart_meal_planner/features/recipes/presentation/recipe_detail_page.dart';
 
 final class AppRouter {
   AppRouter(
@@ -39,6 +42,7 @@ final class AppRouter {
     MealPlanningController? mealPlanningController,
     PantryController? pantryController,
     CatalogRepository? pantryCatalogRepository,
+    RecipeController? recipeController,
   }) : router = GoRouter(
          initialLocation: '/catalog/foods',
          refreshListenable: sessionController,
@@ -275,6 +279,67 @@ final class AppRouter {
                );
              },
            ),
+           GoRoute(
+             path: '/recipes',
+             builder: (context, state) => SessionRouteGate(
+               sessionController: sessionController,
+               child: AuthenticatedShell(
+                 sessionController: sessionController,
+                 selectedIndex: 7,
+                 content: recipeController == null
+                     ? const Center(
+                         child: Text(AppStrings.recipeDetailLoadFailed),
+                       )
+                     : AnimatedBuilder(
+                         animation: sessionController,
+                         builder: (context, _) =>
+                             !sessionController.isAuthenticated
+                             ? const SizedBox.shrink()
+                             : RecipeBrowsePage(
+                                 key: ValueKey(
+                                   sessionController.identity?.publicId,
+                                 ),
+                                 controller: recipeController,
+                                 onRecipeSelected: (recipe) => context.push(
+                                   '/recipes/${Uri.encodeComponent(recipe.publicId)}',
+                                 ),
+                               ),
+                       ),
+               ),
+             ),
+           ),
+           GoRoute(
+             path: '/recipes/:publicId',
+             builder: (context, state) {
+               final publicId = state.pathParameters['publicId'] ?? '';
+               return SessionRouteGate(
+                 sessionController: sessionController,
+                 child: !_isValidPublicId(publicId)
+                     ? const _NotFoundPage()
+                     : AuthenticatedShell(
+                         sessionController: sessionController,
+                         selectedIndex: 7,
+                         content: recipeController == null
+                             ? const Center(
+                                 child: Text(AppStrings.recipeDetailLoadFailed),
+                               )
+                             : AnimatedBuilder(
+                                 animation: sessionController,
+                                 builder: (context, _) =>
+                                     !sessionController.isAuthenticated
+                                     ? const SizedBox.shrink()
+                                     : RecipeDetailPage(
+                                         key: ValueKey(
+                                           '${sessionController.identity?.publicId}-$publicId',
+                                         ),
+                                         controller: recipeController,
+                                         publicId: publicId,
+                                       ),
+                               ),
+                       ),
+               );
+             },
+           ),
          ],
          errorBuilder: (context, state) => const _NotFoundPage(),
        );
@@ -298,6 +363,8 @@ final class AppRouter {
         path == '/meal-planning' ||
         path == '/pantry' ||
         path == '/pantry/new' ||
+        path == '/recipes' ||
+        _isRecipeDetailPath(path) ||
         _isPantryEditPath(path) ||
         _isPantryDetailPath(path);
 
@@ -333,6 +400,9 @@ final class AppRouter {
                 uri.path == '/meal-planning' ||
                 uri.path == '/pantry' ||
                 uri.path == '/pantry/new' ||
+                uri.path == '/recipes' ||
+                (_isRecipeDetailPath(uri.path) &&
+                    _isValidPublicId(uri.path.split('/').last)) ||
                 (_isPantryEditPath(uri.path) &&
                     _isValidPublicId(uri.path.split('/')[2])) ||
                 (_isPantryDetailPath(uri.path) &&
@@ -352,6 +422,13 @@ final class AppRouter {
 
   static bool _isPantryDetailPath(String path) {
     const prefix = '/pantry/';
+    if (!path.startsWith(prefix)) return false;
+    final segment = path.substring(prefix.length);
+    return segment.isNotEmpty && !segment.contains('/');
+  }
+
+  static bool _isRecipeDetailPath(String path) {
+    const prefix = '/recipes/';
     if (!path.startsWith(prefix)) return false;
     final segment = path.substring(prefix.length);
     return segment.isNotEmpty && !segment.contains('/');

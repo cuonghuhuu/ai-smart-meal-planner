@@ -15,6 +15,7 @@ import 'package:smart_meal_planner/features/catalog/application/ingredient_catal
 import 'package:smart_meal_planner/features/catalog/data/catalog_repository.dart';
 import 'package:smart_meal_planner/features/meal_planning/application/meal_planning_controller.dart';
 import 'package:smart_meal_planner/features/pantry/application/pantry_controller.dart';
+import 'package:smart_meal_planner/features/recipes/application/recipe_controller.dart';
 
 class SmartMealPlannerApp extends StatefulWidget {
   const SmartMealPlannerApp({
@@ -29,6 +30,7 @@ class SmartMealPlannerApp extends StatefulWidget {
     this.mealPlanningController,
     this.pantryController,
     this.pantryCatalogRepository,
+    this.recipeController,
   });
 
   final SessionController? sessionController;
@@ -41,6 +43,7 @@ class SmartMealPlannerApp extends StatefulWidget {
   final MealPlanningController? mealPlanningController;
   final PantryController? pantryController;
   final CatalogRepository? pantryCatalogRepository;
+  final RecipeController? recipeController;
 
   @override
   State<SmartMealPlannerApp> createState() => _SmartMealPlannerAppState();
@@ -57,6 +60,8 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
   late final MealPlanningController? _mealPlanningController;
   late final PantryController? _pantryController;
   late final CatalogRepository? _pantryCatalogRepository;
+  late final RecipeController? _recipeController;
+  late final bool _ownsRecipeController;
   late final bool _ownsMealPlanningController;
   late final bool _ownsPantryController;
   late final AppRouter _appRouter;
@@ -86,6 +91,10 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       );
       _ownsPantryController = true;
       _pantryCatalogRepository = dependencies.catalogRepository;
+      _recipeController = RecipeController(
+        repository: dependencies.recipeRepository,
+      );
+      _ownsRecipeController = true;
     } else {
       _sessionController = widget.sessionController!;
       _profileController = widget.profileController;
@@ -99,6 +108,8 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       _pantryController = widget.pantryController;
       _ownsPantryController = false;
       _pantryCatalogRepository = widget.pantryCatalogRepository;
+      _recipeController = widget.recipeController;
+      _ownsRecipeController = false;
     }
     _appRouter = AppRouter(
       _sessionController,
@@ -111,6 +122,7 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       mealPlanningController: _mealPlanningController,
       pantryController: _pantryController,
       pantryCatalogRepository: _pantryCatalogRepository,
+      recipeController: _recipeController,
     );
     _observedSessionStatus = _sessionController.status;
     _observedAuthenticatedPublicId = _sessionController.identity?.publicId;
@@ -143,6 +155,7 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       _ingredientCatalogController?.resetForSessionChange();
       _mealPlanningController?.resetForSessionChange();
       _pantryController?.resetForSessionChange();
+      _recipeController?.resetForSessionChange();
     }
   }
 
@@ -151,6 +164,7 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
     _sessionController.removeListener(_handleSessionChanged);
     if (_ownsMealPlanningController) _mealPlanningController?.dispose();
     if (_ownsPantryController) _pantryController?.dispose();
+    if (_ownsRecipeController) _recipeController?.dispose();
     super.dispose();
   }
 
