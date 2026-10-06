@@ -45,6 +45,8 @@ def test_ingredient_recognition_endpoint_returns_vietnamese_contract() -> None:
     )
 
     assert response.status_code == 200
+    assert response.headers["content-type"] == "application/json; charset=utf-8"
+    assert "Cà chua" in response.content.decode("utf-8")
     assert response.json() == {
         "algorithmVersion": "YOLO11N_INGREDIENT_V1",
         "imageWidth": 640,
