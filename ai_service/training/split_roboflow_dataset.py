@@ -214,38 +214,96 @@ def split_groups(
     split_class_groups: dict[str, Counter[int]] = {
         name: Counter() for name in split_names
     }
+    class_to_groups: dict[int, list[str]] = defaultdict(list)
+    for group_key, classes in group_classes.items():
+        for class_id in classes:
+            class_to_groups[class_id].append(group_key)
+
+    def assign_group(group_key: str, split: str) -> None:
+        assignments[group_key] = split
+        split_group_count[split] += 1
+        split_class_groups[split].update(group_classes[group_key])
+
+    def coverage_score(group_key: str, split: str) -> tuple[int, int, str]:
+        uncovered = sum(
+            1
+            for class_id in group_classes[group_key]
+            if split_class_groups[split][class_id] == 0
+        )
+        remaining_capacity = target_groups[split] - split_group_count[split]
+        return (uncovered, remaining_capacity, tie_value(f"{group_key}:{split}"))
+
+    # Seed rare-class coverage before balancing the remaining groups. Every class
+    # with data must be learnable from train; classes backed by >=2 or >=3
+    # independent source groups are also represented in val/test respectively.
+    for class_id in sorted(
+        class_to_groups,
+        key=lambda item: (len(class_to_groups[item]), item),
+    ):
+        source_groups = sorted(class_to_groups[class_id], key=tie_value)
+        desired_splits = ["train"]
+        if len(source_groups) >= 2:
+            desired_splits.append("val")
+        if len(source_groups) >= 3:
+            desired_splits.append("test")
+
+        for split in desired_splits:
+            if any(assignments.get(group_key) == split for group_key in source_groups):
+                continue
+            unassigned = [
+                group_key for group_key in source_groups if group_key not in assignments
+            ]
+            if not unassigned:
+                continue
+            _, chosen = max(
+                (coverage_score(group_key, split), group_key)
+                for group_key in unassigned
+            )
+            assign_group(chosen, split)
+
+    def balance_score(group_key: str, split: str) -> tuple[float, float, str]:
+        class_need = 0.0
+        for class_id in group_classes[group_key]:
+            target = target_class_groups[split][class_id]
+            if target > 0:
+                deficit = max(target - split_class_groups[split][class_id], 0.0)
+                class_need += deficit / target
+        size_target = target_groups[split]
+        size_need = max(size_target - split_group_count[split], 0) / size_target
+        return (
+            class_need + 0.35 * size_need,
+            size_need,
+            tie_value(f"{group_key}:{split}"),
+        )
 
     for key in ordered_keys:
-        classes = group_classes[key]
+        if key in assignments:
+            continue
         candidates = [
             name
             for name in split_names
             if split_group_count[name] < target_groups[name]
         ] or list(split_names)
+        _, chosen = max((balance_score(key, split), split) for split in candidates)
+        assign_group(key, chosen)
 
-        def score(
-            split: str,
-            group_classes: frozenset[int] = classes,
-            group_key: str = key,
-        ) -> tuple[float, float, str]:
-            class_need = 0.0
-            for class_id in group_classes:
-                target = target_class_groups[split][class_id]
-                if target > 0:
-                    deficit = max(target - split_class_groups[split][class_id], 0.0)
-                    class_need += deficit / target
-            size_target = target_groups[split]
-            size_need = max(size_target - split_group_count[split], 0) / size_target
-            return (
-                class_need + 0.35 * size_need,
-                size_need,
-                tie_value(f"{group_key}:{split}"),
+    for class_id, source_groups in class_to_groups.items():
+        desired_splits = ["train"]
+        if len(source_groups) >= 2:
+            desired_splits.append("val")
+        if len(source_groups) >= 3:
+            desired_splits.append("test")
+        represented = {
+            assignments[group_key]
+            for group_key in source_groups
+            if group_key in assignments
+        }
+        missing = [split for split in desired_splits if split not in represented]
+        if missing:
+            raise ValueError(
+                "Could not create leakage-safe class coverage for "
+                f"class {class_id}; missing splits: {', '.join(missing)}"
             )
-
-        chosen = max(candidates, key=score)
-        assignments[key] = chosen
-        split_group_count[chosen] += 1
-        split_class_groups[chosen].update(classes)
 
     split_records = {name: [] for name in split_names}
     for key, group_records in grouped.items():
@@ -306,17 +364,53 @@ def print_audit(split_records: dict[str, list[Record]], names: dict[int, str]) -
         record.group_key for records in split_records.values() for record in records
     }
     print(f"Source groups: {len(all_groups)}")
+
+    total_class_groups: Counter[int] = Counter()
+    for group_key in all_groups:
+        classes = {
+            class_id
+            for records in split_records.values()
+            for record in records
+            if record.group_key == group_key
+            for class_id in record.classes
+        }
+        total_class_groups.update(classes)
+
     for split in ("train", "val", "test"):
         records = split_records[split]
         groups = {record.group_key for record in records}
-        class_presence: Counter[int] = Counter(
+        class_image_presence: Counter[int] = Counter(
             class_id for record in records for class_id in record.classes
         )
+        class_group_presence: Counter[int] = Counter()
+        for group_key in groups:
+            classes = {
+                class_id
+                for record in records
+                if record.group_key == group_key
+                for class_id in record.classes
+            }
+            class_group_presence.update(classes)
+
         print(f"{split}: {len(groups)} groups, {len(records)} images")
         for class_id, class_name in names.items():
             print(
                 f"  {class_id:>2} {class_name:<16} "
-                f"{class_presence[class_id]:>5} labelled images"
+                f"{class_group_presence[class_id]:>3} groups / "
+                f"{class_image_presence[class_id]:>5} labelled images"
+            )
+
+    sparse = [
+        (class_id, names[class_id], total_class_groups[class_id])
+        for class_id in names
+        if 0 < total_class_groups[class_id] < 3
+    ]
+    if sparse:
+        print("WARNING: classes with fewer than 3 independent source groups:")
+        for class_id, class_name, group_count in sparse:
+            print(
+                f"  {class_id:>2} {class_name:<16} {group_count} group(s); "
+                "full train/val/test coverage is impossible without leakage"
             )
 
 
