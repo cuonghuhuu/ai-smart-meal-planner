@@ -352,11 +352,17 @@ String _recognitionErrorMessage(Object error) {
         : 'Không thể kết nối tới dịch vụ nhận diện AI.';
   }
   if (error is ApiHttpException) {
+    final code = error.problem?.code ?? 'UNKNOWN';
     return switch (error.statusCode) {
+      401 => 'Phiên đăng nhập không còn hợp lệ. Vui lòng đăng nhập lại.',
+      403 => 'Yêu cầu nhận diện bị chặn bởi bảo vệ CSRF (HTTP 403).',
       413 => 'Ảnh quá lớn. Vui lòng chọn ảnh nhỏ hơn.',
       415 || 422 => 'Ảnh không hợp lệ hoặc định dạng chưa được hỗ trợ.',
-      502 || 503 || 504 => 'Dịch vụ nhận diện AI hiện không khả dụng.',
-      _ => 'Không thể nhận diện ảnh. Vui lòng thử lại.',
+      500 => 'Backend gặp lỗi khi xử lý nhận diện (HTTP 500, $code).',
+      502 || 503 || 504 =>
+        'Dịch vụ nhận diện AI hiện không khả dụng (HTTP ${error.statusCode}, $code).',
+      _ =>
+        'Không thể nhận diện ảnh (HTTP ${error.statusCode}, $code).',
     };
   }
   return 'Không thể nhận diện ảnh. Vui lòng thử lại.';
