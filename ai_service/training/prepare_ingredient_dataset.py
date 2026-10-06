@@ -43,7 +43,16 @@ def _resolve_split(data_yaml: Path, config: dict[str, Any], key: str) -> Path | 
     split_path = Path(raw)
     if not split_path.is_absolute():
         split_path = configured_root / split_path
-    return split_path.resolve()
+    resolved = split_path.resolve()
+    if resolved.exists():
+        return resolved
+
+    # Some Roboflow ZIP exports contain paths such as ../train/images even
+    # though train/ is physically beside data.yaml. Accept that export shape
+    # without weakening class or label validation.
+    trimmed_parts = [part for part in Path(raw).parts if part not in ("..", ".")]
+    fallback = data_yaml.parent.joinpath(*trimmed_parts).resolve()
+    return fallback if fallback.exists() else resolved
 
 
 def _labels_dir(images_dir: Path) -> Path:
@@ -135,11 +144,19 @@ def prepare(source_yaml: Path, output_root: Path) -> None:
             copied_images[split] += 1
             object_counts.update(counts)
 
+    if copied_images["train"] == 0 or copied_images["val"] == 0:
+        raise ValueError("Prepared dataset must contain non-empty train and val splits")
+    missing_objects = [
+        item.name_vi for item in INGREDIENT_CLASSES if object_counts[item.class_id] == 0
+    ]
+    if missing_objects:
+        raise ValueError("No retained objects for: " + ", ".join(missing_objects))
+
     dataset_yaml = {
         "path": str(output_root.resolve()),
         "train": "images/train",
         "val": "images/val",
-        "test": "images/test" if (output_root / "images" / "test").exists() else None,
+        "test": "images/test" if copied_images["test"] else None,
         "names": vietnamese_names(),
     }
     if dataset_yaml["test"] is None:
