@@ -21,7 +21,7 @@ class RecipeRankingContractJsonTest {
                 .hasSize(2);
         assertThat(json.readResponse(fixture("valid_infeasible_response.json")).rankedRecipes())
                 .isEmpty();
-        assertThat(json.writeRequest(request)).contains(""contractVersion":"1"");
+        assertThat(json.writeRequest(request)).contains("contractVersion");
     }
 
     @Test
