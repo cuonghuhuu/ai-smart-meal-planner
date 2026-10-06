@@ -347,7 +347,9 @@ final class IngredientRecognitionState {
 
 String _recognitionErrorMessage(Object error) {
   if (error is ApiTransportException) {
-    return 'Không thể kết nối tới dịch vụ nhận diện AI.';
+    return error.kind == ApiTransportFailureKind.timeout
+        ? 'Nhận diện AI mất quá nhiều thời gian. Vui lòng thử lại.'
+        : 'Không thể kết nối tới dịch vụ nhận diện AI.';
   }
   if (error is ApiHttpException) {
     return switch (error.statusCode) {
