@@ -344,3 +344,15 @@ coverage-reports/
 !docs/**
 !database/
 !database/**
+
+# ------------------------------------------------------------
+
+# LOCAL AI DATASETS / MODEL ARTIFACTS
+
+# ------------------------------------------------------------
+
+ai_service/training/datasets/
+ai_service/training/runs/
+ai_service/app/food_recognition/models/**/*.pt
+*.onnx
+*.engine
