@@ -62,12 +62,14 @@ class ApiClient {
     required String contentType,
     bool authenticated = false,
     bool allowAuthenticationRetry = true,
+    Duration? requestTimeout,
   }) => _requestBytesJson(
     path,
     bytes: bytes,
     contentType: contentType,
     authenticated: authenticated,
     allowAuthenticationRetry: allowAuthenticationRetry,
+    requestTimeout: requestTimeout ?? timeout,
     retried: false,
   );
 
@@ -77,6 +79,7 @@ class ApiClient {
     required String contentType,
     required bool authenticated,
     required bool allowAuthenticationRetry,
+    required Duration requestTimeout,
     required bool retried,
   }) async {
     final requestHeaders = <String, String>{
@@ -96,7 +99,7 @@ class ApiClient {
       final request = http.Request('POST', _resolve(path))
         ..headers.addAll(requestHeaders)
         ..bodyBytes = bytes;
-      final streamed = await _httpClient.send(request).timeout(timeout);
+      final streamed = await _httpClient.send(request).timeout(requestTimeout);
       response = await http.Response.fromStream(streamed);
     } on TimeoutException {
       throw const ApiTransportException(ApiTransportFailureKind.timeout);
@@ -117,6 +120,7 @@ class ApiClient {
         contentType: contentType,
         authenticated: authenticated,
         allowAuthenticationRetry: false,
+        requestTimeout: requestTimeout,
         retried: true,
       );
     }
