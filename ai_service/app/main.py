@@ -3,7 +3,8 @@
 from fastapi import FastAPI
 
 from app.meal_planning.api import router as meal_planning_router
-from app.recipe_ranking.api import router as recipe_ranking_router\nfrom app.request_size_limit import RequestSizeLimitMiddleware
+from app.recipe_ranking.api import router as recipe_ranking_router
+from app.request_size_limit import RequestSizeLimitMiddleware
 from app.settings import InternalServiceSettings
 
 
@@ -29,7 +30,8 @@ def create_app(settings: InternalServiceSettings | None = None) -> FastAPI:
         max_bytes=resolved_settings.max_request_bytes,
     )
     application.add_api_route("/health", health, methods=["GET"])
-    application.include_router(meal_planning_router)\n    application.include_router(recipe_ranking_router)
+    application.include_router(meal_planning_router)
+    application.include_router(recipe_ranking_router)
     return application
 
 
