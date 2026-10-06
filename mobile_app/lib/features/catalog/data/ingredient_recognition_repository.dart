@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:smart_meal_planner/core/api/api_client.dart';
 import 'package:smart_meal_planner/core/api/api_exception.dart';
+import 'package:smart_meal_planner/features/auth/domain/auth_models.dart';
 
 final class IngredientRecognitionResult {
   const IngredientRecognitionResult({
@@ -139,23 +140,29 @@ abstract interface class IngredientRecognitionRepository {
 
 final class HttpIngredientRecognitionRepository
     implements IngredientRecognitionRepository {
-  HttpIngredientRecognitionRepository(this._apiClient);
+  HttpIngredientRecognitionRepository(
+    this._apiClient, {
+    this.csrfTokenProvider,
+  });
 
   static const _path = '/api/v1/food-recognition/ingredients:detect';
 
   final ApiClient _apiClient;
+  final Future<CsrfToken> Function()? csrfTokenProvider;
 
   @override
   Future<IngredientRecognitionResult> detect({
     required Uint8List imageBytes,
     required String contentType,
   }) async {
+    final csrf = await csrfTokenProvider?.call();
     final response = await _apiClient.requestBytesJson(
       _path,
       bytes: imageBytes,
       contentType: contentType,
       authenticated: true,
       requestTimeout: const Duration(seconds: 45),
+      headers: csrf == null ? const {} : {csrf.headerName: csrf.value},
     );
     return IngredientRecognitionResult.fromJson(response);
   }
