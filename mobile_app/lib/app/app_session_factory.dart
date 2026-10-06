@@ -87,7 +87,10 @@ final class AppSessionFactory {
       ),
       ingredientCatalogController: IngredientCatalogController(
         repository: catalogRepository,
-        recognitionRepository: HttpIngredientRecognitionRepository(apiClient),
+        recognitionRepository: HttpIngredientRecognitionRepository(
+          apiClient,
+          csrfTokenProvider: kIsWeb ? authRepository.fetchCsrf : null,
+        ),
       ),
       mealPlanningRepository: HttpMealPlanningRepository(
         apiClient,
