@@ -34,7 +34,7 @@ class YoloIngredientDetector:
         self.device = device
 
     @classmethod
-    def from_environment(cls) -> "YoloIngredientDetector":
+    def from_environment(cls) -> YoloIngredientDetector:
         default_path = Path(
             "ai_service/app/food_recognition/models/ingredients/best.pt"
         )
