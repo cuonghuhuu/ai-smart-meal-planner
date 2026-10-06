@@ -63,18 +63,20 @@ class _PantryItemFormState extends State<PantryItemForm> {
   @override
   void initState() {
     super.initState();
-    widget.controller.clearMutationFeedback();
     widget.controller.addListener(_onControllerChanged);
     if (_editing) {
       final detail = widget.controller.detailState;
       if (detail.publicId == widget.publicId && detail.item != null) {
         _initializeEdit(detail.item!);
-      } else {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) widget.controller.loadDetail(widget.publicId!);
-        });
       }
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      widget.controller.clearMutationFeedback();
+      if (_editing && !_editInitialized) {
+        widget.controller.loadDetail(widget.publicId!);
+      }
+    });
   }
 
   @override
