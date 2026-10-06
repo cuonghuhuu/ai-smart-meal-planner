@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:smart_meal_planner/core/api/api_client.dart';
 import 'package:smart_meal_planner/features/catalog/data/ingredient_recognition_repository.dart';
-import 'package:smart_meal_planner/features/auth/domain/auth_models.dart';
 
 void main() {
   test('recognition repository sends image bytes and parses Vietnamese result',
@@ -22,7 +21,6 @@ void main() {
         );
         expect(request.headers['content-type'], 'image/jpeg');
         expect(request.headers['authorization'], 'Bearer access-token');
-        expect(request.headers['x-csrf-token'], 'csrf-token');
         expect(request.bodyBytes, image);
 
         final body = utf8.encode(
@@ -44,11 +42,7 @@ void main() {
       refreshAccessToken: () async => false,
     );
 
-    final repository = HttpIngredientRecognitionRepository(
-      client,
-      csrfTokenProvider: () async =>
-          const CsrfToken(headerName: 'X-CSRF-TOKEN', value: 'csrf-token'),
-    );
+    final repository = HttpIngredientRecognitionRepository(client);
     final result = await repository.detect(
       imageBytes: image,
       contentType: 'image/jpeg',
