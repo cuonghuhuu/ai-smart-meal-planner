@@ -1,17 +1,27 @@
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 import 'package:smart_meal_planner/features/catalog/application/catalog_error_messages.dart';
+import 'package:smart_meal_planner/core/api/api_exception.dart';
 import 'package:smart_meal_planner/features/catalog/data/catalog_models.dart';
 import 'package:smart_meal_planner/features/catalog/data/catalog_repository.dart';
+import 'package:smart_meal_planner/features/catalog/data/ingredient_recognition_repository.dart';
 
 final class IngredientCatalogController extends ChangeNotifier {
-  IngredientCatalogController({required this.repository, this.pageSize = 20})
-    : _state = CatalogListState<IngredientCatalogItem>.initial(),
-      _detailState = CatalogDetailState<IngredientCatalogDetail>.initial();
+  IngredientCatalogController({
+    required this.repository,
+    this.recognitionRepository,
+    this.pageSize = 20,
+  }) : _state = CatalogListState<IngredientCatalogItem>.initial(),
+       _detailState = CatalogDetailState<IngredientCatalogDetail>.initial(),
+       _recognitionState = IngredientRecognitionState.idle();
 
   final CatalogRepository repository;
+  final IngredientRecognitionRepository? recognitionRepository;
   final int pageSize;
   CatalogListState<IngredientCatalogItem> _state;
   CatalogDetailState<IngredientCatalogDetail> _detailState;
+  IngredientRecognitionState _recognitionState;
   Future<List<CatalogCategory>>? _categoriesFuture;
   bool _categoriesLoaded = false;
   bool _disposed = false;
@@ -20,6 +30,45 @@ final class IngredientCatalogController extends ChangeNotifier {
 
   CatalogListState<IngredientCatalogItem> get state => _state;
   CatalogDetailState<IngredientCatalogDetail> get detailState => _detailState;
+  IngredientRecognitionState get recognitionState => _recognitionState;
+
+  Future<void> recognizeImage(
+    Uint8List imageBytes,
+    String contentType,
+  ) async {
+    final recognizer = recognitionRepository;
+    if (_disposed || recognizer == null) {
+      return;
+    }
+    _recognitionState = IngredientRecognitionState.loading();
+    _notify();
+    try {
+      final result = await recognizer.detect(
+        imageBytes: imageBytes,
+        contentType: contentType,
+      );
+      if (_disposed) {
+        return;
+      }
+      _recognitionState = IngredientRecognitionState.loaded(result);
+    } on Object catch (error) {
+      if (_disposed) {
+        return;
+      }
+      _recognitionState = IngredientRecognitionState.error(
+        _recognitionErrorMessage(error),
+      );
+    }
+    _notify();
+  }
+
+  void clearRecognition() {
+    if (_disposed) {
+      return;
+    }
+    _recognitionState = IngredientRecognitionState.idle();
+    _notify();
+  }
 
   Future<void> loadInitial() {
     if (_state.status == CatalogListStatus.loading || _disposed) {
@@ -148,6 +197,7 @@ final class IngredientCatalogController extends ChangeNotifier {
     _detailGeneration++;
     _state = CatalogListState<IngredientCatalogItem>.initial();
     _detailState = CatalogDetailState<IngredientCatalogDetail>.initial();
+    _recognitionState = IngredientRecognitionState.idle();
     _categoriesLoaded = false;
     _notify();
   }
@@ -260,4 +310,52 @@ final class IngredientCatalogController extends ChangeNotifier {
     _detailGeneration++;
     super.dispose();
   }
+}
+
+
+enum IngredientRecognitionStatus { idle, loading, loaded, error }
+
+final class IngredientRecognitionState {
+  const IngredientRecognitionState._({
+    required this.status,
+    this.result,
+    this.errorMessage,
+  });
+
+  factory IngredientRecognitionState.idle() =>
+      const IngredientRecognitionState._(status: IngredientRecognitionStatus.idle);
+
+  factory IngredientRecognitionState.loading() =>
+      const IngredientRecognitionState._(status: IngredientRecognitionStatus.loading);
+
+  factory IngredientRecognitionState.loaded(IngredientRecognitionResult result) =>
+      IngredientRecognitionState._(
+        status: IngredientRecognitionStatus.loaded,
+        result: result,
+      );
+
+  factory IngredientRecognitionState.error(String message) =>
+      IngredientRecognitionState._(
+        status: IngredientRecognitionStatus.error,
+        errorMessage: message,
+      );
+
+  final IngredientRecognitionStatus status;
+  final IngredientRecognitionResult? result;
+  final String? errorMessage;
+}
+
+String _recognitionErrorMessage(Object error) {
+  if (error is ApiTransportException) {
+    return 'Không thể kết nối tới dịch vụ nhận diện AI.';
+  }
+  if (error is ApiHttpException) {
+    return switch (error.statusCode) {
+      413 => 'Ảnh quá lớn. Vui lòng chọn ảnh nhỏ hơn.',
+      415 || 422 => 'Ảnh không hợp lệ hoặc định dạng chưa được hỗ trợ.',
+      502 || 503 || 504 => 'Dịch vụ nhận diện AI hiện không khả dụng.',
+      _ => 'Không thể nhận diện ảnh. Vui lòng thử lại.',
+    };
+  }
+  return 'Không thể nhận diện ảnh. Vui lòng thử lại.';
 }
