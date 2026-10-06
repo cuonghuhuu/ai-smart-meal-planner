@@ -1,4 +1,4 @@
-package com.smartmealplanner.mealplanning.application;
+package com.smartmealplanner.shared.application;
 
 import java.net.URI;
 import java.time.Duration;

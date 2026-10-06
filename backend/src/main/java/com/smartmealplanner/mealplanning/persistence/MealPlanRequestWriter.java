@@ -1,5 +1,7 @@
 package com.smartmealplanner.mealplanning.persistence;
 
+import com.smartmealplanner.recommendation.persistence.RecommendationRequest;
+import com.smartmealplanner.recommendation.persistence.RecommendationRequestRepository;
 import com.smartmealplanner.mealplanning.persistence.MealPlanPersistenceCommands.Begin;
 import com.smartmealplanner.mealplanning.persistence.MealPlanPersistenceCommands.Started;
 
@@ -26,7 +28,7 @@ public class MealPlanRequestWriter {
                     MealPlanPersistenceException.Reason.INVALID_COMMAND);
         }
         RecommendationRequest request = requests.saveAndFlush(
-                RecommendationRequest.beginMealPlan(command.userId(),
+                RecommendationRequest.begin(command.userId(), RecommendationRequest.Kind.MEAL_PLAN,
                         command.requestPublicId(), command.algorithmVersion().name(),
                         command.constraintsHash()));
         return new Started(request.id(), request.publicId());

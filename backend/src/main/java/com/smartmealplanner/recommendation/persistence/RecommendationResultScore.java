@@ -1,4 +1,4 @@
-package com.smartmealplanner.mealplanning.persistence;
+package com.smartmealplanner.recommendation.persistence;
 
 import java.math.BigDecimal;
 
@@ -29,8 +29,8 @@ public class RecommendationResultScore {
 
     public RecommendationResultScore(RecommendationResult result, Long scoreComponentId,
             BigDecimal scoreValue, BigDecimal weight) {
-        if (result == null || result.id() == null || scoreValue == null) {
-            throw new IllegalArgumentException("Persisted result and scoreValue are required");
+        if (result == null || result.id() == null || scoreComponentId == null || scoreValue == null) {
+            throw new IllegalArgumentException("Persisted result, component and scoreValue are required");
         }
         this.id = new RecommendationResultScoreId(result.id(), scoreComponentId);
         this.result = result;

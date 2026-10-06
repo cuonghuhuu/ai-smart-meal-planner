@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanGenerationRequest;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractJson;
+import com.smartmealplanner.shared.application.AiServiceProperties;
 
 import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.AfterEach;

@@ -14,8 +14,8 @@ import com.smartmealplanner.mealplanning.persistence.MealPlanEntryRepository;
 import com.smartmealplanner.mealplanning.persistence.MealPlanRepository;
 import com.smartmealplanner.mealplanning.persistence.MealPlanUnfilledSlot;
 import com.smartmealplanner.mealplanning.persistence.MealPlanUnfilledSlotRepository;
-import com.smartmealplanner.mealplanning.persistence.RecommendationRequest;
-import com.smartmealplanner.mealplanning.persistence.RecommendationRequestRepository;
+import com.smartmealplanner.recommendation.persistence.RecommendationRequest;
+import com.smartmealplanner.recommendation.persistence.RecommendationRequestRepository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -191,8 +191,8 @@ class ShoppingListIT {
                         RecommendationRequest.Kind.MEAL_PLAN));
         Long requestId = request.id();
         new TransactionTemplate(transactions).executeWithoutResult(ignored ->
-                assertThat(requests.completePending(requestId, status.name(),
-                        null, null)).isEqualTo(1));
+                assertThat(requests.completePending(requestId, RecommendationRequest.Kind.MEAL_PLAN.name(),
+                        status.name(), null, null)).isEqualTo(1));
         request = requests.findById(requestId).orElseThrow();
         return plans.saveAndFlush(new MealPlan(owner.internalId(), DATE,
                 DATE.plusDays(6), new BigDecimal("2.00"), request));
