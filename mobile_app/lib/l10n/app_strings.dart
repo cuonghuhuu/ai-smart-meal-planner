@@ -266,6 +266,20 @@ final class AppStrings {
   static const ingredientNoFoodMappings = 'Chưa có thực phẩm liên kết.';
   static const ingredientNoAllergens = 'Chưa có thông tin chất gây dị ứng.';
   static const ingredientNoConversions = 'Chưa có quy đổi đơn vị.';
+  static const ingredientRecognitionTitle = 'Nhận diện nguyên liệu bằng AI';
+  static const ingredientRecognitionSubtitle =
+      'Chọn ảnh để YOLO phát hiện nguyên liệu. Kết quả độ tin cậy thấp cần được xác nhận.';
+  static const ingredientRecognitionPick = 'Chọn ảnh';
+  static const ingredientRecognitionPickAnother = 'Chọn ảnh khác';
+  static const ingredientRecognitionRunning = 'Đang nhận diện ảnh…';
+  static const ingredientRecognitionNoDetections =
+      'Không phát hiện nguyên liệu nào trong ảnh.';
+  static const ingredientRecognitionConfidence = 'Độ tin cậy';
+  static const ingredientRecognitionNeedsConfirmation = 'Cần xác nhận';
+  static const ingredientRecognitionDetected = 'Đã phát hiện';
+  static const ingredientRecognitionModel = 'Mô hình';
+  static const ingredientRecognitionUnsupported =
+      'Thiết bị hiện không hỗ trợ chọn ảnh.';
   static const ingredientPreparation = 'Trạng thái chế biến';
   static const ingredientYield = 'Hệ số hao hụt';
   static const ingredientPrimary = 'Nguyên liệu chính';
