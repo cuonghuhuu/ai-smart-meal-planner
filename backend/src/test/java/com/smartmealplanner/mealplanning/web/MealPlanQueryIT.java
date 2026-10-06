@@ -14,8 +14,8 @@ import com.smartmealplanner.mealplanning.persistence.MealPlanEntryRepository;
 import com.smartmealplanner.mealplanning.persistence.MealPlanRepository;
 import com.smartmealplanner.mealplanning.persistence.MealPlanUnfilledSlot;
 import com.smartmealplanner.mealplanning.persistence.MealPlanUnfilledSlotRepository;
-import com.smartmealplanner.mealplanning.persistence.RecommendationRequest;
-import com.smartmealplanner.mealplanning.persistence.RecommendationRequestRepository;
+import com.smartmealplanner.recommendation.persistence.RecommendationRequest;
+import com.smartmealplanner.recommendation.persistence.RecommendationRequestRepository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.smartmealplanner.mealplanning.persistence;
+package com.smartmealplanner.recommendation.persistence;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,7 +23,6 @@ public class RecommendationRequest {
     private Long id;
     @Column(name = "public_id", nullable = false, updatable = false, columnDefinition = "BINARY(16)")
     private byte[] publicId;
-    // Cross-module reference IDs follow the existing scalar-FK convention.
     @Column(name = "user_id", nullable = false)
     private Long userId;
     @Enumerated(EnumType.STRING) @Column(name = "request_kind", nullable = false, length = 30)
@@ -58,21 +57,22 @@ public class RecommendationRequest {
         if (userId == null || requestKind == null) {
             throw new IllegalArgumentException("userId and requestKind are required");
         }
-        this.publicId = PublicIds.bytes(UUID.randomUUID());
+        this.publicId = RecommendationPublicIds.bytes(UUID.randomUUID());
         this.userId = userId;
         this.requestKind = requestKind;
         this.status = Status.PENDING;
     }
 
-    public static RecommendationRequest beginMealPlan(Long userId, UUID publicId,
+    public static RecommendationRequest begin(Long userId, Kind requestKind, UUID publicId,
             String algorithmVersion, String constraintsHash) {
-        if (algorithmVersion == null || algorithmVersion.isBlank()
+        if (requestKind == null || publicId == null
+                || algorithmVersion == null || algorithmVersion.isBlank()
                 || algorithmVersion.length() > 60
                 || constraintsHash == null || !constraintsHash.matches("[0-9a-fA-F]{64}")) {
             throw new IllegalArgumentException("Invalid request metadata");
         }
-        RecommendationRequest request = new RecommendationRequest(userId, Kind.MEAL_PLAN);
-        request.publicId = PublicIds.bytes(publicId);
+        RecommendationRequest request = new RecommendationRequest(userId, requestKind);
+        request.publicId = RecommendationPublicIds.bytes(publicId);
         request.correlationId = publicId.toString();
         request.algorithmVersion = algorithmVersion;
         request.constraintsHash = constraintsHash;
@@ -80,7 +80,7 @@ public class RecommendationRequest {
     }
 
     public Long id() { return id; }
-    public UUID publicId() { return PublicIds.uuid(publicId); }
+    public UUID publicId() { return RecommendationPublicIds.uuid(publicId); }
     public Long userId() { return userId; }
     public Kind requestKind() { return requestKind; }
     public Long targetMealSlotTypeId() { return targetMealSlotTypeId; }

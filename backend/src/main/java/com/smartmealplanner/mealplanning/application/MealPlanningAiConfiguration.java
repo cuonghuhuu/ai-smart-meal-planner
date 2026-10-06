@@ -2,6 +2,7 @@ package com.smartmealplanner.mealplanning.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractJson;
+import com.smartmealplanner.shared.application.AiServiceProperties;
 
 import jakarta.validation.Validator;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

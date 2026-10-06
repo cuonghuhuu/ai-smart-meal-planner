@@ -7,6 +7,12 @@ import java.util.UUID;
 
 import com.smartmealplanner.auth.persistence.UserAccount;
 import com.smartmealplanner.auth.persistence.UserAccountRepository;
+import com.smartmealplanner.recommendation.persistence.RecommendationRequest;
+import com.smartmealplanner.recommendation.persistence.RecommendationRequestRepository;
+import com.smartmealplanner.recommendation.persistence.RecommendationResult;
+import com.smartmealplanner.recommendation.persistence.RecommendationResultRepository;
+import com.smartmealplanner.recommendation.persistence.RecommendationResultScore;
+import com.smartmealplanner.recommendation.persistence.RecommendationResultScoreRepository;
 import jakarta.persistence.EntityManager;
 
 import org.junit.jupiter.api.Test;
@@ -69,7 +75,7 @@ class MealPlanningPersistenceIT {
         infeasible = requests.saveAndFlush(infeasible);
         assertThat(requests.findById(infeasible.id()).orElseThrow().status())
                 .isEqualTo(RecommendationRequest.Status.INFEASIBLE);
-        assertThat(requests.findByPublicId(PublicIds.bytes(infeasible.publicId())))
+        assertThat(requests.findByPublicId(infeasible.publicId()))
                 .isPresent();
 
         RecommendationRequest failed = new RecommendationRequest(userId,

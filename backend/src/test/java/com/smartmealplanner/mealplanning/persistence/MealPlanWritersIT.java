@@ -20,6 +20,8 @@ import com.smartmealplanner.mealplanning.persistence.MealPlanPersistenceCommands
 import com.smartmealplanner.mealplanning.persistence.MealPlanPersistenceCommands.GeneratedPlan;
 import com.smartmealplanner.mealplanning.persistence.MealPlanPersistenceCommands.Score;
 import com.smartmealplanner.mealplanning.persistence.MealPlanPersistenceCommands.Started;
+import com.smartmealplanner.recommendation.persistence.RecommendationRequest;
+import com.smartmealplanner.recommendation.persistence.RecommendationRequestRepository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

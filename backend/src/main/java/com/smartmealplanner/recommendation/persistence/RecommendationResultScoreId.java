@@ -1,4 +1,4 @@
-package com.smartmealplanner.mealplanning.persistence;
+package com.smartmealplanner.recommendation.persistence;
 
 import java.io.Serializable;
 import java.util.Objects;
