@@ -278,6 +278,7 @@ pnpm-debug.log*
 
 .agent/cache/
 .agents/cache/
+.local-demo/
 
 # Preserve version-controlled shared instructions/skills
 
