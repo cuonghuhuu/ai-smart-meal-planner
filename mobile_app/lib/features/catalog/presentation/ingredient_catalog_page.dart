@@ -415,11 +415,12 @@ class _DetectionPainter extends CustomPainter {
         textDirection: TextDirection.ltr,
       )..layout(maxWidth: size.width);
 
-      final labelLeft = rect.left.clamp(0.0, size.width - painter.width - 8);
-      final labelTop = (rect.top - painter.height - 8).clamp(
-        0.0,
-        size.height - painter.height - 8,
-      );
+      final labelLeft = rect.left
+          .clamp(0.0, size.width - painter.width - 8)
+          .toDouble();
+      final labelTop = (rect.top - painter.height - 8)
+          .clamp(0.0, size.height - painter.height - 8)
+          .toDouble();
       final background = Rect.fromLTWH(
         labelLeft,
         labelTop,
