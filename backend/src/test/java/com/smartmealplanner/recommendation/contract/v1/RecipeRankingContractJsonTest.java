@@ -40,14 +40,14 @@ class RecipeRankingContractJsonTest {
 
     @Test
     void scorePrecisionIsLockedToFourDecimalPlaces() {
-        String payload = fixture("valid_succeeded_response.json")
+        String excessiveTotalPrecision = fixture("valid_succeeded_response.json")
                 .replace("0.7417", "0.741701");
-        assertThatThrownBy(() -> json.readResponse(payload))
+        assertThatThrownBy(() -> json.readResponse(excessiveTotalPrecision))
                 .isInstanceOf(RecipeRankingContractValidationException.class);
 
-        payload = fixture("valid_succeeded_response.json")
+        String excessiveComponentPrecision = fixture("valid_succeeded_response.json")
                 .replace("\"value\": 0.5", "\"value\": 0.500001");
-        assertThatThrownBy(() -> json.readResponse(payload))
+        assertThatThrownBy(() -> json.readResponse(excessiveComponentPrecision))
                 .isInstanceOf(RecipeRankingContractValidationException.class);
     }
 
