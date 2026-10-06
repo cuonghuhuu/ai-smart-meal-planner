@@ -58,6 +58,29 @@ class IngredientRecognitionControllerTest {
     }
 
     @Test
+    void bearerRecognitionDoesNotRequireCsrfEvenWhenRefreshCookieExists() throws Exception {
+        var result = new IngredientRecognitionResult(
+                "YOLO11N_INGREDIENT_V1",
+                595,
+                336,
+                List.of());
+        when(recognition.detect(any(byte[].class), eq("image/jpeg")))
+                .thenReturn(result);
+
+        mvc.perform(post(PATH)
+                        .with(jwt())
+                        .header("Authorization", "Bearer test-access-token")
+                        .cookie(new jakarta.servlet.http.Cookie(
+                                "__Host-smartmeal_refresh",
+                                "opaque-refresh"))
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .content(new byte[]{1, 2, 3}))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.algorithmVersion")
+                        .value("YOLO11N_INGREDIENT_V1"));
+    }
+
+    @Test
     void authenticatedRequestReturnsVietnameseRecognitionContract() throws Exception {
         var result = new IngredientRecognitionResult(
                 "YOLO11N_INGREDIENT_V1",
