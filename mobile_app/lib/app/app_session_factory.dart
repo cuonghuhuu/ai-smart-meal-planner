@@ -17,6 +17,8 @@ import 'package:smart_meal_planner/features/catalog/application/ingredient_catal
 import 'package:smart_meal_planner/features/catalog/data/catalog_repository.dart';
 import 'package:smart_meal_planner/features/catalog/data/ingredient_recognition_repository.dart';
 import 'package:smart_meal_planner/features/meal_planning/data/meal_planning_repository.dart';
+import 'package:smart_meal_planner/features/meal_planning/data/nutrition_target_repository.dart';
+import 'package:smart_meal_planner/features/meal_planning/application/meal_planning_prerequisites.dart';
 import 'package:smart_meal_planner/features/pantry/data/pantry_repository.dart';
 import 'package:smart_meal_planner/features/recipes/data/recipe_repository.dart';
 
@@ -30,6 +32,7 @@ final class AppSessionDependencies {
     required this.foodCatalogController,
     required this.ingredientCatalogController,
     required this.mealPlanningRepository,
+    required this.mealPlanningPrerequisites,
     required this.pantryRepository,
     required this.catalogRepository,
     required this.recipeRepository,
@@ -43,6 +46,7 @@ final class AppSessionDependencies {
   final FoodCatalogController foodCatalogController;
   final IngredientCatalogController ingredientCatalogController;
   final MealPlanningRepository mealPlanningRepository;
+  final MealPlanningPrerequisites mealPlanningPrerequisites;
   final PantryRepository pantryRepository;
   final CatalogRepository catalogRepository;
   final RecipeRepository recipeRepository;
@@ -65,22 +69,37 @@ final class AppSessionFactory {
       accessTokenProvider: () => session.accessToken,
       refreshAccessToken: session.refresh,
     );
+    if (kIsWeb) {
+      apiClient.configureCsrfHeaders(() async {
+        final token = await authRepository.fetchCsrf();
+        return {token.headerName: token.value};
+      });
+    }
     final catalogRepository = HttpCatalogRepository(apiClient);
+    final profileRepository = HttpProfileRepository(apiClient);
+    final preferencesRepository = HttpPreferencesRepository(apiClient);
+    final dislikedRepository = HttpDislikedIngredientsRepository(apiClient);
+    final measurementsRepository = HttpMeasurementsRepository(apiClient);
+    final pantryRepository = HttpPantryRepository(
+      apiClient,
+      csrfTokenProvider: kIsWeb ? authRepository.fetchCsrf : null,
+    );
+    final recipeRepository = HttpRecipeRepository(apiClient);
     return AppSessionDependencies(
       sessionController: session,
       profileController: ProfileController(
-        profileRepository: HttpProfileRepository(apiClient),
+        profileRepository: profileRepository,
         referenceDataRepository: HttpReferenceDataRepository(apiClient),
       ),
       preferencesController: PreferencesController(
-        repository: HttpPreferencesRepository(apiClient),
+        repository: preferencesRepository,
       ),
       dislikedIngredientsController: DislikedIngredientsController(
-        repository: HttpDislikedIngredientsRepository(apiClient),
+        repository: dislikedRepository,
         catalogRepository: catalogRepository,
       ),
       measurementsController: MeasurementsController(
-        repository: HttpMeasurementsRepository(apiClient),
+        repository: measurementsRepository,
       ),
       foodCatalogController: FoodCatalogController(
         repository: catalogRepository,
@@ -93,12 +112,18 @@ final class AppSessionFactory {
         apiClient,
         csrfTokenProvider: kIsWeb ? authRepository.fetchCsrf : null,
       ),
-      pantryRepository: HttpPantryRepository(
-        apiClient,
-        csrfTokenProvider: kIsWeb ? authRepository.fetchCsrf : null,
+      mealPlanningPrerequisites: MealPlanningPrerequisites(
+        profile: profileRepository,
+        measurements: measurementsRepository,
+        nutritionTarget: HttpNutritionTargetRepository(apiClient),
+        preferences: preferencesRepository,
+        dislikedIngredients: dislikedRepository,
+        pantry: pantryRepository,
+        recipes: recipeRepository,
       ),
+      pantryRepository: pantryRepository,
       catalogRepository: catalogRepository,
-      recipeRepository: HttpRecipeRepository(apiClient),
+      recipeRepository: recipeRepository,
     );
   }
 }

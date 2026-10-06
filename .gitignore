@@ -172,6 +172,7 @@ target/
 # Maven
 
 .mvn/timing.properties
+/.m2/
 
 # Keep Maven Wrapper
 
@@ -357,3 +358,6 @@ ai_service/training/runs/
 ai_service/app/food_recognition/models/**/*.pt
 *.onnx
 *.engine
+
+__pycache__/
+*.pyc

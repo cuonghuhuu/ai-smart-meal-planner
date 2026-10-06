@@ -15,6 +15,25 @@ import 'support/fake_auth_repository.dart';
 import 'support/fake_meal_planning_repository.dart';
 
 void main() {
+  testWidgets('planning controls fit mobile, tablet, and desktop widths', (
+    tester,
+  ) async {
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    for (final size in const [
+      Size(390, 844),
+      Size(768, 1024),
+      Size(1366, 900),
+    ]) {
+      await tester.binding.setSurfaceSize(size);
+      await _showPage(tester, FakeMealPlanningRepository());
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('meal-plan-generate')),
+      );
+      await tester.pump();
+      expect(tester.takeException(), isNull, reason: 'viewport $size');
+    }
+  });
+
   testWidgets('authenticated navigation opens protected Meal Planning route', (
     tester,
   ) async {

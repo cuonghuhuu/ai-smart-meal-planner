@@ -83,6 +83,7 @@ class _SmartMealPlannerAppState extends State<SmartMealPlannerApp> {
       _ingredientCatalogController = dependencies.ingredientCatalogController;
       _mealPlanningController = MealPlanningController(
         repository: dependencies.mealPlanningRepository,
+        prerequisites: dependencies.mealPlanningPrerequisites,
       );
       _ownsMealPlanningController = true;
       _pantryController = PantryController(

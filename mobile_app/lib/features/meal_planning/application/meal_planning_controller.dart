@@ -2,10 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:smart_meal_planner/core/api/api_exception.dart';
 import 'package:smart_meal_planner/features/meal_planning/data/meal_plan_models.dart';
 import 'package:smart_meal_planner/features/meal_planning/data/meal_planning_repository.dart';
+import 'package:smart_meal_planner/features/measurements/data/measurement_models.dart';
+import 'package:smart_meal_planner/features/meal_planning/application/meal_planning_prerequisites.dart';
 import 'package:smart_meal_planner/l10n/app_strings.dart';
 
 enum MealPlanningStatus {
   idle,
+  checkingPrerequisites,
+  missingPrerequisite,
   generating,
   loadingPlan,
   loaded,
@@ -21,6 +25,7 @@ final class MealPlanningState {
     this.plan,
     this.pendingMealPlanPublicId,
     this.errorMessage,
+    this.prerequisiteIssue,
     this.shoppingListStatus = ShoppingListLoadStatus.idle,
     this.shoppingList,
     this.shoppingListErrorMessage,
@@ -30,11 +35,13 @@ final class MealPlanningState {
   final PersistedMealPlan? plan;
   final String? pendingMealPlanPublicId;
   final String? errorMessage;
+  final MealPlanningPrerequisiteIssue? prerequisiteIssue;
   final ShoppingListLoadStatus shoppingListStatus;
   final MealPlanShoppingList? shoppingList;
   final String? shoppingListErrorMessage;
 
   bool get isBusy =>
+      status == MealPlanningStatus.checkingPrerequisites ||
       status == MealPlanningStatus.generating ||
       status == MealPlanningStatus.loadingPlan;
 
@@ -56,9 +63,10 @@ final class MealPlanningState {
 }
 
 final class MealPlanningController extends ChangeNotifier {
-  MealPlanningController({required this.repository});
+  MealPlanningController({required this.repository, this.prerequisites});
 
   final MealPlanningRepository repository;
+  final MealPlanningPrerequisites? prerequisites;
   MealPlanningState _state = const MealPlanningState(
     status: MealPlanningStatus.idle,
   );
@@ -70,6 +78,7 @@ final class MealPlanningController extends ChangeNotifier {
   Future<void> generate(MealPlanGenerationRequest request) async {
     if (_state.isBusy || _state.pendingMealPlanPublicId != null) return;
     final revision = _sessionRevision;
+    if (prerequisites != null && !await _checkPrerequisites(revision)) return;
     _setState(const MealPlanningState(status: MealPlanningStatus.generating));
     try {
       final generated = await repository.generate(request);
@@ -81,6 +90,89 @@ final class MealPlanningController extends ChangeNotifier {
         return;
       }
       await _loadPlan(generated.mealPlanPublicId!, revision);
+    } on Object catch (error) {
+      if (revision != _sessionRevision) return;
+      _setState(
+        MealPlanningState(
+          status: MealPlanningStatus.error,
+          errorMessage: mealPlanningErrorMessage(error),
+        ),
+      );
+    }
+  }
+
+  Future<void> checkPrerequisites() async {
+    if (_state.isBusy ||
+        _state.status == MealPlanningStatus.loaded ||
+        _state.pendingMealPlanPublicId != null) {
+      return;
+    }
+    await _checkPrerequisites(_sessionRevision);
+  }
+
+  Future<bool> _checkPrerequisites(int revision) async {
+    final checker = prerequisites;
+    if (checker == null) return true;
+    _setState(
+      const MealPlanningState(status: MealPlanningStatus.checkingPrerequisites),
+    );
+    try {
+      final issue = await checker.check();
+      if (revision != _sessionRevision) return false;
+      if (issue != null) {
+        _setState(
+          MealPlanningState(
+            status: MealPlanningStatus.missingPrerequisite,
+            prerequisiteIssue: issue,
+          ),
+        );
+        return false;
+      }
+      _setState(const MealPlanningState(status: MealPlanningStatus.idle));
+      return true;
+    } on Object catch (error) {
+      if (revision != _sessionRevision) return false;
+      _setState(
+        MealPlanningState(
+          status: MealPlanningStatus.error,
+          errorMessage: mealPlanningErrorMessage(error),
+        ),
+      );
+      return false;
+    }
+  }
+
+  Future<void> createCalculatedTarget() async {
+    if (_state.isBusy ||
+        _state.prerequisiteIssue !=
+            MealPlanningPrerequisiteIssue.nutritionTarget ||
+        prerequisites == null) {
+      return;
+    }
+    final revision = _sessionRevision;
+    _setState(
+      const MealPlanningState(status: MealPlanningStatus.checkingPrerequisites),
+    );
+    try {
+      await prerequisites!.createCalculatedTarget(backendUtcToday());
+      if (revision == _sessionRevision) await _checkPrerequisites(revision);
+    } on ApiHttpException catch (error) {
+      if (revision != _sessionRevision) return;
+      final issue = switch (error.problem?.code) {
+        'PROFILE_NOT_FOUND' ||
+        'MISSING_CALCULATION_INPUT' => MealPlanningPrerequisiteIssue.profile,
+        'MEASUREMENT_NOT_FOUND' => MealPlanningPrerequisiteIssue.measurement,
+        _ => null,
+      };
+      _setState(
+        MealPlanningState(
+          status: issue == null
+              ? MealPlanningStatus.error
+              : MealPlanningStatus.missingPrerequisite,
+          prerequisiteIssue: issue,
+          errorMessage: issue == null ? mealPlanningErrorMessage(error) : null,
+        ),
+      );
     } on Object catch (error) {
       if (revision != _sessionRevision) return;
       _setState(
@@ -218,6 +310,13 @@ final class MealPlanningController extends ChangeNotifier {
 String mealPlanningErrorMessage(Object error) {
   if (error is ApiTransportException) return AppStrings.unableToReachService;
   if (error is ApiHttpException) {
+    if (error.problem?.code == 'AI_SERVICE_UNAVAILABLE' ||
+        error.problem?.code == 'AI_SERVICE_TIMEOUT') {
+      return 'Dịch vụ lập thực đơn chưa sẵn sàng. Hãy thử lại sau.';
+    }
+    if (error.problem?.code == 'NO_CURRENT_TARGET') {
+      return 'Chưa có mục tiêu dinh dưỡng. Hãy tạo mục tiêu trước khi lập thực đơn.';
+    }
     if (error.statusCode >= 500) return AppStrings.serviceUnavailable;
     if (error.statusCode == 400 || error.statusCode == 422) {
       return AppStrings.requestFailed;

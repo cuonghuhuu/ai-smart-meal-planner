@@ -44,33 +44,46 @@ void main() {
     );
   });
 
-  testWidgets('preferences keeps dietary/allergen sections and renders saved avoidance', (
+  testWidgets(
+    'preferences keeps dietary/allergen sections and renders saved avoidance',
+    (tester) async {
+      final dislikedController = _dislikedController(
+        preferences: [_savedPreference],
+      );
+      addTearDown(dislikedController.dispose);
+
+      await tester.pumpWidget(
+        _page(
+          preferencesController: _preferencesController(),
+          dislikedController: dislikedController,
+        ),
+      );
+      await _pumpAsync(tester);
+
+      expect(
+        find.byKey(const ValueKey('dietary-preferences-section')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('allergens-section')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('disliked-ingredients-section')),
+        findsOneWidget,
+      );
+      expect(find.text(_savedPreference.ingredientDisplayName), findsOneWidget);
+      final chip = find.byKey(
+        const ValueKey('disliked-chip-$testIngredientId'),
+      );
+      await tester.ensureVisible(chip);
+      await tester.pumpAndSettle();
+      await tester.tap(chip);
+      await tester.pump();
+      expect(find.text(AppStrings.dislikedIngredientAvoid), findsOneWidget);
+    },
+  );
+
+  testWidgets('typed catalog search adds a structured ingredient once', (
     tester,
   ) async {
-    final dislikedController = _dislikedController(
-      preferences: [_savedPreference],
-    );
-    addTearDown(dislikedController.dispose);
-
-    await tester.pumpWidget(
-      _page(
-        preferencesController: _preferencesController(),
-        dislikedController: dislikedController,
-      ),
-    );
-    await _pumpAsync(tester);
-
-    expect(find.byKey(const ValueKey('dietary-preferences-section')), findsOneWidget);
-    expect(find.byKey(const ValueKey('allergens-section')), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey('disliked-ingredients-section')),
-      findsOneWidget,
-    );
-    expect(find.text(_savedPreference.ingredientDisplayName), findsOneWidget);
-    expect(find.text(AppStrings.dislikedIngredientAvoid), findsOneWidget);
-  });
-
-  testWidgets('picker adds an ingredient once with DISLIKE default', (tester) async {
     final dislikedController = _dislikedController();
     addTearDown(dislikedController.dispose);
     await tester.pumpWidget(
@@ -82,14 +95,14 @@ void main() {
     await _pumpAsync(tester);
 
     expect(find.text(AppStrings.dislikedIngredientsEmpty), findsOneWidget);
-    final addButton = find.byKey(const ValueKey('disliked-add-ingredient'));
-    await tester.ensureVisible(addButton);
+    final search = find.byKey(const ValueKey('disliked-search'));
+    await tester.ensureVisible(search);
     await tester.pump();
-    await tester.tap(addButton);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.enterText(search, 'Chicken');
+    await tester.pump(const Duration(milliseconds: 350));
+    await _pumpAsync(tester);
 
-    expect(find.byKey(const ValueKey('disliked-picker')), findsOneWidget);
+    expect(find.byKey(const ValueKey('disliked-suggestions')), findsOneWidget);
     final item = find.byKey(
       const ValueKey('disliked-picker-item-$testIngredientId'),
     );
@@ -103,17 +116,68 @@ void main() {
       dislikedController.state.draftPreferences.single.strength,
       DislikedIngredientStrength.dislike,
     );
-    expect(find.text(AppStrings.dislikedIngredientPickerSelected), findsOneWidget);
-
-    await tester.tap(
-      find.byKey(const ValueKey('disliked-picker-close')),
+    expect(
+      dislikedController.state.draftPreferences.single.ingredientPublicId,
+      testIngredientId,
     );
-    await tester.pump(const Duration(milliseconds: 300));
+    expect(
+      find.byKey(const ValueKey('disliked-chip-$testIngredientId')),
+      findsOneWidget,
+    );
+    await tester.enterText(search, 'Chicken');
+    await tester.pump(const Duration(milliseconds: 350));
+    await _pumpAsync(tester);
+    expect(
+      find.byKey(const ValueKey('disliked-picker-item-$testIngredientId')),
+      findsNothing,
+    );
+    final chip = find.byKey(const ValueKey('disliked-chip-$testIngredientId'));
+    await tester.ensureVisible(chip);
+    await tester.pumpAndSettle();
+    await tester.tap(chip);
+    await tester.pump();
     expect(
       find.byKey(const ValueKey('disliked-editor-$testIngredientId')),
       findsOneWidget,
     );
   });
+
+  testWidgets(
+    'unresolved text remains unsaved and shows a friendly empty state',
+    (tester) async {
+      final repository = FakeDislikedIngredientsRepository();
+      final catalog = FakeCatalogRepository()
+        ..onGetIngredients = (_) async => IngredientCatalogPage(
+          page: 0,
+          size: 20,
+          totalElements: 0,
+          totalPages: 0,
+          content: const [],
+        );
+      final dislikedController = _dislikedController(
+        repository: repository,
+        catalogRepository: catalog,
+      );
+      addTearDown(dislikedController.dispose);
+      await tester.pumpWidget(
+        _page(
+          preferencesController: _preferencesController(),
+          dislikedController: dislikedController,
+        ),
+      );
+      await _pumpAsync(tester);
+
+      await tester.enterText(
+        find.byKey(const ValueKey('disliked-search')),
+        'Không có trong danh mục',
+      );
+      await tester.pump(const Duration(milliseconds: 350));
+      await _pumpAsync(tester);
+      expect(find.text(AppStrings.dislikedNoMatch), findsOneWidget);
+      expect(dislikedController.state.draftPreferences, isEmpty);
+      expect(repository.saveCalls, isEmpty);
+    },
+  );
 
   testWidgets('strength, note validation, and remove update only the draft', (
     tester,
@@ -131,13 +195,16 @@ void main() {
     );
     await _pumpAsync(tester);
 
+    final chip = find.byKey(const ValueKey('disliked-chip-$testIngredientId'));
+    await tester.ensureVisible(chip);
+    await tester.pumpAndSettle();
+    await tester.tap(chip);
+    await tester.pump();
     expect(find.text(AppStrings.dislikedIngredientDislike), findsOneWidget);
     final strength = find.byKey(
       const ValueKey('disliked-strength-$testIngredientId'),
     );
     await tester.ensureVisible(strength);
-    await tester.pump();
-    await tester.tap(strength);
     await tester.pump();
     await tester.tap(find.text(AppStrings.dislikedIngredientAvoid).last);
     await tester.pump();
@@ -146,9 +213,7 @@ void main() {
       DislikedIngredientStrength.avoid,
     );
 
-    final note = find.byKey(
-      const ValueKey('disliked-note-$testIngredientId'),
-    );
+    final note = find.byKey(const ValueKey('disliked-note-$testIngredientId'));
     await tester.ensureVisible(note);
     await tester.pump();
     await tester.enterText(note, 'x' * 256);
@@ -175,34 +240,38 @@ void main() {
     expect(dislikedController.state.savedPreferences, hasLength(1));
   });
 
-  testWidgets('picker pagination and narrow layout remain interactive', (tester) async {
+  testWidgets('picker pagination and narrow layout remain interactive', (
+    tester,
+  ) async {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.binding.setSurfaceSize(const Size(360, 800));
-    final catalogRepository = FakeCatalogRepository(
-      ingredientPage: IngredientCatalogPage(
-        page: 0,
-        size: 20,
-        totalElements: 2,
-        totalPages: 2,
-        content: [testIngredient],
-      ),
-    )..onGetIngredients = (request) => Future.value(
-      request.page == 0
-          ? IngredientCatalogPage(
+    final catalogRepository =
+        FakeCatalogRepository(
+            ingredientPage: IngredientCatalogPage(
               page: 0,
               size: 20,
               totalElements: 2,
               totalPages: 2,
               content: [testIngredient],
-            )
-          : IngredientCatalogPage(
-              page: 1,
-              size: 20,
-              totalElements: 2,
-              totalPages: 2,
-              content: [_secondIngredient],
             ),
-    );
+          )
+          ..onGetIngredients = (request) => Future.value(
+            request.page == 0
+                ? IngredientCatalogPage(
+                    page: 0,
+                    size: 20,
+                    totalElements: 2,
+                    totalPages: 2,
+                    content: [testIngredient],
+                  )
+                : IngredientCatalogPage(
+                    page: 1,
+                    size: 20,
+                    totalElements: 2,
+                    totalPages: 2,
+                    content: [_secondIngredient],
+                  ),
+          );
     final dislikedController = _dislikedController(
       catalogRepository: catalogRepository,
     );
@@ -215,12 +284,12 @@ void main() {
     );
     await _pumpAsync(tester);
 
-    final addButton = find.byKey(const ValueKey('disliked-add-ingredient'));
-    await tester.ensureVisible(addButton);
+    final search = find.byKey(const ValueKey('disliked-search'));
+    await tester.ensureVisible(search);
     await tester.pump();
-    await tester.tap(addButton);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.enterText(search, 'Chicken');
+    await tester.pump(const Duration(milliseconds: 350));
+    await _pumpAsync(tester);
 
     final loadMore = find.byKey(const ValueKey('disliked-picker-load-more'));
     await tester.ensureVisible(loadMore);
@@ -230,9 +299,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
 
     expect(
-      find.byKey(
-        const ValueKey('disliked-picker-item-$testIngredientIdTwo'),
-      ),
+      find.byKey(const ValueKey('disliked-picker-item-$testIngredientIdTwo')),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
@@ -254,25 +321,21 @@ void main() {
     );
     await _pumpAsync(tester);
 
-    final remove = find.byKey(
-      const ValueKey('disliked-remove-$testIngredientId'),
-    );
-    await tester.ensureVisible(remove);
+    tester
+        .widget<InputChip>(
+          find.byKey(const ValueKey('disliked-chip-$testIngredientId')),
+        )
+        .onDeleted!();
     await tester.pump();
-    await tester.tap(remove);
-    await tester.pump();
-    final add = find.byKey(const ValueKey('disliked-add-ingredient'));
-    await tester.ensureVisible(add);
-    await tester.pump();
-    await tester.tap(add);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    final search = find.byKey(const ValueKey('disliked-search'));
+    await tester.ensureVisible(search);
+    await tester.enterText(search, 'Chicken');
+    await tester.pump(const Duration(milliseconds: 350));
+    await _pumpAsync(tester);
     await tester.tap(
       find.byKey(const ValueKey('disliked-picker-item-$testIngredientId')),
     );
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('disliked-picker-close')));
-    await tester.pump(const Duration(milliseconds: 300));
 
     final save = find.byKey(const ValueKey('save-disliked-ingredients'));
     await tester.ensureVisible(save);
@@ -281,7 +344,7 @@ void main() {
     await tester.pump();
 
     expect(
-      find.byKey(const ValueKey('disliked-editor-$testIngredientId')),
+      find.byKey(const ValueKey('disliked-chip-$testIngredientId')),
       findsOneWidget,
     );
     expect(dislikedController.state.hasChanges, isTrue);
@@ -299,9 +362,8 @@ Widget _page({
   ),
 );
 
-PreferencesController _preferencesController() => PreferencesController(
-  repository: _PreferencesRepository(),
-);
+PreferencesController _preferencesController() =>
+    PreferencesController(repository: _PreferencesRepository());
 
 DislikedIngredientsController _dislikedController({
   List<DislikedIngredientPreference>? preferences,

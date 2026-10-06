@@ -6,6 +6,24 @@ final class AppStrings {
   const AppStrings._();
 
   static const productName = 'AI Smart Meal Planner';
+  static const wellnessEyebrow = 'Sống khỏe mỗi ngày';
+  static const dietarySectionTitle = 'Chế độ ăn';
+  static const allergenSectionTitle = 'Dị ứng & cần tránh';
+  static const allergenSearchHint = 'Nhập thực phẩm hoặc chất gây dị ứng...';
+  static const allergenNoMatch =
+      'Không tìm thấy chất gây dị ứng này trong danh mục.';
+  static const dislikedSectionTitle = 'Không thích ăn';
+  static const dislikedSearchHint = 'Nhập nguyên liệu bạn không thích...';
+  static const dislikedNoMatch =
+      'Không tìm thấy nguyên liệu này trong danh mục.';
+  static const planWorkspaceEyebrow = 'Lên kế hoạch';
+  static const mealPlanConfigurationTitle = 'Thiết lập thực đơn';
+  static const mealPlanConfigurationSubtitle =
+      'Chọn nhịp ăn phù hợp với lịch của bạn.';
+  static const mealPlanScheduleTitle = 'Thời gian';
+  static const mealPlanPracticalDetails = 'Nhu cầu mỗi bữa';
+  static const mealPlanSummaryTitle = 'Tóm tắt kế hoạch';
+  static const catalogExploreTitle = 'Khám phá danh mục';
 
   // Shared actions and navigation.
   static const foods = 'Thực phẩm';
@@ -421,6 +439,7 @@ final class AppStrings {
   static const householdSize = 'Số người trong hộ gia đình';
   static const maxCookingTime = 'Thời gian nấu tối đa (phút)';
   static const notes = 'Ghi chú';
+  static const profileAdditionalNotes = 'Thông tin bổ sung';
   static const saveProfile = 'Lưu hồ sơ';
   static const saving = 'Đang lưu…';
   static const profileSaved = 'Đã lưu hồ sơ.';

@@ -27,10 +27,9 @@ void main() {
 
     expect(_dietarySectionTitle(), findsOneWidget);
     expect(find.text('Thuần chay'), findsOneWidget);
-    expect(find.text('Đậu phộng'), findsOneWidget);
-    expect(find.text('Chất gây dị ứng'), findsOneWidget);
-    expect(find.text('Loại phản ứng'), findsOneWidget);
-    expect(find.text('Ghi chú (không bắt buộc)'), findsOneWidget);
+    expect(find.text('Dị ứng & cần tránh'), findsOneWidget);
+    expect(find.byKey(const ValueKey('allergen-search')), findsOneWidget);
+    expect(find.text('Loại phản ứng'), findsNothing);
     expect(find.text('Lưu thông tin dị ứng'), findsOneWidget);
   });
 
@@ -120,10 +119,10 @@ void main() {
     await tester.pumpWidget(_pageApp(controller));
     await tester.pumpAndSettle();
 
-    final veganTile = tester.widget<CheckboxListTile>(
+    final veganTile = tester.widget<FilterChip>(
       find.byKey(const ValueKey('dietary-VEGAN')),
     );
-    expect(veganTile.value, isTrue);
+    expect(veganTile.selected, isTrue);
   });
 
   testWidgets('existing allergens render selected', (tester) async {
@@ -131,12 +130,47 @@ void main() {
     await tester.pumpWidget(_pageApp(controller));
     await tester.pumpAndSettle();
 
-    final peanutTile = tester.widget<CheckboxListTile>(
+    final peanutTile = tester.widget<InputChip>(
       find.byKey(const ValueKey('allergen-PEANUT')),
     );
-    expect(peanutTile.value, isTrue);
-    expect(find.byKey(const ValueKey('reaction-PEANUT')), findsOneWidget);
+    expect(peanutTile.onDeleted, isNotNull);
+    expect(find.byKey(const ValueKey('reaction-PEANUT')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('allergen-editor-PEANUT')),
+      findsOneWidget,
+    );
   });
+
+  testWidgets(
+    'allergen typing resolves codes, prevents duplicates, and removes chips',
+    (tester) async {
+      final controller = _controller(selectedAllergens: const []);
+      await tester.pumpWidget(_pageApp(controller));
+      await tester.pumpAndSettle();
+
+      final search = find.byKey(const ValueKey('allergen-search'));
+      await tester.enterText(search, 'Đậu');
+      await tester.pumpAndSettle();
+      expect(find.text('Đậu phộng'), findsOneWidget);
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+      expect(controller.state.selectedAllergenCodes, ['PEANUT']);
+      expect(find.byKey(const ValueKey('allergen-PEANUT')), findsOneWidget);
+
+      await tester.enterText(search, 'Đậu');
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Không tìm thấy chất gây dị ứng này trong danh mục.'),
+        findsOneWidget,
+      );
+      expect(controller.state.selectedAllergenCodes, ['PEANUT']);
+      tester
+          .widget<InputChip>(find.byKey(const ValueKey('allergen-PEANUT')))
+          .onDeleted!();
+      await tester.pump();
+      expect(controller.state.selectedAllergenCodes, isEmpty);
+    },
+  );
 
   testWidgets('dietary selections can be added and removed', (tester) async {
     final controller = _controller(selectedDietaryPreferences: const []);
@@ -165,7 +199,7 @@ void main() {
 
     await _tapAfterScroll(
       tester,
-      find.widgetWithText(FilledButton, 'Lưu sở thích ăn uống'),
+      find.byKey(const ValueKey('save-dietary-preferences')),
     );
     await tester.pumpAndSettle();
 
@@ -182,11 +216,18 @@ void main() {
     await tester.pumpWidget(_pageApp(controller));
     await tester.pumpAndSettle();
 
-    final allergenTile = find.byKey(const ValueKey('allergen-PEANUT'));
-    await tester.ensureVisible(allergenTile);
+    await tester.enterText(
+      find.byKey(const ValueKey('allergen-search')),
+      'Đậu',
+    );
     await tester.pump();
-    await tester.tap(allergenTile);
+    await tester.tap(find.text('Đậu phộng').last);
     await tester.pump();
+    expect(controller.state.selectedAllergenCodes, ['PEANUT']);
+    final editor = find.byKey(const ValueKey('allergen-editor-PEANUT'));
+    await tester.ensureVisible(editor);
+    await tester.tap(editor);
+    await tester.pumpAndSettle();
 
     final reaction = find.byKey(const ValueKey('reaction-PEANUT'));
     await tester.ensureVisible(reaction);
@@ -202,10 +243,7 @@ void main() {
     await tester.enterText(note, 'Avoid cross-contact');
     await tester.pump();
 
-    await _tapAfterScroll(
-      tester,
-      find.widgetWithText(FilledButton, 'Lưu thông tin dị ứng'),
-    );
+    await _tapAfterScroll(tester, find.byKey(const ValueKey('save-allergens')));
     await tester.pumpAndSettle();
 
     expect(repository.allergenUpdateCalls, 1);
@@ -221,16 +259,52 @@ void main() {
     expect(find.text('Đã lưu thông tin dị ứng.'), findsOneWidget);
   });
 
+  testWidgets('typing shrimp resolves the supported crustacean code', (
+    tester,
+  ) async {
+    final repository = FakePreferencesRepository(
+      allergenReferences: const [
+        AllergenReference(
+          code: 'CRUSTACEANS',
+          displayName: 'Crustaceans',
+          description: 'Crustaceans and their products.',
+          displayOrder: 1,
+        ),
+      ],
+      selectedAllergens: const [],
+    );
+    final controller = _controller(repository: repository);
+    await tester.pumpWidget(_pageApp(controller));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const ValueKey('allergen-search')),
+      'Tôm',
+    );
+    await tester.pump();
+    await tester.tap(find.text('Động vật giáp xác').last);
+    await tester.pump();
+
+    expect(controller.state.selectedAllergenCodes, ['CRUSTACEANS']);
+    expect(find.byKey(const ValueKey('allergen-CRUSTACEANS')), findsOneWidget);
+  });
+
   testWidgets('256-character allergen note blocks save', (tester) async {
     final repository = FakePreferencesRepository(selectedAllergens: const []);
     final controller = _controller(repository: repository);
     await tester.pumpWidget(_pageApp(controller));
     await tester.pumpAndSettle();
-    final allergenTile = find.byKey(const ValueKey('allergen-PEANUT'));
-    await tester.ensureVisible(allergenTile);
+    await tester.enterText(
+      find.byKey(const ValueKey('allergen-search')),
+      'Đậu',
+    );
     await tester.pump();
-    await tester.tap(allergenTile);
+    await tester.tap(find.text('Đậu phộng').last);
     await tester.pump();
+    final editor = find.byKey(const ValueKey('allergen-editor-PEANUT'));
+    await tester.ensureVisible(editor);
+    await tester.tap(editor);
+    await tester.pumpAndSettle();
 
     final note = find.byKey(const ValueKey('note-PEANUT'));
     await tester.ensureVisible(note);
@@ -238,11 +312,8 @@ void main() {
     await tester.enterText(note, 'x' * 256);
     expect(tester.widget<TextFormField>(note).controller!.text, 'x' * 256);
 
-    final saveFinder = find.widgetWithText(
-      FilledButton,
-      'Lưu thông tin dị ứng',
-    );
-    final saveButton = tester.widget<FilledButton>(saveFinder);
+    final saveFinder = find.byKey(const ValueKey('save-allergens'));
+    final saveButton = tester.widget<TextButton>(saveFinder);
     expect(saveButton.onPressed, isNotNull);
     saveButton.onPressed!();
     await tester.pump();
@@ -267,15 +338,12 @@ void main() {
       ),
       findsOneWidget,
     );
-    final allergenTile = find.byKey(const ValueKey('allergen-PEANUT'));
-    await tester.ensureVisible(allergenTile);
-    await tester.pump();
-    await tester.tap(allergenTile);
-    await tester.pump();
-    await _tapAfterScroll(
-      tester,
-      find.widgetWithText(FilledButton, 'Lưu thông tin dị ứng'),
+    final allergenChip = tester.widget<InputChip>(
+      find.byKey(const ValueKey('allergen-PEANUT')),
     );
+    allergenChip.onDeleted!();
+    await tester.pump();
+    await _tapAfterScroll(tester, find.byKey(const ValueKey('save-allergens')));
     await tester.pumpAndSettle();
 
     expect(repository.lastAllergenSelections, isEmpty);
@@ -290,10 +358,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final scrollView = find.byKey(const ValueKey('preferences-scroll'));
-    final saveButton = find.widgetWithText(
-      FilledButton,
-      'Lưu thông tin dị ứng',
-    );
+    final saveButton = find.byKey(const ValueKey('save-allergens'));
     expect(scrollView, findsOneWidget);
     expect(saveButton, findsOneWidget);
     await tester.ensureVisible(saveButton);
@@ -339,7 +404,7 @@ Finder _fieldWithLabel(String label) =>
 
 Finder _dietarySectionTitle() => find.descendant(
   of: find.byKey(const ValueKey('dietary-preferences-section')),
-  matching: find.text('Sở thích ăn uống'),
+  matching: find.text('Chế độ ăn'),
 );
 
 Widget _routerApp(GoRouter router) => MaterialApp.router(routerConfig: router);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:smart_meal_planner/core/ui/responsive_content.dart';
+import 'package:smart_meal_planner/core/ui/wellness_components.dart';
 import 'package:smart_meal_planner/features/auth/application/session_controller.dart';
 import 'package:smart_meal_planner/features/auth/presentation/authenticated_shell.dart';
 import 'package:smart_meal_planner/features/preferences/application/preferences_controller.dart';
@@ -29,6 +30,8 @@ class PreferencesPage extends StatefulWidget {
 
 class _PreferencesPageState extends State<PreferencesPage> {
   final _allergensFormKey = GlobalKey<FormState>();
+  TextEditingController? _allergenInput;
+  String _allergenQuery = '';
 
   PreferencesController get _controller => widget.preferencesController;
 
@@ -58,6 +61,18 @@ class _PreferencesPageState extends State<PreferencesPage> {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  bool _matchesAllergen(AllergenReference reference, String query) {
+    final normalized = query.trim().toLowerCase();
+    return ReferenceLocalizations.allergenName(
+          reference.code,
+          reference.displayName,
+        ).toLowerCase().contains(normalized) ||
+        ReferenceLocalizations.allergenDescription(
+          reference.code,
+          reference.description,
+        ).toLowerCase().contains(normalized);
   }
 
   Future<void> _saveDietaryPreferences() =>
@@ -101,12 +116,12 @@ class _PreferencesPageState extends State<PreferencesPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              AppStrings.preferences,
-              style: Theme.of(context).textTheme.headlineMedium,
+            const PageIntro(
+              eyebrow: AppStrings.wellnessEyebrow,
+              title: AppStrings.preferences,
+              subtitle: AppStrings.preferencesSubtitle,
+              icon: Icons.tune_rounded,
             ),
-            const SizedBox(height: 8),
-            const Text(AppStrings.preferencesSubtitle),
             if (state.status == PreferencesStatus.loading) ...[
               const SizedBox(height: 16),
               const LinearProgressIndicator(),
@@ -132,7 +147,8 @@ class _PreferencesPageState extends State<PreferencesPage> {
               key: _allergensFormKey,
               child: _buildAllergenSection(state, busy),
             ),
-            if (widget.dislikedIngredientsController case final controller?) ...[
+            if (widget.dislikedIngredientsController
+                case final controller?) ...[
               const SizedBox(height: 20),
               DislikedIngredientsSection(controller: controller),
             ],
@@ -142,61 +158,66 @@ class _PreferencesPageState extends State<PreferencesPage> {
     );
   }
 
-  Widget _buildDietarySection(PreferencesState state, bool busy) => Card(
-    key: const ValueKey('dietary-preferences-section'),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            AppStrings.dietaryPreferences,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          const Text(AppStrings.dietaryPreferencesDescription),
-          const SizedBox(height: 12),
-          if (state.dietaryPreferenceReferences.isEmpty)
-            const Text(AppStrings.noDietaryPreferences),
-          for (final reference in state.dietaryPreferenceReferences)
-            CheckboxListTile(
-              key: ValueKey('dietary-${reference.code}'),
-              contentPadding: EdgeInsets.zero,
-              value: state.selectedDietaryCodes.contains(reference.code),
-              selected: state.selectedDietaryCodes.contains(reference.code),
-              title: Text(
-                ReferenceLocalizations.dietaryName(
-                  reference.code,
-                  reference.displayName,
-                ),
-              ),
-              subtitle: Text(_dietaryDescription(reference)),
-              onChanged: busy
-                  ? null
-                  : (selected) => _controller.setDietaryPreferenceSelected(
-                      reference.code,
-                      selected ?? false,
+  Widget _buildDietarySection(PreferencesState state, bool busy) =>
+      SectionSurface(
+        key: const ValueKey('dietary-preferences-section'),
+        title: AppStrings.dietarySectionTitle,
+        subtitle: AppStrings.dietaryPreferencesDescription,
+        icon: Icons.eco_outlined,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (state.dietaryPreferenceReferences.isEmpty)
+              const Text(AppStrings.noDietaryPreferences),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                for (final reference in state.dietaryPreferenceReferences)
+                  Tooltip(
+                    message: _dietaryDescription(reference),
+                    child: FilterChip(
+                      key: ValueKey('dietary-${reference.code}'),
+                      selected: state.selectedDietaryCodes.contains(
+                        reference.code,
+                      ),
+                      showCheckmark: true,
+                      avatar: const Icon(Icons.spa_outlined, size: 18),
+                      label: Text(
+                        ReferenceLocalizations.dietaryName(
+                          reference.code,
+                          reference.displayName,
+                        ),
+                      ),
+                      onSelected: busy
+                          ? null
+                          : (selected) =>
+                                _controller.setDietaryPreferenceSelected(
+                                  reference.code,
+                                  selected,
+                                ),
                     ),
+                  ),
+              ],
             ),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: FilledButton.icon(
-              key: const ValueKey('save-dietary-preferences'),
-              onPressed: busy ? null : _saveDietaryPreferences,
-              icon: busy
-                  ? const SizedBox.square(
-                      dimension: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.save),
-              label: const Text(AppStrings.saveDietaryPreferences),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                key: const ValueKey('save-dietary-preferences'),
+                onPressed: busy ? null : _saveDietaryPreferences,
+                icon: busy
+                    ? const SizedBox.square(
+                        dimension: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.save),
+                label: const Text(AppStrings.saveDietaryPreferences),
+              ),
             ),
-          ),
-        ],
-      ),
-    ),
-  );
+          ],
+        ),
+      );
 
   String _dietaryDescription(DietaryPreferenceReference reference) {
     final description = ReferenceLocalizations.dietaryDescription(
@@ -208,89 +229,137 @@ class _PreferencesPageState extends State<PreferencesPage> {
         : description;
   }
 
-  Widget _buildAllergenSection(PreferencesState state, bool busy) => Card(
+  Widget _buildAllergenSection(
+    PreferencesState state,
+    bool busy,
+  ) => SectionSurface(
     key: const ValueKey('allergens-section'),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            AppStrings.allergens,
-            style: Theme.of(context).textTheme.titleLarge,
+    title: AppStrings.allergenSectionTitle,
+    subtitle: AppStrings.allergenSafety,
+    icon: Icons.shield_outlined,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (state.allergenReferences.isEmpty)
+          const Text(AppStrings.noAllergens),
+        Autocomplete<AllergenReference>(
+          displayStringForOption: (reference) =>
+              ReferenceLocalizations.allergenName(
+                reference.code,
+                reference.displayName,
+              ),
+          optionsBuilder: (value) {
+            final query = value.text.trim().toLowerCase();
+            if (query.isEmpty) return const Iterable<AllergenReference>.empty();
+            return state.allergenReferences.where(
+              (reference) =>
+                  !state.selectedAllergenCodes.contains(reference.code) &&
+                  _matchesAllergen(reference, query),
+            );
+          },
+          onSelected: (reference) {
+            _controller.setAllergenSelected(reference.code, true);
+            _allergenInput?.clear();
+            setState(() => _allergenQuery = '');
+          },
+          fieldViewBuilder: (context, fieldController, focusNode, onSubmitted) {
+            _allergenInput = fieldController;
+            return TextField(
+              key: const ValueKey('allergen-search'),
+              controller: fieldController,
+              focusNode: focusNode,
+              enabled: !busy,
+              textInputAction: TextInputAction.search,
+              onChanged: (value) => setState(() => _allergenQuery = value),
+              onSubmitted: (_) => onSubmitted(),
+              decoration: const InputDecoration(
+                hintText: AppStrings.allergenSearchHint,
+                prefixIcon: Icon(Icons.search_rounded),
+              ),
+            );
+          },
+        ),
+        if (_allergenQuery.trim().isNotEmpty &&
+            !state.allergenReferences.any(
+              (reference) =>
+                  !state.selectedAllergenCodes.contains(reference.code) &&
+                  _matchesAllergen(reference, _allergenQuery),
+            ))
+          const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text(AppStrings.allergenNoMatch),
           ),
-          const SizedBox(height: 8),
-          const Text(AppStrings.allergenSafety),
-          const SizedBox(height: 12),
-          if (state.allergenReferences.isEmpty)
-            const Text(AppStrings.noAllergens),
-          for (final reference in state.allergenReferences) ...[
-            CheckboxListTile(
-              key: ValueKey('allergen-${reference.code}'),
-              contentPadding: EdgeInsets.zero,
-              value: state.selectedAllergenCodes.contains(reference.code),
-              selected: state.selectedAllergenCodes.contains(reference.code),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final selected in state.selectedAllergens)
+              InputChip(
+                key: ValueKey('allergen-${selected.allergen}'),
+                label: Text(
+                  ReferenceLocalizations.allergenName(
+                    selected.allergen,
+                    selected.displayName,
+                  ),
+                ),
+                onDeleted: busy
+                    ? null
+                    : () => _controller.setAllergenSelected(
+                        selected.allergen,
+                        false,
+                      ),
+              ),
+          ],
+        ),
+        for (final selected in state.selectedAllergens)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: ExpansionTile(
+              key: ValueKey('allergen-editor-${selected.allergen}'),
               title: Text(
                 ReferenceLocalizations.allergenName(
-                  reference.code,
-                  reference.displayName,
+                  selected.allergen,
+                  selected.displayName,
                 ),
               ),
               subtitle: Text(
-                ReferenceLocalizations.allergenDescription(
-                  reference.code,
-                  reference.description,
+                ReferenceLocalizations.reactionKindName(
+                  selected.reactionKind.wireValue,
+                  selected.reactionKind.displayName,
                 ),
               ),
-              onChanged: busy
-                  ? null
-                  : (selected) => _controller.setAllergenSelected(
-                      reference.code,
-                      selected ?? false,
-                    ),
-            ),
-            if (_selectedAllergen(state, reference.code) case final selected?)
-              Padding(
-                key: ValueKey('allergen-editor-${reference.code}'),
-                padding: const EdgeInsets.only(left: 16, bottom: 12),
-                child: _AllergenEditor(
+              childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              children: [
+                _AllergenEditor(
                   selected: selected,
                   enabled: !busy,
                   onReactionChanged: (reactionKind) => _controller
-                      .setAllergenReactionKind(reference.code, reactionKind),
+                      .setAllergenReactionKind(selected.allergen, reactionKind),
                   onNoteChanged: (note) =>
-                      _controller.setAllergenNote(reference.code, note),
+                      _controller.setAllergenNote(selected.allergen, note),
                 ),
-              ),
-          ],
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: FilledButton.icon(
-              key: const ValueKey('save-allergens'),
-              onPressed: busy ? null : _saveAllergens,
-              icon: busy
-                  ? const SizedBox.square(
-                      dimension: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.save),
-              label: const Text(AppStrings.saveAllergens),
+              ],
             ),
           ),
-        ],
-      ),
+        const SizedBox(height: 12),
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton.icon(
+            key: const ValueKey('save-allergens'),
+            onPressed: busy ? null : _saveAllergens,
+            icon: busy
+                ? const SizedBox.square(
+                    dimension: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.save),
+            label: const Text(AppStrings.saveAllergens),
+          ),
+        ),
+      ],
     ),
   );
-
-  SelectedAllergen? _selectedAllergen(PreferencesState state, String code) {
-    for (final selected in state.selectedAllergens) {
-      if (selected.allergen == code) {
-        return selected;
-      }
-    }
-    return null;
-  }
 }
 
 class _AllergenEditor extends StatefulWidget {

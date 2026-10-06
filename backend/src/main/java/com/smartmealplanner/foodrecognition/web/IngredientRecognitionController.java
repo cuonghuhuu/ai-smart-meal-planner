@@ -2,6 +2,7 @@ package com.smartmealplanner.foodrecognition.web;
 
 import com.smartmealplanner.foodrecognition.IngredientRecognitionAiClient;
 import com.smartmealplanner.foodrecognition.IngredientRecognitionResult;
+import java.util.Locale;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -36,6 +37,7 @@ public class IngredientRecognitionController {
                     defaultValue = MediaType.APPLICATION_OCTET_STREAM_VALUE)
             String contentType,
             @RequestBody byte[] imageBytes) {
-        return recognition.detect(imageBytes, contentType);
+        return recognition.detect(imageBytes,
+                contentType.split(";", 2)[0].trim().toLowerCase(Locale.ROOT));
     }
 }

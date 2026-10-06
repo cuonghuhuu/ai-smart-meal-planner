@@ -182,7 +182,7 @@ try {
     Wait-Demo 'Mailpit' 30 { $null -ne (Get-DemoPortOwner 8025) }
 
     $env:AI_VISION_DEVICE = if ($env:AI_VISION_DEVICE) { $env:AI_VISION_DEVICE } else { '0' }
-    $env:AI_RECOGNITION_CONFIDENCE = '0.10'
+    $env:AI_RECOGNITION_CONFIDENCE = '0.35'
     Ensure-DemoProcess 'ai' 8000 $python $state
     Wait-Demo 'FastAPI' 90 {
         Assert-DemoProcessAlive $state 'ai'

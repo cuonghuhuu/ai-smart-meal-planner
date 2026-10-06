@@ -1,0 +1,1142 @@
+{
+  "dataset": "AI Smart Meal Planner local demonstration recipes",
+  "datasetVersion": "v1",
+  "recipes": [
+    {
+      "sourceIdentifier": "LOCAL_DEMO_001",
+      "title": "Trứng luộc và cơm",
+      "slug": "local-demo-001",
+      "summary": "Trứng luộc và cơm. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_001",
+      "tags": [
+        "VIETNAMESE",
+        "MAIN_DISH"
+      ],
+      "mealSlots": [
+        "BREAKFAST",
+        "LUNCH"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_TRUNG_GA",
+          "quantity": 100,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_GAO_TE",
+          "quantity": 80,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_002",
+      "title": "Cháo gà cà rốt",
+      "slug": "local-demo-002",
+      "summary": "Cháo gà cà rốt. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_002",
+      "tags": [
+        "VIETNAMESE",
+        "SOUP"
+      ],
+      "mealSlots": [
+        "BREAKFAST"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_GAO_TE",
+          "quantity": 70,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_THIT_GA",
+          "quantity": 100,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 3,
+          "ingredientCode": "DEMO_ING_CA_ROT",
+          "quantity": 70,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_003",
+      "title": "Trứng chiên cà chua",
+      "slug": "local-demo-003",
+      "summary": "Trứng chiên cà chua. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_003",
+      "tags": [
+        "VIETNAMESE",
+        "MAIN_DISH"
+      ],
+      "mealSlots": [
+        "BREAKFAST",
+        "LUNCH"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_TRUNG_GA",
+          "quantity": 100,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_CA_CHUA",
+          "quantity": 100,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 3,
+          "ingredientCode": "DEMO_ING_DAU_AN",
+          "quantity": 8,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_004",
+      "title": "Canh bắp cải thịt lợn",
+      "slug": "local-demo-004",
+      "summary": "Canh bắp cải thịt lợn. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_004",
+      "tags": [
+        "VIETNAMESE",
+        "SOUP"
+      ],
+      "mealSlots": [
+        "LUNCH",
+        "DINNER"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_BAP_CAI",
+          "quantity": 150,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_THIT_LON",
+          "quantity": 100,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_005",
+      "title": "Cơm thịt gà hành tây",
+      "slug": "local-demo-005",
+      "summary": "Cơm thịt gà hành tây. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_005",
+      "tags": [
+        "VIETNAMESE",
+        "MAIN_DISH"
+      ],
+      "mealSlots": [
+        "LUNCH",
+        "DINNER"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_GAO_TE",
+          "quantity": 90,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_THIT_GA",
+          "quantity": 140,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 3,
+          "ingredientCode": "DEMO_ING_HANH_TAY",
+          "quantity": 60,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_006",
+      "title": "Cá hấp tỏi",
+      "slug": "local-demo-006",
+      "summary": "Cá hấp tỏi. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_006",
+      "tags": [
+        "VIETNAMESE",
+        "STEAMED"
+      ],
+      "mealSlots": [
+        "LUNCH",
+        "DINNER"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_CA",
+          "quantity": 160,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_TOI",
+          "quantity": 8,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 3,
+          "ingredientCode": "DEMO_ING_GAO_TE",
+          "quantity": 80,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_007",
+      "title": "Bò xào cà rốt",
+      "slug": "local-demo-007",
+      "summary": "Bò xào cà rốt. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_007",
+      "tags": [
+        "VIETNAMESE",
+        "STIR_FRIED"
+      ],
+      "mealSlots": [
+        "LUNCH",
+        "DINNER"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_THIT_BO",
+          "quantity": 140,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_CA_ROT",
+          "quantity": 90,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 3,
+          "ingredientCode": "DEMO_ING_DAU_AN",
+          "quantity": 8,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_008",
+      "title": "Canh cà chua trứng",
+      "slug": "local-demo-008",
+      "summary": "Canh cà chua trứng. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_008",
+      "tags": [
+        "VIETNAMESE",
+        "SOUP"
+      ],
+      "mealSlots": [
+        "BREAKFAST",
+        "LUNCH"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_CA_CHUA",
+          "quantity": 150,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_TRUNG_GA",
+          "quantity": 100,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_009",
+      "title": "Đậu phụ xào bắp cải",
+      "slug": "local-demo-009",
+      "summary": "Đậu phụ xào bắp cải. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_009",
+      "tags": [
+        "VIETNAMESE",
+        "VEGETARIAN"
+      ],
+      "mealSlots": [
+        "LUNCH",
+        "DINNER"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_DAU_PHU",
+          "quantity": 150,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_BAP_CAI",
+          "quantity": 150,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 3,
+          "ingredientCode": "DEMO_ING_DAU_AN",
+          "quantity": 8,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_010",
+      "title": "Khoai tây gà áp chảo",
+      "slug": "local-demo-010",
+      "summary": "Khoai tây gà áp chảo. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_010",
+      "tags": [
+        "VIETNAMESE",
+        "MAIN_DISH"
+      ],
+      "mealSlots": [
+        "LUNCH",
+        "DINNER"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_KHOAI_TAY",
+          "quantity": 180,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_THIT_GA",
+          "quantity": 130,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_011",
+      "title": "Cơm cá cà chua",
+      "slug": "local-demo-011",
+      "summary": "Cơm cá cà chua. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_011",
+      "tags": [
+        "VIETNAMESE",
+        "MAIN_DISH"
+      ],
+      "mealSlots": [
+        "LUNCH",
+        "DINNER"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_GAO_TE",
+          "quantity": 90,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_CA",
+          "quantity": 140,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 3,
+          "ingredientCode": "DEMO_ING_CA_CHUA",
+          "quantity": 100,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_012",
+      "title": "Cháo thịt lợn rau muống",
+      "slug": "local-demo-012",
+      "summary": "Cháo thịt lợn rau muống. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_012",
+      "tags": [
+        "VIETNAMESE",
+        "SOUP"
+      ],
+      "mealSlots": [
+        "BREAKFAST"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_GAO_TE",
+          "quantity": 70,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_THIT_LON",
+          "quantity": 100,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 3,
+          "ingredientCode": "DEMO_ING_RAU_MUONG",
+          "quantity": 80,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_013",
+      "title": "Salad dưa chuột trứng",
+      "slug": "local-demo-013",
+      "summary": "Salad dưa chuột trứng. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_013",
+      "tags": [
+        "VIETNAMESE",
+        "SALAD"
+      ],
+      "mealSlots": [
+        "BREAKFAST",
+        "LUNCH"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_DUA_CHUOT",
+          "quantity": 150,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_TRUNG_GA",
+          "quantity": 100,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 3,
+          "ingredientCode": "DEMO_ING_CA_CHUA",
+          "quantity": 100,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_014",
+      "title": "Bò hầm khoai tây",
+      "slug": "local-demo-014",
+      "summary": "Bò hầm khoai tây. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_014",
+      "tags": [
+        "VIETNAMESE",
+        "MAIN_DISH"
+      ],
+      "mealSlots": [
+        "LUNCH",
+        "DINNER"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_THIT_BO",
+          "quantity": 140,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_KHOAI_TAY",
+          "quantity": 170,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 3,
+          "ingredientCode": "DEMO_ING_HANH_TAY",
+          "quantity": 50,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_015",
+      "title": "Canh cá rau muống",
+      "slug": "local-demo-015",
+      "summary": "Canh cá rau muống. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_015",
+      "tags": [
+        "VIETNAMESE",
+        "SOUP"
+      ],
+      "mealSlots": [
+        "LUNCH",
+        "DINNER"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_CA",
+          "quantity": 140,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_RAU_MUONG",
+          "quantity": 120,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_016",
+      "title": "Cơm đậu phụ cà rốt",
+      "slug": "local-demo-016",
+      "summary": "Cơm đậu phụ cà rốt. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_016",
+      "tags": [
+        "VIETNAMESE",
+        "VEGETARIAN"
+      ],
+      "mealSlots": [
+        "LUNCH",
+        "DINNER"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_GAO_TE",
+          "quantity": 85,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_DAU_PHU",
+          "quantity": 160,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 3,
+          "ingredientCode": "DEMO_ING_CA_ROT",
+          "quantity": 90,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_017",
+      "title": "Gà xào bắp cải",
+      "slug": "local-demo-017",
+      "summary": "Gà xào bắp cải. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_017",
+      "tags": [
+        "VIETNAMESE",
+        "STIR_FRIED"
+      ],
+      "mealSlots": [
+        "LUNCH",
+        "DINNER"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_THIT_GA",
+          "quantity": 140,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_BAP_CAI",
+          "quantity": 170,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 3,
+          "ingredientCode": "DEMO_ING_TOI",
+          "quantity": 8,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_018",
+      "title": "Cơm thịt lợn cà chua",
+      "slug": "local-demo-018",
+      "summary": "Cơm thịt lợn cà chua. Công thức mẫu cho buổi trình diễn.",
+      "servings": 1,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "difficulty": "EASY",
+      "instructionsNote": "Điều chỉnh gia vị và độ chín theo thực phẩm thực tế.",
+      "imageUrl": null,
+      "source": "CURATED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:LOCAL_DEMO_018",
+      "tags": [
+        "VIETNAMESE",
+        "MAIN_DISH"
+      ],
+      "mealSlots": [
+        "LUNCH",
+        "DINNER"
+      ],
+      "ingredients": [
+        {
+          "lineNumber": 1,
+          "ingredientCode": "DEMO_ING_GAO_TE",
+          "quantity": 90,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 2,
+          "ingredientCode": "DEMO_ING_THIT_LON",
+          "quantity": 130,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        },
+        {
+          "lineNumber": 3,
+          "ingredientCode": "DEMO_ING_CA_CHUA",
+          "quantity": 120,
+          "unitCode": "g",
+          "preparationNote": null,
+          "optional": false,
+          "allowSubstitution": false,
+          "sectionLabel": "Nguyên liệu"
+        }
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "instruction": "Sơ chế nguyên liệu, rửa sạch và chia đúng khẩu phần.",
+          "durationMinutes": 10
+        },
+        {
+          "stepNumber": 2,
+          "instruction": "Nấu chín nguyên liệu phù hợp với tên món, rồi dùng ngay.",
+          "durationMinutes": 20
+        }
+      ]
+    }
+  ]
+}

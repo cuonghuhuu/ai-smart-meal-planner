@@ -20,6 +20,7 @@ class ApiClient {
 
   String? Function()? _accessTokenProvider;
   Future<bool> Function()? _refreshAccessToken;
+  Future<Map<String, String>> Function()? _csrfHeadersProvider;
 
   void configureAuthentication({
     required String? Function() accessTokenProvider,
@@ -27,6 +28,11 @@ class ApiClient {
   }) {
     _accessTokenProvider = accessTokenProvider;
     _refreshAccessToken = refreshAccessToken;
+  }
+
+  /// Supplies the CSRF header for authenticated browser mutations.
+  void configureCsrfHeaders(Future<Map<String, String>> Function()? provider) {
+    _csrfHeadersProvider = provider;
   }
 
   Future<Map<String, dynamic>> getJson(String path) async {
@@ -159,6 +165,17 @@ class ApiClient {
       'Accept': 'application/json, application/problem+json',
       ...headers,
     };
+
+    if (authenticated &&
+        method != 'GET' &&
+        method != 'HEAD' &&
+        method != 'OPTIONS' &&
+        _csrfHeadersProvider != null &&
+        !requestHeaders.keys.any(
+          (key) => key.toLowerCase() == 'x-csrf-token',
+        )) {
+      requestHeaders.addAll(await _csrfHeadersProvider!());
+    }
 
     if (body != null) {
       requestHeaders['Content-Type'] = 'application/json';

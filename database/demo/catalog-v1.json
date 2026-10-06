@@ -1,0 +1,838 @@
+{
+  "dataset": "AI Smart Meal Planner local demonstration catalog",
+  "datasetVersion": "v1",
+  "foods": [
+    {
+      "sourceIdentifier": "LOCAL_DEMO_TRUNG_GA",
+      "catalogCode": "DEMO_FOOD_TRUNG_GA",
+      "displayName": "Trứng gà",
+      "sourceName": null,
+      "categoryCode": "PROTEIN_EGG",
+      "description": "Dữ liệu mẫu địa phương; giá trị dinh dưỡng ước tính.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:TRUNG_GA",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 143,
+          "unitCode": "kcal",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 13,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "fat_total",
+          "canonicalCode": "FAT_TOTAL",
+          "amount": 10,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "carbohydrate",
+          "canonicalCode": "CARBOHYDRATE",
+          "amount": 1,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "DEMO_ING_TRUNG_GA",
+        "displayName": "Trứng gà",
+        "categoryCode": "PROTEIN_EGG",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1,
+        "primary": true,
+        "aliases": []
+      }
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_CA_CHUA",
+      "catalogCode": "DEMO_FOOD_CA_CHUA",
+      "displayName": "Cà chua",
+      "sourceName": null,
+      "categoryCode": "VEGETABLES",
+      "description": "Dữ liệu mẫu địa phương; giá trị dinh dưỡng ước tính.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:CA_CHUA",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 18,
+          "unitCode": "kcal",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 1,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "fat_total",
+          "canonicalCode": "FAT_TOTAL",
+          "amount": 0,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "carbohydrate",
+          "canonicalCode": "CARBOHYDRATE",
+          "amount": 4,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "DEMO_ING_CA_CHUA",
+        "displayName": "Cà chua",
+        "categoryCode": "VEGETABLES",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1,
+        "primary": true,
+        "aliases": []
+      }
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_CA_ROT",
+      "catalogCode": "DEMO_FOOD_CA_ROT",
+      "displayName": "Cà rốt",
+      "sourceName": null,
+      "categoryCode": "VEG_ROOT",
+      "description": "Dữ liệu mẫu địa phương; giá trị dinh dưỡng ước tính.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:CA_ROT",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 41,
+          "unitCode": "kcal",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 1,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "fat_total",
+          "canonicalCode": "FAT_TOTAL",
+          "amount": 0,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "carbohydrate",
+          "canonicalCode": "CARBOHYDRATE",
+          "amount": 10,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "DEMO_ING_CA_ROT",
+        "displayName": "Cà rốt",
+        "categoryCode": "VEG_ROOT",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1,
+        "primary": true,
+        "aliases": []
+      }
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_HANH_TAY",
+      "catalogCode": "DEMO_FOOD_HANH_TAY",
+      "displayName": "Hành tây",
+      "sourceName": null,
+      "categoryCode": "VEG_ALLIUM",
+      "description": "Dữ liệu mẫu địa phương; giá trị dinh dưỡng ước tính.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:HANH_TAY",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 40,
+          "unitCode": "kcal",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 1,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "fat_total",
+          "canonicalCode": "FAT_TOTAL",
+          "amount": 0,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "carbohydrate",
+          "canonicalCode": "CARBOHYDRATE",
+          "amount": 9,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "DEMO_ING_HANH_TAY",
+        "displayName": "Hành tây",
+        "categoryCode": "VEG_ALLIUM",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1,
+        "primary": true,
+        "aliases": []
+      }
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_TOI",
+      "catalogCode": "DEMO_FOOD_TOI",
+      "displayName": "Tỏi",
+      "sourceName": null,
+      "categoryCode": "VEG_ALLIUM",
+      "description": "Dữ liệu mẫu địa phương; giá trị dinh dưỡng ước tính.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:TOI",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 149,
+          "unitCode": "kcal",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 6,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "fat_total",
+          "canonicalCode": "FAT_TOTAL",
+          "amount": 1,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "carbohydrate",
+          "canonicalCode": "CARBOHYDRATE",
+          "amount": 33,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "DEMO_ING_TOI",
+        "displayName": "Tỏi",
+        "categoryCode": "VEG_ALLIUM",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1,
+        "primary": true,
+        "aliases": []
+      }
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_DUA_CHUOT",
+      "catalogCode": "DEMO_FOOD_DUA_CHUOT",
+      "displayName": "Dưa chuột",
+      "sourceName": null,
+      "categoryCode": "VEGETABLES",
+      "description": "Dữ liệu mẫu địa phương; giá trị dinh dưỡng ước tính.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:DUA_CHUOT",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 15,
+          "unitCode": "kcal",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 1,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "fat_total",
+          "canonicalCode": "FAT_TOTAL",
+          "amount": 0,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "carbohydrate",
+          "canonicalCode": "CARBOHYDRATE",
+          "amount": 4,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "DEMO_ING_DUA_CHUOT",
+        "displayName": "Dưa chuột",
+        "categoryCode": "VEGETABLES",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1,
+        "primary": true,
+        "aliases": []
+      }
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_KHOAI_TAY",
+      "catalogCode": "DEMO_FOOD_KHOAI_TAY",
+      "displayName": "Khoai tây",
+      "sourceName": null,
+      "categoryCode": "VEG_ROOT",
+      "description": "Dữ liệu mẫu địa phương; giá trị dinh dưỡng ước tính.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:KHOAI_TAY",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 77,
+          "unitCode": "kcal",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 2,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "fat_total",
+          "canonicalCode": "FAT_TOTAL",
+          "amount": 0,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "carbohydrate",
+          "canonicalCode": "CARBOHYDRATE",
+          "amount": 17,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "DEMO_ING_KHOAI_TAY",
+        "displayName": "Khoai tây",
+        "categoryCode": "VEG_ROOT",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1,
+        "primary": true,
+        "aliases": []
+      }
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_THIT_GA",
+      "catalogCode": "DEMO_FOOD_THIT_GA",
+      "displayName": "Thịt gà",
+      "sourceName": null,
+      "categoryCode": "PROTEIN_POULTRY",
+      "description": "Dữ liệu mẫu địa phương; giá trị dinh dưỡng ước tính.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:THIT_GA",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 165,
+          "unitCode": "kcal",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 31,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "fat_total",
+          "canonicalCode": "FAT_TOTAL",
+          "amount": 4,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "carbohydrate",
+          "canonicalCode": "CARBOHYDRATE",
+          "amount": 0,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "DEMO_ING_THIT_GA",
+        "displayName": "Thịt gà",
+        "categoryCode": "PROTEIN_POULTRY",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1,
+        "primary": true,
+        "aliases": []
+      }
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_THIT_LON",
+      "catalogCode": "DEMO_FOOD_THIT_LON",
+      "displayName": "Thịt lợn",
+      "sourceName": null,
+      "categoryCode": "PROTEIN_MEAT",
+      "description": "Dữ liệu mẫu địa phương; giá trị dinh dưỡng ước tính.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:THIT_LON",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 242,
+          "unitCode": "kcal",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 27,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "fat_total",
+          "canonicalCode": "FAT_TOTAL",
+          "amount": 14,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "carbohydrate",
+          "canonicalCode": "CARBOHYDRATE",
+          "amount": 0,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "DEMO_ING_THIT_LON",
+        "displayName": "Thịt lợn",
+        "categoryCode": "PROTEIN_MEAT",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1,
+        "primary": true,
+        "aliases": []
+      }
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_THIT_BO",
+      "catalogCode": "DEMO_FOOD_THIT_BO",
+      "displayName": "Thịt bò",
+      "sourceName": null,
+      "categoryCode": "PROTEIN_MEAT",
+      "description": "Dữ liệu mẫu địa phương; giá trị dinh dưỡng ước tính.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:THIT_BO",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 250,
+          "unitCode": "kcal",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 26,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "fat_total",
+          "canonicalCode": "FAT_TOTAL",
+          "amount": 15,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "carbohydrate",
+          "canonicalCode": "CARBOHYDRATE",
+          "amount": 0,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "DEMO_ING_THIT_BO",
+        "displayName": "Thịt bò",
+        "categoryCode": "PROTEIN_MEAT",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1,
+        "primary": true,
+        "aliases": []
+      }
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_CA",
+      "catalogCode": "DEMO_FOOD_CA",
+      "displayName": "Cá",
+      "sourceName": null,
+      "categoryCode": "PROTEIN_SEAFOOD",
+      "description": "Dữ liệu mẫu địa phương; giá trị dinh dưỡng ước tính.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:CA",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 128,
+          "unitCode": "kcal",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 20,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "fat_total",
+          "canonicalCode": "FAT_TOTAL",
+          "amount": 5,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "carbohydrate",
+          "canonicalCode": "CARBOHYDRATE",
+          "amount": 0,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "DEMO_ING_CA",
+        "displayName": "Cá",
+        "categoryCode": "PROTEIN_SEAFOOD",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1,
+        "primary": true,
+        "aliases": []
+      }
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_BAP_CAI",
+      "catalogCode": "DEMO_FOOD_BAP_CAI",
+      "displayName": "Bắp cải",
+      "sourceName": null,
+      "categoryCode": "VEG_LEAFY",
+      "description": "Dữ liệu mẫu địa phương; giá trị dinh dưỡng ước tính.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:BAP_CAI",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 25,
+          "unitCode": "kcal",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 1,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "fat_total",
+          "canonicalCode": "FAT_TOTAL",
+          "amount": 0,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "carbohydrate",
+          "canonicalCode": "CARBOHYDRATE",
+          "amount": 6,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "DEMO_ING_BAP_CAI",
+        "displayName": "Bắp cải",
+        "categoryCode": "VEG_LEAFY",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1,
+        "primary": true,
+        "aliases": []
+      }
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_GAO_TE",
+      "catalogCode": "DEMO_FOOD_GAO_TE",
+      "displayName": "Gạo tẻ",
+      "sourceName": null,
+      "categoryCode": "GRAINS_RICE",
+      "description": "Dữ liệu mẫu địa phương; giá trị dinh dưỡng ước tính.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:GAO_TE",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 365,
+          "unitCode": "kcal",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 7,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "fat_total",
+          "canonicalCode": "FAT_TOTAL",
+          "amount": 1,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "carbohydrate",
+          "canonicalCode": "CARBOHYDRATE",
+          "amount": 80,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "DEMO_ING_GAO_TE",
+        "displayName": "Gạo tẻ",
+        "categoryCode": "GRAINS_RICE",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1,
+        "primary": true,
+        "aliases": []
+      }
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_DAU_PHU",
+      "catalogCode": "DEMO_FOOD_DAU_PHU",
+      "displayName": "Đậu phụ",
+      "sourceName": null,
+      "categoryCode": "PROTEIN_LEGUME",
+      "description": "Dữ liệu mẫu địa phương; giá trị dinh dưỡng ước tính.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:DAU_PHU",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 76,
+          "unitCode": "kcal",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 8,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "fat_total",
+          "canonicalCode": "FAT_TOTAL",
+          "amount": 5,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "carbohydrate",
+          "canonicalCode": "CARBOHYDRATE",
+          "amount": 2,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "DEMO_ING_DAU_PHU",
+        "displayName": "Đậu phụ",
+        "categoryCode": "PROTEIN_LEGUME",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1,
+        "primary": true,
+        "aliases": []
+      }
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_RAU_MUONG",
+      "catalogCode": "DEMO_FOOD_RAU_MUONG",
+      "displayName": "Rau muống",
+      "sourceName": null,
+      "categoryCode": "VEG_LEAFY",
+      "description": "Dữ liệu mẫu địa phương; giá trị dinh dưỡng ước tính.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:RAU_MUONG",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 19,
+          "unitCode": "kcal",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 3,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "fat_total",
+          "canonicalCode": "FAT_TOTAL",
+          "amount": 0,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "carbohydrate",
+          "canonicalCode": "CARBOHYDRATE",
+          "amount": 3,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "DEMO_ING_RAU_MUONG",
+        "displayName": "Rau muống",
+        "categoryCode": "VEG_LEAFY",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1,
+        "primary": true,
+        "aliases": []
+      }
+    },
+    {
+      "sourceIdentifier": "LOCAL_DEMO_DAU_AN",
+      "catalogCode": "DEMO_FOOD_DAU_AN",
+      "displayName": "Dầu ăn",
+      "sourceName": null,
+      "categoryCode": "FATS_OILS",
+      "description": "Dữ liệu mẫu địa phương; giá trị dinh dưỡng ước tính.",
+      "nutritionBasis": "PER_100_G",
+      "densityGPerMl": null,
+      "source": "IMPORTED",
+      "sourceReference": "AI_MEAL_PLANNER_LOCAL_DEMO_V1:DAU_AN",
+      "nutrientFacts": [
+        {
+          "sourceCode": "energy",
+          "canonicalCode": "ENERGY",
+          "amount": 884,
+          "unitCode": "kcal",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "protein",
+          "canonicalCode": "PROTEIN",
+          "amount": 0,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "fat_total",
+          "canonicalCode": "FAT_TOTAL",
+          "amount": 100,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        },
+        {
+          "sourceCode": "carbohydrate",
+          "canonicalCode": "CARBOHYDRATE",
+          "amount": 0,
+          "unitCode": "g",
+          "dataQuality": "ESTIMATED"
+        }
+      ],
+      "ingredientMapping": {
+        "ingredientCode": "DEMO_ING_DAU_AN",
+        "displayName": "Dầu ăn",
+        "categoryCode": "FATS_OILS",
+        "defaultUnitCode": "g",
+        "preparationState": "RAW",
+        "yieldFactor": 1,
+        "primary": true,
+        "aliases": []
+      }
+    }
+  ]
+}

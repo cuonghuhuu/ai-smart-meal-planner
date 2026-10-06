@@ -141,6 +141,7 @@ final class AppRouter {
                    : IngredientCatalogPage(
                        sessionController: sessionController,
                        controller: ingredientCatalogController,
+                       pantryController: pantryController,
                      ),
              ),
            ),

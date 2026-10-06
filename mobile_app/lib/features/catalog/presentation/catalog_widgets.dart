@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:smart_meal_planner/core/ui/wellness_components.dart';
 import 'package:smart_meal_planner/features/catalog/data/catalog_models.dart';
 import 'package:smart_meal_planner/features/catalog/presentation/catalog_localizations.dart';
 import 'package:smart_meal_planner/l10n/app_strings.dart';
@@ -27,9 +28,8 @@ class CatalogSearchBar extends StatelessWidget {
         textInputAction: TextInputAction.search,
         onSubmitted: onSubmitted,
         decoration: InputDecoration(
-          labelText: AppStrings.catalogSearchHint,
-          prefixIcon: const Icon(Icons.search),
-          border: const OutlineInputBorder(),
+          hintText: AppStrings.catalogSearchHint,
+          prefixIcon: const Icon(Icons.search_rounded),
         ),
       );
       final button = FilledButton.icon(
@@ -91,7 +91,8 @@ class CatalogCategoryFilter extends StatelessWidget {
               child: Text(CatalogLocalizations.categoryName(category)),
             ),
         ],
-        onChanged: (value) => onChanged(value == null || value.isEmpty ? null : value),
+        onChanged: (value) =>
+            onChanged(value == null || value.isEmpty ? null : value),
       ),
     ),
   );
@@ -110,22 +111,13 @@ class CatalogErrorPanel extends StatelessWidget {
   final VoidCallback onRetry;
 
   @override
-  Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          const Icon(Icons.cloud_off, size: 32),
-          const SizedBox(height: 8),
-          Text(message, textAlign: TextAlign.center),
-          const SizedBox(height: 12),
-          OutlinedButton(
-            key: retryKey,
-            onPressed: onRetry,
-            child: const Text(AppStrings.retry),
-          ),
-        ],
-      ),
+  Widget build(BuildContext context) => WellnessEmptyState(
+    icon: Icons.cloud_off_outlined,
+    message: message,
+    action: OutlinedButton(
+      key: retryKey,
+      onPressed: onRetry,
+      child: const Text(AppStrings.retry),
     ),
   );
 }
@@ -136,12 +128,8 @@ class CatalogEmptyPanel extends StatelessWidget {
   final String message;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 48),
-    child: Center(
-      child: Text(message, textAlign: TextAlign.center),
-    ),
-  );
+  Widget build(BuildContext context) =>
+      WellnessEmptyState(icon: Icons.search_off_rounded, message: message);
 }
 
 class FoodCatalogListItem extends StatelessWidget {
@@ -152,15 +140,23 @@ class FoodCatalogListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Card(
     child: InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(24),
       onTap: () => context.push('/catalog/foods/${item.publicId}'),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.restaurant, size: 28),
-            const SizedBox(width: 12),
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(Icons.restaurant_menu_rounded, size: 25),
+            ),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,17 +165,17 @@ class FoodCatalogListItem extends StatelessWidget {
                     item.displayName,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  const SizedBox(height: 4),
-                  Text(CatalogLocalizations.categoryName(item.category)),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
-                    item.code,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    CatalogLocalizations.categoryName(item.category),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right),
+            const Icon(Icons.chevron_right_rounded),
           ],
         ),
       ),
@@ -195,15 +191,23 @@ class IngredientCatalogListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Card(
     child: InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(24),
       onTap: () => context.push('/catalog/ingredients/${item.publicId}'),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.kitchen, size: 28),
-            const SizedBox(width: 12),
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(Icons.spa_outlined, size: 25),
+            ),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,7 +217,12 @@ class IngredientCatalogListItem extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 4),
-                  Text(CatalogLocalizations.categoryName(item.category)),
+                  Text(
+                    CatalogLocalizations.categoryName(item.category),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
                   if (item.staple) ...[
                     const SizedBox(height: 4),
                     Text(
@@ -224,7 +233,7 @@ class IngredientCatalogListItem extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right),
+            const Icon(Icons.chevron_right_rounded),
           ],
         ),
       ),

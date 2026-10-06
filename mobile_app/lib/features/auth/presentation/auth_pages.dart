@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_meal_planner/core/api/api_exception.dart';
+import 'package:smart_meal_planner/app/theme/app_theme.dart';
 import 'package:smart_meal_planner/features/auth/application/session_controller.dart';
 import 'package:smart_meal_planner/l10n/app_strings.dart';
 
@@ -508,31 +509,77 @@ class AuthPageShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     body: SafeArea(
-      child: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(subtitle),
-                    const SizedBox(height: 24),
-                    child,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 900;
+          final form = ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 460),
+            child: Container(
+              padding: EdgeInsets.all(wide ? 40 : 24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(28),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (!wide) ...[
+                    Icon(Icons.spa_outlined, color: AppTheme.forest, size: 34),
+                    const SizedBox(height: 16),
                   ],
-                ),
+                  Text(title, style: Theme.of(context).textTheme.headlineSmall),
+                  const SizedBox(height: 8),
+                  Text(subtitle),
+                  const SizedBox(height: 28),
+                  child,
+                ],
               ),
             ),
-          ),
-        ),
+          );
+          return Row(
+            children: [
+              if (wide)
+                Expanded(
+                  child: Container(
+                    height: double.infinity,
+                    padding: const EdgeInsets.all(64),
+                    color: AppTheme.forest,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.spa_outlined,
+                          color: Colors.white,
+                          size: 52,
+                        ),
+                        const SizedBox(height: 36),
+                        Text(
+                          AppStrings.productName,
+                          style: Theme.of(context).textTheme.displaySmall
+                              ?.copyWith(color: Colors.white),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          AppStrings.wellnessEyebrow,
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(color: AppTheme.mint),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: form,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     ),
   );
