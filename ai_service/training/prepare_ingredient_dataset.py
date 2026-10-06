@@ -26,7 +26,7 @@ def _source_names(config: dict[str, Any]) -> dict[int, str]:
         return {index: str(name) for index, name in enumerate(raw)}
     if isinstance(raw, dict):
         return {int(index): str(name) for index, name in raw.items()}
-    raise ValueError("Source data.yaml must contain names as a list or mapping")
+    raise TypeError("Source data.yaml must contain names as a list or mapping")
 
 
 def _resolve_split(data_yaml: Path, config: dict[str, Any], key: str) -> Path | None:
@@ -34,7 +34,7 @@ def _resolve_split(data_yaml: Path, config: dict[str, Any], key: str) -> Path | 
     if raw is None:
         return None
     if not isinstance(raw, str):
-        raise ValueError(f"Only one directory per split is supported for {key!r}")
+        raise TypeError(f"Only one directory per split is supported for {key!r}")
 
     configured_root = Path(str(config.get("path", ".")))
     if not configured_root.is_absolute():
@@ -47,9 +47,6 @@ def _resolve_split(data_yaml: Path, config: dict[str, Any], key: str) -> Path | 
     if resolved.exists():
         return resolved
 
-    # Some Roboflow ZIP exports contain paths such as ../train/images even
-    # though train/ is physically beside data.yaml. Accept that export shape
-    # without weakening class or label validation.
     trimmed_parts = [part for part in Path(raw).parts if part not in ("..", ".")]
     fallback = data_yaml.parent.joinpath(*trimmed_parts).resolve()
     return fallback if fallback.exists() else resolved
@@ -73,13 +70,17 @@ def _iter_images(images_dir: Path):
             yield path
 
 
-def _remap_label_file(label_path: Path, source_to_target: dict[int, Any]) -> tuple[list[str], Counter[int]]:
+def _remap_label_file(
+    label_path: Path, source_to_target: dict[int, Any]
+) -> tuple[list[str], Counter[int]]:
     output: list[str] = []
     counts: Counter[int] = Counter()
     if not label_path.exists():
         return output, counts
 
-    for line_number, raw_line in enumerate(label_path.read_text(encoding="utf-8").splitlines(), 1):
+    for line_number, raw_line in enumerate(
+        label_path.read_text(encoding="utf-8").splitlines(), 1
+    ):
         stripped = raw_line.strip()
         if not stripped:
             continue
@@ -90,9 +91,13 @@ def _remap_label_file(label_path: Path, source_to_target: dict[int, Any]) -> tup
             source_id = int(fields[0])
             coords = [float(value) for value in fields[1:]]
         except ValueError as exc:
-            raise ValueError(f"{label_path}:{line_number}: invalid numeric YOLO label") from exc
+            raise ValueError(
+                f"{label_path}:{line_number}: invalid numeric YOLO label"
+            ) from exc
         if any(value < 0.0 or value > 1.0 for value in coords):
-            raise ValueError(f"{label_path}:{line_number}: coordinates must be normalized to 0..1")
+            raise ValueError(
+                f"{label_path}:{line_number}: coordinates must be normalized to 0..1"
+            )
 
         target = source_to_target.get(source_id)
         if target is None:
@@ -105,7 +110,7 @@ def _remap_label_file(label_path: Path, source_to_target: dict[int, Any]) -> tup
 def prepare(source_yaml: Path, output_root: Path) -> None:
     config = yaml.safe_load(source_yaml.read_text(encoding="utf-8"))
     if not isinstance(config, dict):
-        raise ValueError("Source data.yaml must decode to a mapping")
+        raise TypeError("Source data.yaml must decode to a mapping")
 
     source_to_target = map_source_classes(_source_names(config))
     if output_root.exists():
@@ -120,7 +125,9 @@ def prepare(source_yaml: Path, output_root: Path) -> None:
         if source_images is None:
             continue
         if not source_images.exists():
-            raise FileNotFoundError(f"{split} images directory does not exist: {source_images}")
+            raise FileNotFoundError(
+                f"{split} images directory does not exist: {source_images}"
+            )
         source_labels = _labels_dir(source_images)
 
         destination_images = output_root / "images" / split
