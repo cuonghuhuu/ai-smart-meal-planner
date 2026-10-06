@@ -155,6 +155,7 @@ final class HttpIngredientRecognitionRepository
       bytes: imageBytes,
       contentType: contentType,
       authenticated: true,
+      requestTimeout: const Duration(seconds: 45),
     );
     return IngredientRecognitionResult.fromJson(response);
   }
