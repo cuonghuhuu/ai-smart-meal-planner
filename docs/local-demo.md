@@ -29,6 +29,23 @@ on 127.0.0.1:8000 with `AI_VISION_DEVICE=0` by default and
 port 8080, and Flutter Web on port 3000. Open <http://localhost:3000> and
 Mailpit at <http://localhost:8025>.
 
+
+## Demo administrator
+
+Register and verify the account normally first. Then grant the local demo
+administrator role from the repository root:
+
+```powershell
+.\\scripts\\local\\promote-admin.ps1 -Email admin@example.com
+```
+
+The script prompts for `DB_PASSWORD` when it is not already present in the
+PowerShell process. Sign out and sign in again after promotion so the newly
+issued access JWT contains `ROLE_ADMIN`. The Flutter navigation then exposes
+the administrator user-management screen at `/admin/users`. Standard users
+cannot open this route, and Spring Security separately enforces
+`ROLE_ADMIN` for `/api/v1/admin/**`.
+
 ## Explicit demo catalog import
 
 Normal startup does not seed food or recipes. After the local MySQL database is
