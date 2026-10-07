@@ -21,6 +21,8 @@ import 'package:smart_meal_planner/features/meal_planning/data/nutrition_target_
 import 'package:smart_meal_planner/features/meal_planning/application/meal_planning_prerequisites.dart';
 import 'package:smart_meal_planner/features/pantry/data/pantry_repository.dart';
 import 'package:smart_meal_planner/features/recipes/data/recipe_repository.dart';
+import 'package:smart_meal_planner/features/admin/users/application/admin_user_controller.dart';
+import 'package:smart_meal_planner/features/admin/users/data/admin_user_repository.dart';
 
 final class AppSessionDependencies {
   const AppSessionDependencies({
@@ -36,6 +38,7 @@ final class AppSessionDependencies {
     required this.pantryRepository,
     required this.catalogRepository,
     required this.recipeRepository,
+    required this.adminUserController,
   });
 
   final SessionController sessionController;
@@ -50,6 +53,7 @@ final class AppSessionDependencies {
   final PantryRepository pantryRepository;
   final CatalogRepository catalogRepository;
   final RecipeRepository recipeRepository;
+  final AdminUserController adminUserController;
 }
 
 final class AppSessionFactory {
@@ -124,6 +128,9 @@ final class AppSessionFactory {
       pantryRepository: pantryRepository,
       catalogRepository: catalogRepository,
       recipeRepository: recipeRepository,
+      adminUserController: AdminUserController(
+        repository: HttpAdminUserRepository(apiClient),
+      ),
     );
   }
 }
