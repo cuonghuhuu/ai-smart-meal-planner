@@ -4,4 +4,8 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Local demo only: adb reverse exposes the host Spring Boot HTTP server
+         to the debug app as 127.0.0.1:8080. Release builds do not inherit this. -->
+    <application android:usesCleartextTraffic="true"/>
 </manifest>
