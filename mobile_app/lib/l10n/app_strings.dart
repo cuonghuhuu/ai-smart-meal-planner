@@ -622,6 +622,35 @@ final class AppStrings {
       'Ghi chú không được vượt quá 255 ký tự.';
   static const measurementInvalidNumber = 'Vui lòng nhập một số hợp lệ.';
 
+
+  // Administrator user-management demo.
+  static const adminUsers = 'Quản trị người dùng';
+  static const adminUsersSubtitle =
+      'Xem tài khoản và quản lý trạng thái người dùng.';
+  static const adminSearch = 'Tìm kiếm';
+  static const adminStatusFilter = 'Trạng thái';
+  static const adminAllStatuses = 'Tất cả trạng thái';
+  static const adminActive = 'Đang hoạt động';
+  static const adminSuspended = 'Đã tạm khóa';
+  static const adminPendingVerification = 'Chờ xác minh';
+  static const adminDeactivated = 'Đã vô hiệu hóa';
+  static const adminSuspend = 'Tạm khóa';
+  static const adminReactivate = 'Kích hoạt lại';
+  static const adminSuspendConfirmation =
+      'Bạn có chắc muốn tạm khóa tài khoản này không?';
+  static const adminReactivateConfirmation =
+      'Bạn có chắc muốn kích hoạt lại tài khoản này không?';
+  static const adminCreatedAt = 'Tạo lúc';
+  static const adminUsersEmpty = 'Không tìm thấy người dùng.';
+  static const adminUserLoadFailed =
+      'Không thể tải danh sách người dùng. Vui lòng thử lại.';
+  static const adminUserRequestFailed =
+      'Không thể hoàn tất thao tác với người dùng. Vui lòng thử lại.';
+  static const adminForbidden = 'Bạn không có quyền thực hiện thao tác này.';
+  static const adminNotFound = 'Không tìm thấy dữ liệu quản trị.';
+  static const adminConflict =
+      'Dữ liệu đã thay đổi hoặc thao tác không hợp lệ. Vui lòng thử lại.';
+
   // Safe, user-facing error copy. Backend problem details are intentionally
   // not returned directly to the UI.
   static const incorrectCredentials = 'Email hoặc mật khẩu không chính xác.';
