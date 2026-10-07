@@ -29,6 +29,8 @@ import 'package:smart_meal_planner/features/pantry/presentation/pantry_item_form
 import 'package:smart_meal_planner/features/recipes/application/recipe_controller.dart';
 import 'package:smart_meal_planner/features/recipes/presentation/recipe_browse_page.dart';
 import 'package:smart_meal_planner/features/recipes/presentation/recipe_detail_page.dart';
+import 'package:smart_meal_planner/features/admin/users/application/admin_user_controller.dart';
+import 'package:smart_meal_planner/features/admin/users/presentation/admin_users_page.dart';
 
 final class AppRouter {
   AppRouter(
@@ -43,6 +45,7 @@ final class AppRouter {
     PantryController? pantryController,
     CatalogRepository? pantryCatalogRepository,
     RecipeController? recipeController,
+    AdminUserController? adminUserController,
   }) : router = GoRouter(
          initialLocation: '/catalog/foods',
          refreshListenable: sessionController,
@@ -341,6 +344,18 @@ final class AppRouter {
                );
              },
            ),
+           GoRoute(
+             path: '/admin/users',
+             builder: (context, state) => SessionRouteGate(
+               sessionController: sessionController,
+               child: adminUserController == null
+                   ? const _AdminUnavailablePage()
+                   : AdminUsersPage(
+                       sessionController: sessionController,
+                       controller: adminUserController,
+                     ),
+             ),
+           ),
          ],
          errorBuilder: (context, state) => const _NotFoundPage(),
        );
@@ -367,10 +382,17 @@ final class AppRouter {
         path == '/recipes' ||
         _isRecipeDetailPath(path) ||
         _isPantryEditPath(path) ||
-        _isPantryDetailPath(path);
+        _isPantryDetailPath(path) ||
+        _isAdminPath(path);
 
     if (session.status == SessionStatus.anonymous && isProtectedRoute) {
       return '/auth/login?from=${Uri.encodeComponent(state.uri.toString())}';
+    }
+
+    if (session.status == SessionStatus.authenticated &&
+        _isAdminPath(path) &&
+        !session.isAdmin) {
+      return '/catalog/foods';
     }
 
     if (session.status == SessionStatus.authenticated && isAuthRoute) {
@@ -407,7 +429,8 @@ final class AppRouter {
                 (_isPantryEditPath(uri.path) &&
                     _isValidPublicId(uri.path.split('/')[2])) ||
                 (_isPantryDetailPath(uri.path) &&
-                    _isValidPublicId(uri.path.split('/').last)))
+                    _isValidPublicId(uri.path.split('/').last)) ||
+                uri.path == '/admin/users')
         ? uri.toString()
         : '/catalog/foods';
   }
@@ -443,6 +466,8 @@ final class AppRouter {
         segments[2].isNotEmpty &&
         segments[3] == 'edit';
   }
+
+  static bool _isAdminPath(String path) => path == '/admin/users';
 
   static bool _isValidPublicId(String value) => RegExp(
     r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
@@ -490,6 +515,15 @@ class _PantryUnavailablePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       const Scaffold(body: Center(child: Text(AppStrings.pantryUnavailable)));
+}
+
+class _AdminUnavailablePage extends StatelessWidget {
+  const _AdminUnavailablePage();
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(
+    body: Center(child: Text('Chức năng quản trị hiện không khả dụng.')),
+  );
 }
 
 class _NotFoundPage extends StatelessWidget {
