@@ -109,6 +109,10 @@ spring:
     hikari:
       maximum-pool-size: 5
 
+app:
+  ai:
+    response-timeout: ${AI_RESPONSE_TIMEOUT:90s}
+
 ---
 spring:
   config:

@@ -1,10 +1,17 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:smart_meal_planner/core/ui/responsive_content.dart';
+import 'package:smart_meal_planner/core/ui/wellness_components.dart';
 import 'package:smart_meal_planner/features/auth/application/session_controller.dart';
 import 'package:smart_meal_planner/features/auth/presentation/authenticated_shell.dart';
 import 'package:smart_meal_planner/features/catalog/application/ingredient_catalog_controller.dart';
 import 'package:smart_meal_planner/features/catalog/data/catalog_models.dart';
+import 'package:smart_meal_planner/features/catalog/data/ingredient_recognition_repository.dart';
 import 'package:smart_meal_planner/features/catalog/presentation/catalog_widgets.dart';
+import 'package:smart_meal_planner/features/catalog/presentation/recognition_pantry_editor.dart';
+import 'package:smart_meal_planner/features/pantry/application/pantry_controller.dart';
 import 'package:smart_meal_planner/l10n/app_strings.dart';
 
 class IngredientCatalogPage extends StatefulWidget {
@@ -12,10 +19,12 @@ class IngredientCatalogPage extends StatefulWidget {
     super.key,
     required this.sessionController,
     required this.controller,
+    this.pantryController,
   });
 
   final SessionController sessionController;
   final IngredientCatalogController controller;
+  final PantryController? pantryController;
 
   @override
   State<IngredientCatalogPage> createState() => _IngredientCatalogPageState();
@@ -23,6 +32,9 @@ class IngredientCatalogPage extends StatefulWidget {
 
 class _IngredientCatalogPageState extends State<IngredientCatalogPage> {
   late final TextEditingController _searchController;
+  final ImagePicker _imagePicker = ImagePicker();
+  Uint8List? _pickedImageBytes;
+  String? _pickerError;
 
   IngredientCatalogController get _controller => widget.controller;
 
@@ -49,6 +61,45 @@ class _IngredientCatalogPageState extends State<IngredientCatalogPage> {
     }
   }
 
+  Future<void> _pickAndRecognize() async {
+    try {
+      final file = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1920,
+        imageQuality: 90,
+      );
+      if (file == null || !mounted) {
+        return;
+      }
+      final bytes = await file.readAsBytes();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _pickedImageBytes = bytes;
+        _pickerError = null;
+      });
+      await _controller.recognizeImage(bytes, _contentTypeFor(file));
+    } on Object {
+      if (mounted) {
+        setState(() => _pickerError = AppStrings.genericError);
+      }
+    }
+  }
+
+  String _contentTypeFor(XFile file) {
+    final mimeType = file.mimeType?.toLowerCase();
+    if (mimeType == 'image/png' ||
+        mimeType == 'image/webp' ||
+        mimeType == 'image/jpeg') {
+      return mimeType!;
+    }
+    final path = file.path.toLowerCase();
+    if (path.endsWith('.png')) return 'image/png';
+    if (path.endsWith('.webp')) return 'image/webp';
+    return 'image/jpeg';
+  }
+
   @override
   Widget build(BuildContext context) => AuthenticatedShell(
     sessionController: widget.sessionController,
@@ -63,26 +114,51 @@ class _IngredientCatalogPageState extends State<IngredientCatalogPage> {
         child: ListView(
           key: const ValueKey('ingredient-list'),
           children: [
-            Text(
-              AppStrings.ingredients,
-              key: const ValueKey('ingredient-catalog-title'),
-              style: Theme.of(context).textTheme.headlineMedium,
+            const PageIntro(
+              key: ValueKey('ingredient-catalog-title'),
+              eyebrow: AppStrings.wellnessEyebrow,
+              title: AppStrings.ingredients,
+              subtitle: AppStrings.catalogIngredientsSubtitle,
+              icon: Icons.spa_outlined,
             ),
-            const SizedBox(height: 8),
-            const Text(AppStrings.catalogIngredientsSubtitle),
+            if (_controller.recognitionRepository != null) ...[
+              const SizedBox(height: 20),
+              _RecognitionCard(
+                state: _controller.recognitionState,
+                imageBytes: _pickedImageBytes,
+                pickerError: _pickerError,
+                onPickImage: _pickAndRecognize,
+              ),
+              if (_controller.recognitionState.result != null &&
+                  widget.pantryController != null)
+                RecognitionPantryEditor(
+                  key: ObjectKey(_controller.recognitionState.result),
+                  result: _controller.recognitionState.result!,
+                  catalogRepository: _controller.repository,
+                  pantryController: widget.pantryController!,
+                ),
+            ],
             const SizedBox(height: 20),
-            CatalogSearchBar(
-              controller: _searchController,
-              fieldKey: const ValueKey('ingredient-search-field'),
-              submitKey: const ValueKey('ingredient-search-submit'),
-              onSubmitted: _controller.search,
-            ),
-            const SizedBox(height: 12),
-            CatalogCategoryFilter(
-              categories: state.categories,
-              selectedCategoryCode: state.selectedCategoryCode,
-              filterKey: const ValueKey('ingredient-category-filter'),
-              onChanged: _controller.setCategory,
+            SectionSurface(
+              title: AppStrings.catalogExploreTitle,
+              icon: Icons.search_rounded,
+              child: Column(
+                children: [
+                  CatalogSearchBar(
+                    controller: _searchController,
+                    fieldKey: const ValueKey('ingredient-search-field'),
+                    submitKey: const ValueKey('ingredient-search-submit'),
+                    onSubmitted: _controller.search,
+                  ),
+                  const SizedBox(height: 12),
+                  CatalogCategoryFilter(
+                    categories: state.categories,
+                    selectedCategoryCode: state.selectedCategoryCode,
+                    filterKey: const ValueKey('ingredient-category-filter'),
+                    onChanged: _controller.setCategory,
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 20),
             ..._bodyChildren(state),
@@ -92,9 +168,7 @@ class _IngredientCatalogPageState extends State<IngredientCatalogPage> {
     );
   }
 
-  List<Widget> _bodyChildren(
-    CatalogListState<IngredientCatalogItem> state,
-  ) {
+  List<Widget> _bodyChildren(CatalogListState<IngredientCatalogItem> state) {
     if (state.isInitialLoading) {
       return const [
         Padding(
@@ -113,17 +187,34 @@ class _IngredientCatalogPageState extends State<IngredientCatalogPage> {
       ];
     }
     if (state.items.isEmpty) {
-      return const [
-        CatalogEmptyPanel(message: AppStrings.catalogNoIngredients),
+      return [
+        const CatalogEmptyPanel(message: AppStrings.catalogNoIngredients),
+        if (state.searchQuery.isEmpty && state.selectedCategoryCode == null)
+          const Text('Danh mục nguyên liệu đang trống. Hãy chạy import demo.'),
       ];
     }
 
     return [
-      for (final item in state.items)
-        IngredientCatalogListItem(
-          key: ValueKey('ingredient-item-${item.publicId}'),
-          item: item,
-        ),
+      LayoutBuilder(
+        builder: (context, constraints) {
+          final columns = constraints.maxWidth >= 760 ? 2 : 1;
+          final width = (constraints.maxWidth - (columns - 1) * 14) / columns;
+          return Wrap(
+            spacing: 14,
+            runSpacing: 14,
+            children: [
+              for (final item in state.items)
+                SizedBox(
+                  width: width,
+                  child: IngredientCatalogListItem(
+                    key: ValueKey('ingredient-item-${item.publicId}'),
+                    item: item,
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
       if (state.hasMore)
         CatalogLoadMoreFooter(
           loading: state.isLoadingMore,
@@ -134,4 +225,233 @@ class _IngredientCatalogPageState extends State<IngredientCatalogPage> {
         ),
     ];
   }
+}
+
+class _RecognitionCard extends StatelessWidget {
+  const _RecognitionCard({
+    required this.state,
+    required this.imageBytes,
+    required this.pickerError,
+    required this.onPickImage,
+  });
+
+  final IngredientRecognitionState state;
+  final Uint8List? imageBytes;
+  final String? pickerError;
+  final VoidCallback onPickImage;
+
+  @override
+  Widget build(BuildContext context) {
+    final result = state.result;
+    return SectionSurface(
+      key: const ValueKey('ingredient-recognition-card'),
+      title: AppStrings.ingredientRecognitionTitle,
+      subtitle: AppStrings.ingredientRecognitionSubtitle,
+      icon: Icons.document_scanner_outlined,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          FilledButton.icon(
+            key: const ValueKey('ingredient-recognition-pick'),
+            onPressed: state.status == IngredientRecognitionStatus.loading
+                ? null
+                : onPickImage,
+            icon: const Icon(Icons.add_photo_alternate_outlined),
+            label: Text(
+              imageBytes == null
+                  ? AppStrings.ingredientRecognitionPick
+                  : AppStrings.ingredientRecognitionPickAnother,
+            ),
+          ),
+          if (pickerError != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              pickerError!,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ],
+          if (imageBytes != null) ...[
+            const SizedBox(height: 18),
+            _RecognitionPreview(imageBytes: imageBytes!, result: result),
+          ],
+          if (state.status == IngredientRecognitionStatus.loading) ...[
+            const SizedBox(height: 16),
+            const LinearProgressIndicator(),
+            const SizedBox(height: 8),
+            const Text(AppStrings.ingredientRecognitionRunning),
+          ],
+          if (state.status == IngredientRecognitionStatus.error) ...[
+            const SizedBox(height: 16),
+            Text(
+              state.errorMessage ?? AppStrings.genericError,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ],
+          if (result != null) ...[
+            const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            if (result.detections.isEmpty)
+              const Text(AppStrings.ingredientRecognitionNoDetections)
+            else
+              ...result.detections.map(
+                (detection) => _DetectionRow(detection: detection),
+              ),
+            const SizedBox(height: 10),
+            Text(
+              '${AppStrings.ingredientRecognitionModel}: ${result.algorithmVersion}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _RecognitionPreview extends StatelessWidget {
+  const _RecognitionPreview({required this.imageBytes, required this.result});
+
+  final Uint8List imageBytes;
+  final IngredientRecognitionResult? result;
+
+  @override
+  Widget build(BuildContext context) {
+    final width = result?.imageWidth ?? 16;
+    final height = result?.imageHeight ?? 9;
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 760),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: AspectRatio(
+            aspectRatio: width / height,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.memory(
+                  imageBytes,
+                  fit: result == null ? BoxFit.contain : BoxFit.fill,
+                  gaplessPlayback: true,
+                ),
+                if (result != null)
+                  CustomPaint(
+                    painter: _DetectionPainter(
+                      result: result!,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DetectionRow extends StatelessWidget {
+  const _DetectionRow({required this.detection});
+
+  final IngredientRecognitionDetection detection;
+
+  @override
+  Widget build(BuildContext context) {
+    final percent = (detection.confidence * 100).toStringAsFixed(1);
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.tertiaryContainer
+            .withValues(alpha: .5),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.help_outline_rounded),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  detection.nameVi,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              Text('$percent%', style: Theme.of(context).textTheme.titleMedium),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            AppStrings.ingredientRecognitionNeedsConfirmation,
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DetectionPainter extends CustomPainter {
+  const _DetectionPainter({required this.result, required this.color});
+
+  final IngredientRecognitionResult result;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final scaleX = size.width / result.imageWidth;
+    final scaleY = size.height / result.imageHeight;
+    final boxPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5;
+    final labelPaint = Paint()..color = color.withValues(alpha: 0.92);
+
+    for (final detection in result.detections) {
+      final rect = Rect.fromLTRB(
+        detection.box.x1 * scaleX,
+        detection.box.y1 * scaleY,
+        detection.box.x2 * scaleX,
+        detection.box.y2 * scaleY,
+      );
+      canvas.drawRect(rect, boxPaint);
+
+      final label =
+          '${detection.nameVi} ${(detection.confidence * 100).toStringAsFixed(1)}%';
+      final painter = TextPainter(
+        text: TextSpan(
+          text: label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout(maxWidth: size.width);
+
+      final labelLeft = rect.left
+          .clamp(0.0, size.width - painter.width - 8)
+          .toDouble();
+      final labelTop = (rect.top - painter.height - 8)
+          .clamp(0.0, size.height - painter.height - 8)
+          .toDouble();
+      final background = Rect.fromLTWH(
+        labelLeft,
+        labelTop,
+        painter.width + 8,
+        painter.height + 6,
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(background, const Radius.circular(4)),
+        labelPaint,
+      );
+      painter.paint(canvas, Offset(labelLeft + 4, labelTop + 3));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DetectionPainter oldDelegate) =>
+      oldDelegate.result != result || oldDelegate.color != color;
 }

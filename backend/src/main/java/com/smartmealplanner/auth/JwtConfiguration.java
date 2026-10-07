@@ -68,9 +68,9 @@ public class JwtConfiguration {
         }
 
         if (environment.acceptsProfiles(
-                Profiles.of("test"))) {
+                Profiles.of("test", "local"))) {
 
-            return generateTestKeyPair();
+            return generateDevelopmentKeyPair();
         }
 
         throw new IllegalStateException(
@@ -190,7 +190,7 @@ public class JwtConfiguration {
         }
     }
 
-    private static KeyPair generateTestKeyPair() {
+    private static KeyPair generateDevelopmentKeyPair() {
 
         try {
             KeyPairGenerator generator =

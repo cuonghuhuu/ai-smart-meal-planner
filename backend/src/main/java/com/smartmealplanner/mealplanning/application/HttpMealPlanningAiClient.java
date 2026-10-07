@@ -26,6 +26,7 @@ import com.smartmealplanner.mealplanning.contract.v1.MealPlanGenerationResponse;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractJson;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractLimits;
 import com.smartmealplanner.mealplanning.contract.v1.MealPlanningContractValidationException;
+import com.smartmealplanner.shared.application.AiServiceProperties;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;

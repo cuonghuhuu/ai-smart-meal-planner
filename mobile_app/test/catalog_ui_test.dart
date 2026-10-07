@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -8,22 +10,47 @@ import 'package:smart_meal_planner/features/auth/data/refresh_token_store.dart';
 import 'package:smart_meal_planner/features/catalog/application/food_catalog_controller.dart';
 import 'package:smart_meal_planner/features/catalog/application/ingredient_catalog_controller.dart';
 import 'package:smart_meal_planner/features/catalog/data/catalog_models.dart';
+import 'package:smart_meal_planner/features/catalog/data/ingredient_recognition_repository.dart';
 import 'package:smart_meal_planner/l10n/app_strings.dart';
 
 import 'support/fake_auth_repository.dart';
 import 'support/fake_catalog_repository.dart';
 
 void main() {
+  testWidgets('weak YOLO detection keeps confidence and confirmation visible', (
+    tester,
+  ) async {
+    final session = await _authenticatedSession();
+    final controller = IngredientCatalogController(
+      repository: FakeCatalogRepository(),
+      recognitionRepository: _RecognitionResultRepository(),
+    );
+    await controller.recognizeImage(Uint8List.fromList([1]), 'image/jpeg');
+    final router = _router(session, ingredientController: controller);
+    addTearDown(() {
+      controller.dispose();
+      router.dispose();
+    });
+
+    await tester.pumpWidget(_routerApp(router));
+    router.go('/catalog/ingredients');
+    await _pumpAsync(tester);
+
+    expect(find.text('16.7%'), findsOneWidget);
+    expect(
+      find.text(AppStrings.ingredientRecognitionNeedsConfirmation),
+      findsOneWidget,
+    );
+    expect(find.text('Dưa chuột'), findsOneWidget);
+  });
+
   testWidgets('authenticated foods page renders Vietnamese data and search', (
     tester,
   ) async {
     final repository = FakeCatalogRepository();
     final session = await _authenticatedSession();
     final foodController = FoodCatalogController(repository: repository);
-    final router = _router(
-      session,
-      foodController: foodController,
-    );
+    final router = _router(session, foodController: foodController);
     addTearDown(() {
       foodController.dispose();
       router.dispose();
@@ -39,7 +66,10 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('food-item-$testFoodId')));
     await _pumpAsync(tester);
-    expect(find.byKey(const ValueKey('food-detail-$testFoodId')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('food-detail-$testFoodId')),
+      findsOneWidget,
+    );
     router.go('/catalog/foods');
     await _pumpAsync(tester);
 
@@ -60,10 +90,7 @@ void main() {
     final repository = FakeCatalogRepository();
     final session = await _authenticatedSession();
     final foodController = FoodCatalogController(repository: repository);
-    final router = _router(
-      session,
-      foodController: foodController,
-    );
+    final router = _router(session, foodController: foodController);
     addTearDown(() {
       foodController.dispose();
       router.dispose();
@@ -73,7 +100,9 @@ void main() {
     await _pumpAsync(tester);
     await tester.tap(find.byType(DropdownButton<String>));
     await tester.pump();
-    await tester.tap(find.text(AppStrings.catalogCategoryLabels['GRAINS']!).last);
+    await tester.tap(
+      find.text(AppStrings.catalogCategoryLabels['GRAINS']!).last,
+    );
     await _pumpAsync(tester);
 
     expect(repository.foodRequests.last.categoryCode, 'GRAINS');
@@ -91,10 +120,7 @@ void main() {
     );
     final session = await _authenticatedSession();
     final foodController = FoodCatalogController(repository: repository);
-    final router = _router(
-      session,
-      foodController: foodController,
-    );
+    final router = _router(session, foodController: foodController);
     addTearDown(() {
       foodController.dispose();
       router.dispose();
@@ -102,12 +128,19 @@ void main() {
 
     await tester.pumpWidget(_routerApp(router));
     await _pumpAsync(tester);
+    await tester.ensureVisible(find.byKey(const ValueKey('food-load-more')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('food-load-more')));
     await _pumpAsync(tester);
 
-    expect(find.byKey(const ValueKey('food-item-$testFoodIdTwo')), findsOneWidget);
-    expect(repository.foodRequests.where((request) => request.page == 1),
-        hasLength(1));
+    expect(
+      find.byKey(const ValueKey('food-item-$testFoodIdTwo')),
+      findsOneWidget,
+    );
+    expect(
+      repository.foodRequests.where((request) => request.page == 1),
+      hasLength(1),
+    );
   });
 
   testWidgets('food detail shows returned nutrients without invented zeros', (
@@ -116,10 +149,7 @@ void main() {
     final repository = FakeCatalogRepository();
     final session = await _authenticatedSession();
     final foodController = FoodCatalogController(repository: repository);
-    final router = _router(
-      session,
-      foodController: foodController,
-    );
+    final router = _router(session, foodController: foodController);
     addTearDown(() {
       foodController.dispose();
       router.dispose();
@@ -129,7 +159,10 @@ void main() {
     router.go('/catalog/foods/$testFoodId');
     await _pumpAsync(tester);
 
-    expect(find.byKey(const ValueKey('food-detail-$testFoodId')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('food-detail-$testFoodId')),
+      findsOneWidget,
+    );
     expect(find.text('Gạo nếp cái'), findsOneWidget);
     expect(find.textContaining('10.7083'), findsOneWidget);
     expect(find.text('SODIUM'), findsNothing);
@@ -169,15 +202,16 @@ void main() {
       findsOneWidget,
     );
 
-    final foodLink = find.byKey(
-      const ValueKey('ingredient-food-$testFoodId'),
-    );
+    final foodLink = find.byKey(const ValueKey('ingredient-food-$testFoodId'));
     await tester.ensureVisible(foodLink);
     await tester.pump();
     await tester.tap(foodLink);
     await _pumpAsync(tester);
 
-    expect(find.byKey(const ValueKey('food-detail-$testFoodId')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('food-detail-$testFoodId')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('ingredient navigation works from the desktop shell', (
@@ -264,77 +298,86 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('catalog routes are protected and restore a safe food detail route', (
-    tester,
-  ) async {
-    final repository = FakeCatalogRepository();
-    final session = await _anonymousSession();
-    final foodController = FoodCatalogController(repository: repository);
-    final ingredientController = IngredientCatalogController(
-      repository: repository,
-    );
-    final router = _router(
-      session,
-      foodController: foodController,
-      ingredientController: ingredientController,
-    );
-    addTearDown(() {
-      foodController.dispose();
-      ingredientController.dispose();
-      router.dispose();
-    });
+  testWidgets(
+    'catalog routes are protected and restore a safe food detail route',
+    (tester) async {
+      final repository = FakeCatalogRepository();
+      final session = await _anonymousSession();
+      final foodController = FoodCatalogController(repository: repository);
+      final ingredientController = IngredientCatalogController(
+        repository: repository,
+      );
+      final router = _router(
+        session,
+        foodController: foodController,
+        ingredientController: ingredientController,
+      );
+      addTearDown(() {
+        foodController.dispose();
+        ingredientController.dispose();
+        router.dispose();
+      });
 
-    await tester.pumpWidget(_routerApp(router));
-    await _pumpAsync(tester);
-    expect(find.text(AppStrings.welcomeBack), findsOneWidget);
+      await tester.pumpWidget(_routerApp(router));
+      await _pumpAsync(tester);
+      expect(find.text(AppStrings.welcomeBack), findsOneWidget);
 
-    router.go('/catalog/ingredients');
-    await _pumpAsync(tester);
-    expect(find.text(AppStrings.welcomeBack), findsOneWidget);
+      router.go('/catalog/ingredients');
+      await _pumpAsync(tester);
+      expect(find.text(AppStrings.welcomeBack), findsOneWidget);
 
-    router.go('/catalog/ingredients/$testIngredientId');
-    await _pumpAsync(tester);
-    expect(find.text(AppStrings.welcomeBack), findsOneWidget);
+      router.go('/catalog/ingredients/$testIngredientId');
+      await _pumpAsync(tester);
+      expect(find.text(AppStrings.welcomeBack), findsOneWidget);
 
-    router.go('/catalog/foods/$testFoodId');
-    await _pumpAsync(tester);
-    expect(find.text(AppStrings.welcomeBack), findsOneWidget);
+      router.go('/catalog/foods/$testFoodId');
+      await _pumpAsync(tester);
+      expect(find.text(AppStrings.welcomeBack), findsOneWidget);
 
-    await tester.enterText(find.byType(TextFormField).at(0), 'user@example.test');
-    await tester.enterText(find.byType(TextFormField).at(1), 'Password123!');
-    await tester.tap(find.widgetWithText(FilledButton, AppStrings.signIn));
-    await _pumpAsync(tester);
+      await tester.enterText(
+        find.byType(TextFormField).at(0),
+        'user@example.test',
+      );
+      await tester.enterText(find.byType(TextFormField).at(1), 'Password123!');
+      await tester.tap(find.widgetWithText(FilledButton, AppStrings.signIn));
+      await _pumpAsync(tester);
 
-    expect(find.byKey(const ValueKey('food-detail-$testFoodId')), findsOneWidget);
-  });
+      expect(
+        find.byKey(const ValueKey('food-detail-$testFoodId')),
+        findsOneWidget,
+      );
+    },
+  );
 
-  testWidgets('initial catalog failure exposes retry and preserves generic errors', (
-    tester,
-  ) async {
-    final repository = FakeCatalogRepository(
-      foodsError: const ApiTransportException(ApiTransportFailureKind.network),
-    );
-    final session = await _authenticatedSession();
-    final foodController = FoodCatalogController(repository: repository);
-    final router = _router(
-      session,
-      foodController: foodController,
-    );
-    addTearDown(() {
-      foodController.dispose();
-      router.dispose();
-    });
+  testWidgets(
+    'initial catalog failure exposes retry and preserves generic errors',
+    (tester) async {
+      final repository = FakeCatalogRepository(
+        foodsError: const ApiTransportException(
+          ApiTransportFailureKind.network,
+        ),
+      );
+      final session = await _authenticatedSession();
+      final foodController = FoodCatalogController(repository: repository);
+      final router = _router(session, foodController: foodController);
+      addTearDown(() {
+        foodController.dispose();
+        router.dispose();
+      });
 
-    await tester.pumpWidget(_routerApp(router));
-    await _pumpAsync(tester);
-    expect(find.byKey(const ValueKey('food-retry')), findsOneWidget);
-    expect(find.textContaining('SocketException'), findsNothing);
+      await tester.pumpWidget(_routerApp(router));
+      await _pumpAsync(tester);
+      expect(find.byKey(const ValueKey('food-retry')), findsOneWidget);
+      expect(find.textContaining('SocketException'), findsNothing);
 
-    repository.foodsError = null;
-    await tester.tap(find.byKey(const ValueKey('food-retry')));
-    await _pumpAsync(tester);
-    expect(find.text('Gạo nếp cái'), findsOneWidget);
-  });
+      repository.foodsError = null;
+      await tester.ensureVisible(find.byKey(const ValueKey('food-retry')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('food-retry')));
+      await _pumpAsync(tester);
+      expect(find.text('Gạo nếp cái'), findsOneWidget);
+    },
+  );
 
   testWidgets('malicious catalog intended destinations are rejected', (
     tester,
@@ -342,10 +385,7 @@ void main() {
     final repository = FakeCatalogRepository();
     final session = await _authenticatedSession();
     final foodController = FoodCatalogController(repository: repository);
-    final router = _router(
-      session,
-      foodController: foodController,
-    );
+    final router = _router(session, foodController: foodController);
     addTearDown(() {
       foodController.dispose();
       router.dispose();
@@ -422,3 +462,25 @@ FoodCatalogPage _foodPage({
   totalPages: totalPages,
   content: content,
 );
+
+final class _RecognitionResultRepository
+    implements IngredientRecognitionRepository {
+  @override
+  Future<IngredientRecognitionResult> detect({
+    required Uint8List imageBytes,
+    required String contentType,
+  }) async => const IngredientRecognitionResult(
+    algorithmVersion: 'YOLO11N_INGREDIENT_V1',
+    imageWidth: 640,
+    imageHeight: 480,
+    detections: [
+      IngredientRecognitionDetection(
+        classId: 1,
+        code: 'DUA_CHUOT',
+        nameVi: 'Dưa chuột',
+        confidence: 0.167,
+        box: RecognitionBoundingBox(x1: 1, y1: 2, x2: 60, y2: 40),
+      ),
+    ],
+  );
+}

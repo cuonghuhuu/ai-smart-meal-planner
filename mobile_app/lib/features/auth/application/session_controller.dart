@@ -26,6 +26,7 @@ class SessionController extends ChangeNotifier {
   String? get accessToken => _accessToken;
   DateTime? get accessTokenExpiresAt => _accessTokenExpiresAt;
   bool get isAuthenticated => _status == SessionStatus.authenticated;
+  bool get isAdmin => _identity?.roles.contains('ROLE_ADMIN') ?? false;
 
   Future<void> bootstrap() async {
     final restored = await refresh();

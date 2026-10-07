@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:smart_meal_planner/core/ui/responsive_content.dart';
+import 'package:smart_meal_planner/core/ui/wellness_components.dart';
 import 'package:smart_meal_planner/features/auth/application/session_controller.dart';
 import 'package:smart_meal_planner/features/auth/presentation/authenticated_shell.dart';
 import 'package:smart_meal_planner/features/meal_planning/application/meal_planning_controller.dart';
+import 'package:smart_meal_planner/features/meal_planning/application/meal_planning_prerequisites.dart';
 import 'package:smart_meal_planner/features/meal_planning/data/meal_plan_models.dart';
 import 'package:smart_meal_planner/l10n/app_strings.dart';
 
@@ -13,6 +16,15 @@ String mealSlotLabel(MealSlotCode slot) => switch (slot) {
   MealSlotCode.afternoonSnack => AppStrings.mealPlanAfternoonSnack,
   MealSlotCode.dinner => AppStrings.mealPlanDinner,
   MealSlotCode.eveningSnack => AppStrings.mealPlanEveningSnack,
+};
+
+IconData mealSlotIcon(MealSlotCode slot) => switch (slot) {
+  MealSlotCode.breakfast => Icons.wb_sunny_outlined,
+  MealSlotCode.morningSnack ||
+  MealSlotCode.afternoonSnack => Icons.local_cafe_outlined,
+  MealSlotCode.lunch => Icons.lunch_dining_outlined,
+  MealSlotCode.dinner => Icons.dinner_dining_outlined,
+  MealSlotCode.eveningSnack => Icons.nights_stay_outlined,
 };
 
 String unfilledReasonLabel(UnfilledSlotReasonCode reason) => switch (reason) {
@@ -62,6 +74,9 @@ class _MealPlanningPageState extends State<MealPlanningPage> {
   void initState() {
     super.initState();
     _controller.addListener(_onStateChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _controller.checkPrerequisites();
+    });
   }
 
   @override
@@ -118,14 +133,13 @@ class _MealPlanningPageState extends State<MealPlanningPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              AppStrings.mealPlanning,
-              key: const ValueKey('meal-planning-title'),
-              style: Theme.of(context).textTheme.headlineMedium,
+            const PageIntro(
+              key: ValueKey('meal-planning-title'),
+              eyebrow: AppStrings.planWorkspaceEyebrow,
+              title: AppStrings.mealPlanning,
+              subtitle: AppStrings.mealPlanningSubtitle,
+              icon: Icons.calendar_month_outlined,
             ),
-            const SizedBox(height: 8),
-            const Text(AppStrings.mealPlanningSubtitle),
-            const SizedBox(height: 20),
             _buildForm(),
             const SizedBox(height: 24),
             _buildOutcome(),
@@ -140,119 +154,261 @@ class _MealPlanningPageState extends State<MealPlanningPage> {
     final enabled = !state.isBusy && state.pendingMealPlanPublicId == null;
     return Form(
       key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            AppStrings.mealPlanStartDate,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: OutlinedButton.icon(
-              key: const ValueKey('meal-plan-start-date'),
-              onPressed: enabled ? _pickStartDate : null,
-              icon: const Icon(Icons.calendar_today),
-              label: Text(formatMealPlanDate(_startDate)),
-            ),
-          ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<int>(
-            key: const ValueKey('meal-plan-days'),
-            initialValue: _days,
-            decoration: const InputDecoration(
-              labelText: AppStrings.mealPlanDays,
-            ),
-            items: [
-              for (var day = 1; day <= 7; day++)
-                DropdownMenuItem(value: day, child: Text('$day')),
-            ],
-            onChanged: enabled
-                ? (value) => setState(() => _days = value!)
-                : null,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            AppStrings.mealPlanSlots,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            children: [
-              for (final slot in MealSlotCode.values)
-                FilterChip(
-                  key: ValueKey('meal-plan-slot-${slot.wireValue}'),
-                  label: Text(mealSlotLabel(slot)),
-                  selected: _slots.contains(slot),
-                  onSelected: enabled
-                      ? (selected) => setState(() {
-                          if (selected) {
-                            _slots.add(slot);
-                          } else {
-                            _slots.remove(slot);
-                          }
-                          _slotError = _slots.isEmpty
-                              ? AppStrings.mealPlanSlotsRequired
-                              : null;
-                        })
-                      : null,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final configuration = SectionSurface(
+            title: AppStrings.mealPlanConfigurationTitle,
+            subtitle: AppStrings.mealPlanConfigurationSubtitle,
+            icon: Icons.tune_rounded,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  AppStrings.mealPlanScheduleTitle,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
+                const SizedBox(height: 12),
+                LayoutBuilder(
+                  builder: (context, width) {
+                    final date = OutlinedButton.icon(
+                      key: const ValueKey('meal-plan-start-date'),
+                      onPressed: enabled ? _pickStartDate : null,
+                      icon: const Icon(Icons.calendar_today_outlined),
+                      label: Text(
+                        '${AppStrings.mealPlanStartDate}: ${formatMealPlanDate(_startDate)}',
+                      ),
+                    );
+                    final days = DropdownButtonFormField<int>(
+                      key: const ValueKey('meal-plan-days'),
+                      initialValue: _days,
+                      decoration: const InputDecoration(
+                        labelText: AppStrings.mealPlanDays,
+                      ),
+                      items: [
+                        for (var day = 1; day <= 7; day++)
+                          DropdownMenuItem(value: day, child: Text('$day')),
+                      ],
+                      onChanged: enabled
+                          ? (value) => setState(() => _days = value!)
+                          : null,
+                    );
+                    if (width.maxWidth < 470) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [date, const SizedBox(height: 12), days],
+                      );
+                    }
+                    return Row(
+                      children: [
+                        Expanded(child: date),
+                        const SizedBox(width: 12),
+                        SizedBox(width: 125, child: days),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  AppStrings.mealPlanSlots,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 9,
+                  runSpacing: 9,
+                  children: [
+                    for (final slot in MealSlotCode.values)
+                      FilterChip(
+                        key: ValueKey('meal-plan-slot-${slot.wireValue}'),
+                        avatar: Icon(mealSlotIcon(slot), size: 18),
+                        label: Text(mealSlotLabel(slot)),
+                        selected: _slots.contains(slot),
+                        onSelected: enabled
+                            ? (selected) => setState(() {
+                                if (selected) {
+                                  _slots.add(slot);
+                                } else {
+                                  _slots.remove(slot);
+                                }
+                                _slotError = _slots.isEmpty
+                                    ? AppStrings.mealPlanSlotsRequired
+                                    : null;
+                              })
+                            : null,
+                      ),
+                  ],
+                ),
+                if (_slotError != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      _slotError!,
+                      key: const ValueKey('meal-plan-slots-error'),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 24),
+                Text(
+                  AppStrings.mealPlanPracticalDetails,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 12),
+                LayoutBuilder(
+                  builder: (context, width) {
+                    final servings = TextFormField(
+                      key: const ValueKey('meal-plan-servings'),
+                      controller: _servings,
+                      enabled: enabled,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      onChanged: (_) => setState(() {}),
+                      decoration: const InputDecoration(
+                        labelText: AppStrings.mealPlanServings,
+                        prefixIcon: Icon(Icons.people_outline),
+                      ),
+                      validator: (value) => _parseServings(value ?? '') == null
+                          ? AppStrings.mealPlanServingsInvalid
+                          : null,
+                    );
+                    final minutes = TextFormField(
+                      key: const ValueKey('meal-plan-max-minutes'),
+                      controller: _maxMinutes,
+                      enabled: enabled,
+                      keyboardType: TextInputType.number,
+                      onChanged: (_) => setState(() {}),
+                      decoration: const InputDecoration(
+                        labelText: AppStrings.mealPlanMaxMinutes,
+                        prefixIcon: Icon(Icons.timer_outlined),
+                      ),
+                      validator: (value) => _validMaxMinutes(value ?? '')
+                          ? null
+                          : AppStrings.mealPlanMaxMinutesInvalid,
+                    );
+                    if (width.maxWidth < 470) {
+                      return Column(
+                        children: [
+                          servings,
+                          const SizedBox(height: 12),
+                          minutes,
+                        ],
+                      );
+                    }
+                    return Row(
+                      children: [
+                        Expanded(child: servings),
+                        const SizedBox(width: 12),
+                        Expanded(child: minutes),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+          final summary = SectionSurface(
+            title: AppStrings.mealPlanSummaryTitle,
+            icon: Icons.assignment_outlined,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _summaryLine(
+                  context,
+                  Icons.calendar_today_outlined,
+                  AppStrings.mealPlanStartDate,
+                  formatMealPlanDate(_startDate),
+                ),
+                _summaryLine(
+                  context,
+                  Icons.date_range_outlined,
+                  AppStrings.mealPlanDays,
+                  '$_days',
+                ),
+                _summaryLine(
+                  context,
+                  Icons.restaurant_outlined,
+                  AppStrings.mealPlanSlots,
+                  '${_slots.length}',
+                ),
+                _summaryLine(
+                  context,
+                  Icons.people_outline,
+                  AppStrings.mealPlanServings,
+                  _servings.text,
+                ),
+                _summaryLine(
+                  context,
+                  Icons.timer_outlined,
+                  AppStrings.mealPlanMaxMinutes,
+                  _maxMinutes.text.trim().isEmpty
+                      ? '—'
+                      : _maxMinutes.text.trim(),
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  key: const ValueKey('meal-plan-generate'),
+                  onPressed: enabled ? _submit : null,
+                  icon: const Icon(Icons.auto_awesome_rounded),
+                  label: const Text(AppStrings.mealPlanGenerate),
+                ),
+              ],
+            ),
+          );
+          if (constraints.maxWidth < 800) {
+            return Column(
+              children: [configuration, const SizedBox(height: 16), summary],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(flex: 3, child: configuration),
+              const SizedBox(width: 20),
+              Expanded(flex: 2, child: summary),
             ],
-          ),
-          if (_slotError != null)
-            Text(
-              _slotError!,
-              key: const ValueKey('meal-plan-slots-error'),
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
-          const SizedBox(height: 16),
-          TextFormField(
-            key: const ValueKey('meal-plan-servings'),
-            controller: _servings,
-            enabled: enabled,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: AppStrings.mealPlanServings,
-            ),
-            validator: (value) => _parseServings(value ?? '') == null
-                ? AppStrings.mealPlanServingsInvalid
-                : null,
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            key: const ValueKey('meal-plan-max-minutes'),
-            controller: _maxMinutes,
-            enabled: enabled,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: AppStrings.mealPlanMaxMinutes,
-            ),
-            validator: (value) => _validMaxMinutes(value ?? '')
-                ? null
-                : AppStrings.mealPlanMaxMinutesInvalid,
-          ),
-          const SizedBox(height: 20),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: FilledButton.icon(
-              key: const ValueKey('meal-plan-generate'),
-              onPressed: enabled ? _submit : null,
-              icon: const Icon(Icons.auto_awesome),
-              label: const Text(AppStrings.mealPlanGenerate),
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
+
+  Widget _summaryLine(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Row(
+      children: [
+        Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(label, style: Theme.of(context).textTheme.bodySmall),
+        ),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _buildOutcome() {
     final state = _controller.state;
     return switch (state.status) {
       MealPlanningStatus.idle => const SizedBox.shrink(),
+      MealPlanningStatus.checkingPrerequisites => const _ProgressMessage(
+        'Đang kiểm tra hồ sơ, mục tiêu và dữ liệu công thức...',
+      ),
+      MealPlanningStatus.missingPrerequisite => _prerequisiteMessage(
+        state.prerequisiteIssue!,
+      ),
       MealPlanningStatus.generating => const _ProgressMessage(
         AppStrings.mealPlanGenerating,
       ),
@@ -275,7 +431,10 @@ class _MealPlanningPageState extends State<MealPlanningPage> {
                 onPressed: _controller.retryLoad,
                 child: const Text(AppStrings.mealPlanRetryLoading),
               )
-            : null,
+            : FilledButton(
+                onPressed: _controller.checkPrerequisites,
+                child: const Text('Kiểm tra lại'),
+              ),
       ),
       MealPlanningStatus.loaded => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -287,6 +446,38 @@ class _MealPlanningPageState extends State<MealPlanningPage> {
       ),
     };
   }
+
+  Widget _prerequisiteMessage(MealPlanningPrerequisiteIssue issue) =>
+      switch (issue) {
+        MealPlanningPrerequisiteIssue.profile => _MessageCard(
+          key: const ValueKey('meal-plan-needs-profile'),
+          message: 'Hoàn thiện hồ sơ trước khi lập thực đơn.',
+          action: FilledButton(
+            onPressed: () => context.go('/profile'),
+            child: const Text('Hoàn thiện hồ sơ'),
+          ),
+        ),
+        MealPlanningPrerequisiteIssue.measurement => _MessageCard(
+          key: const ValueKey('meal-plan-needs-measurement'),
+          message: 'Ghi cân nặng mới nhất để tính mục tiêu dinh dưỡng.',
+          action: FilledButton(
+            onPressed: () => context.go('/measurements'),
+            child: const Text('Thêm số đo'),
+          ),
+        ),
+        MealPlanningPrerequisiteIssue.nutritionTarget => _MessageCard(
+          key: const ValueKey('meal-plan-needs-target'),
+          message: 'Chưa có mục tiêu dinh dưỡng hiện tại.',
+          action: FilledButton(
+            onPressed: _controller.createCalculatedTarget,
+            child: const Text('Tạo mục tiêu dinh dưỡng'),
+          ),
+        ),
+        MealPlanningPrerequisiteIssue.recipes => const _MessageCard(
+          key: ValueKey('meal-plan-needs-recipes'),
+          message: 'Chưa có dữ liệu công thức. Hãy chạy lệnh import demo rồi kiểm tra lại.',
+        ),
+      };
 }
 
 double? _parseServings(String text) {
@@ -360,12 +551,26 @@ class _PlanResult extends StatelessWidget {
       key: const ValueKey('meal-plan-result'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          plan.status == MealPlanGenerationStatus.degraded
-              ? AppStrings.mealPlanDegraded
-              : AppStrings.mealPlanSucceeded,
-          style: Theme.of(context).textTheme.headlineSmall,
+        Row(
+          children: [
+            Icon(
+              plan.status == MealPlanGenerationStatus.degraded
+                  ? Icons.info_outline_rounded
+                  : Icons.check_circle_outline_rounded,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                plan.status == MealPlanGenerationStatus.degraded
+                    ? AppStrings.mealPlanDegraded
+                    : AppStrings.mealPlanSucceeded,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ),
+          ],
         ),
+        const SizedBox(height: 4),
         Text(
           '${formatMealPlanDate(plan.startDate)} – ${formatMealPlanDate(plan.endDate)}',
         ),
@@ -374,45 +579,25 @@ class _PlanResult extends StatelessWidget {
             padding: EdgeInsets.only(top: 8),
             child: Text(AppStrings.mealPlanDegradedHint),
           ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         for (final date in dates)
-          Card(
+          Padding(
             key: ValueKey('meal-plan-day-$date'),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.only(bottom: 14),
+            child: SectionSurface(
+              title: date,
+              icon: Icons.today_outlined,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      date,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
                   for (final entry in plan.entries.where(
                     (entry) => formatMealPlanDate(entry.planDate) == date,
                   ))
-                    ListTile(
-                      title: Text(entry.recipeTitle),
-                      subtitle: Text(
-                        '${mealSlotLabel(entry.mealSlotCode)} · ${_servingsLabel(entry.servings)} khẩu phần',
-                      ),
-                    ),
+                    _planEntry(context, entry),
                   for (final slot in plan.unfilledSlots.where(
                     (slot) => formatMealPlanDate(slot.planDate) == date,
                   ))
-                    ListTile(
-                      leading: const Icon(Icons.info_outline),
-                      title: Text(
-                        '${mealSlotLabel(slot.mealSlotCode)} · ${AppStrings.mealPlanUnfilled}',
-                      ),
-                      subtitle: Text(
-                        slot.explanation?.trim().isNotEmpty == true
-                            ? slot.explanation!.trim()
-                            : unfilledReasonLabel(slot.reasonCode),
-                      ),
-                    ),
+                    _unfilledEntry(context, slot),
                 ],
               ),
             ),
@@ -420,6 +605,77 @@ class _PlanResult extends StatelessWidget {
       ],
     );
   }
+
+  Widget _planEntry(BuildContext context, MealPlanEntry entry) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CircleAvatar(
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          child: Icon(mealSlotIcon(entry.mealSlotCode), size: 20),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                mealSlotLabel(entry.mealSlotCode),
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+              TextButton(
+                key: ValueKey('meal-plan-recipe-${entry.recipePublicId}'),
+                onPressed: () =>
+                    context.push('/recipes/${entry.recipePublicId}'),
+                child: Text(entry.recipeTitle),
+              ),
+              Text(
+                '${_servingsLabel(entry.servings)} ${AppStrings.recipeServings}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _unfilledEntry(
+    BuildContext context,
+    MealPlanUnfilledSlot slot,
+  ) => Container(
+    margin: const EdgeInsets.only(bottom: 10),
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: .5),
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(Icons.info_outline_rounded, size: 21),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${mealSlotLabel(slot.mealSlotCode)} · ${AppStrings.mealPlanUnfilled}',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                slot.explanation?.trim().isNotEmpty == true
+                    ? slot.explanation!.trim()
+                    : unfilledReasonLabel(slot.reasonCode),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _ShoppingListSection extends StatelessWidget {

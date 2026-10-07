@@ -172,6 +172,7 @@ target/
 # Maven
 
 .mvn/timing.properties
+/.m2/
 
 # Keep Maven Wrapper
 
@@ -278,6 +279,7 @@ pnpm-debug.log*
 
 .agent/cache/
 .agents/cache/
+.local-demo/
 
 # Preserve version-controlled shared instructions/skills
 
@@ -344,3 +346,18 @@ coverage-reports/
 !docs/**
 !database/
 !database/**
+
+# ------------------------------------------------------------
+
+# LOCAL AI DATASETS / MODEL ARTIFACTS
+
+# ------------------------------------------------------------
+
+ai_service/training/datasets/
+ai_service/training/runs/
+ai_service/app/food_recognition/models/**/*.pt
+*.onnx
+*.engine
+
+__pycache__/
+*.pyc

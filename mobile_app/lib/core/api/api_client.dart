@@ -20,6 +20,7 @@ class ApiClient {
 
   String? Function()? _accessTokenProvider;
   Future<bool> Function()? _refreshAccessToken;
+  Future<Map<String, String>> Function()? _csrfHeadersProvider;
 
   void configureAuthentication({
     required String? Function() accessTokenProvider,
@@ -27,6 +28,11 @@ class ApiClient {
   }) {
     _accessTokenProvider = accessTokenProvider;
     _refreshAccessToken = refreshAccessToken;
+  }
+
+  /// Supplies the CSRF header for authenticated browser mutations.
+  void configureCsrfHeaders(Future<Map<String, String>> Function()? provider) {
+    _csrfHeadersProvider = provider;
   }
 
   Future<Map<String, dynamic>> getJson(String path) async {
@@ -56,6 +62,95 @@ class ApiClient {
     retried: false,
   );
 
+  Future<Object?> requestBytesJson(
+    String path, {
+    required List<int> bytes,
+    required String contentType,
+    bool authenticated = false,
+    bool allowAuthenticationRetry = true,
+    Duration? requestTimeout,
+    Map<String, String> headers = const {},
+  }) => _requestBytesJson(
+    path,
+    bytes: bytes,
+    contentType: contentType,
+    authenticated: authenticated,
+    allowAuthenticationRetry: allowAuthenticationRetry,
+    requestTimeout: requestTimeout ?? timeout,
+    headers: headers,
+    retried: false,
+  );
+
+  Future<Object?> _requestBytesJson(
+    String path, {
+    required List<int> bytes,
+    required String contentType,
+    required bool authenticated,
+    required bool allowAuthenticationRetry,
+    required Duration requestTimeout,
+    required Map<String, String> headers,
+    required bool retried,
+  }) async {
+    final requestHeaders = <String, String>{
+      'Accept': 'application/json, application/problem+json',
+      'Content-Type': contentType,
+      ...headers,
+    };
+
+    if (authenticated) {
+      final token = _accessTokenProvider?.call();
+      if (token != null && token.isNotEmpty) {
+        requestHeaders['Authorization'] = 'Bearer $token';
+      }
+    }
+
+    final http.Response response;
+    try {
+      final request = http.Request('POST', _resolve(path))
+        ..headers.addAll(requestHeaders)
+        ..bodyBytes = bytes;
+      final streamed = await _httpClient.send(request).timeout(requestTimeout);
+      response = await http.Response.fromStream(streamed);
+    } on TimeoutException {
+      throw const ApiTransportException(ApiTransportFailureKind.timeout);
+    } on http.ClientException {
+      throw const ApiTransportException(ApiTransportFailureKind.network);
+    } catch (_) {
+      throw const ApiTransportException(ApiTransportFailureKind.transport);
+    }
+
+    if (response.statusCode == 401 &&
+        authenticated &&
+        allowAuthenticationRetry &&
+        !retried &&
+        await (_refreshAccessToken?.call() ?? Future.value(false))) {
+      return _requestBytesJson(
+        path,
+        bytes: bytes,
+        contentType: contentType,
+        authenticated: authenticated,
+        allowAuthenticationRetry: false,
+        requestTimeout: requestTimeout,
+        headers: headers,
+        retried: true,
+      );
+    }
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiHttpException(response.statusCode, problem: _problem(response));
+    }
+
+    if (response.statusCode == 204 || response.bodyBytes.isEmpty) {
+      return null;
+    }
+
+    try {
+      return jsonDecode(utf8.decode(response.bodyBytes));
+    } on FormatException {
+      throw const ApiResponseFormatException();
+    }
+  }
+
   Future<Object?> _requestJson(
     String path, {
     required String method,
@@ -70,6 +165,17 @@ class ApiClient {
       'Accept': 'application/json, application/problem+json',
       ...headers,
     };
+
+    if (authenticated &&
+        method != 'GET' &&
+        method != 'HEAD' &&
+        method != 'OPTIONS' &&
+        _csrfHeadersProvider != null &&
+        !requestHeaders.keys.any(
+          (key) => key.toLowerCase() == 'x-csrf-token',
+        )) {
+      requestHeaders.addAll(await _csrfHeadersProvider!());
+    }
 
     if (body != null) {
       requestHeaders['Content-Type'] = 'application/json';

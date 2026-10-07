@@ -6,6 +6,24 @@ final class AppStrings {
   const AppStrings._();
 
   static const productName = 'AI Smart Meal Planner';
+  static const wellnessEyebrow = 'Sống khỏe mỗi ngày';
+  static const dietarySectionTitle = 'Chế độ ăn';
+  static const allergenSectionTitle = 'Dị ứng & cần tránh';
+  static const allergenSearchHint = 'Nhập thực phẩm hoặc chất gây dị ứng...';
+  static const allergenNoMatch =
+      'Không tìm thấy chất gây dị ứng này trong danh mục.';
+  static const dislikedSectionTitle = 'Không thích ăn';
+  static const dislikedSearchHint = 'Nhập nguyên liệu bạn không thích...';
+  static const dislikedNoMatch =
+      'Không tìm thấy nguyên liệu này trong danh mục.';
+  static const planWorkspaceEyebrow = 'Lên kế hoạch';
+  static const mealPlanConfigurationTitle = 'Thiết lập thực đơn';
+  static const mealPlanConfigurationSubtitle =
+      'Chọn nhịp ăn phù hợp với lịch của bạn.';
+  static const mealPlanScheduleTitle = 'Thời gian';
+  static const mealPlanPracticalDetails = 'Nhu cầu mỗi bữa';
+  static const mealPlanSummaryTitle = 'Tóm tắt kế hoạch';
+  static const catalogExploreTitle = 'Khám phá danh mục';
 
   // Shared actions and navigation.
   static const foods = 'Thực phẩm';
@@ -266,6 +284,20 @@ final class AppStrings {
   static const ingredientNoFoodMappings = 'Chưa có thực phẩm liên kết.';
   static const ingredientNoAllergens = 'Chưa có thông tin chất gây dị ứng.';
   static const ingredientNoConversions = 'Chưa có quy đổi đơn vị.';
+  static const ingredientRecognitionTitle = 'Nhận diện nguyên liệu bằng AI';
+  static const ingredientRecognitionSubtitle =
+      'Chọn ảnh để YOLO phát hiện nguyên liệu. Kết quả độ tin cậy thấp cần được xác nhận.';
+  static const ingredientRecognitionPick = 'Chọn ảnh';
+  static const ingredientRecognitionPickAnother = 'Chọn ảnh khác';
+  static const ingredientRecognitionRunning = 'Đang nhận diện ảnh…';
+  static const ingredientRecognitionNoDetections =
+      'Không phát hiện nguyên liệu nào trong ảnh.';
+  static const ingredientRecognitionConfidence = 'Độ tin cậy';
+  static const ingredientRecognitionNeedsConfirmation = 'Cần xác nhận';
+  static const ingredientRecognitionDetected = 'Đã phát hiện';
+  static const ingredientRecognitionModel = 'Mô hình';
+  static const ingredientRecognitionUnsupported =
+      'Thiết bị hiện không hỗ trợ chọn ảnh.';
   static const ingredientPreparation = 'Trạng thái chế biến';
   static const ingredientYield = 'Hệ số hao hụt';
   static const ingredientPrimary = 'Nguyên liệu chính';
@@ -407,6 +439,7 @@ final class AppStrings {
   static const householdSize = 'Số người trong hộ gia đình';
   static const maxCookingTime = 'Thời gian nấu tối đa (phút)';
   static const notes = 'Ghi chú';
+  static const profileAdditionalNotes = 'Thông tin bổ sung';
   static const saveProfile = 'Lưu hồ sơ';
   static const saving = 'Đang lưu…';
   static const profileSaved = 'Đã lưu hồ sơ.';
@@ -588,6 +621,35 @@ final class AppStrings {
   static const measurementNoteTooLong =
       'Ghi chú không được vượt quá 255 ký tự.';
   static const measurementInvalidNumber = 'Vui lòng nhập một số hợp lệ.';
+
+
+  // Administrator user-management demo.
+  static const adminUsers = 'Quản trị người dùng';
+  static const adminUsersSubtitle =
+      'Xem tài khoản và quản lý trạng thái người dùng.';
+  static const adminSearch = 'Tìm kiếm';
+  static const adminStatusFilter = 'Trạng thái';
+  static const adminAllStatuses = 'Tất cả trạng thái';
+  static const adminActive = 'Đang hoạt động';
+  static const adminSuspended = 'Đã tạm khóa';
+  static const adminPendingVerification = 'Chờ xác minh';
+  static const adminDeactivated = 'Đã vô hiệu hóa';
+  static const adminSuspend = 'Tạm khóa';
+  static const adminReactivate = 'Kích hoạt lại';
+  static const adminSuspendConfirmation =
+      'Bạn có chắc muốn tạm khóa tài khoản này không?';
+  static const adminReactivateConfirmation =
+      'Bạn có chắc muốn kích hoạt lại tài khoản này không?';
+  static const adminCreatedAt = 'Tạo lúc';
+  static const adminUsersEmpty = 'Không tìm thấy người dùng.';
+  static const adminUserLoadFailed =
+      'Không thể tải danh sách người dùng. Vui lòng thử lại.';
+  static const adminUserRequestFailed =
+      'Không thể hoàn tất thao tác với người dùng. Vui lòng thử lại.';
+  static const adminForbidden = 'Bạn không có quyền thực hiện thao tác này.';
+  static const adminNotFound = 'Không tìm thấy dữ liệu quản trị.';
+  static const adminConflict =
+      'Dữ liệu đã thay đổi hoặc thao tác không hợp lệ. Vui lòng thử lại.';
 
   // Safe, user-facing error copy. Backend problem details are intentionally
   // not returned directly to the UI.

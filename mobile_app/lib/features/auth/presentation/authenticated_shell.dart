@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:smart_meal_planner/app/theme/app_theme.dart';
 import 'package:smart_meal_planner/features/auth/application/session_controller.dart';
 import 'package:smart_meal_planner/l10n/app_strings.dart';
 
@@ -21,7 +22,19 @@ class AuthenticatedShell extends StatelessWidget {
       final pageContent = content ?? const _FoodsPlaceholder();
       if (!wide) {
         return Scaffold(
-          appBar: AppBar(title: const Text(AppStrings.productName)),
+          appBar: AppBar(
+            title: const Text(
+              AppStrings.productName,
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+            actions: [
+              IconButton(
+                tooltip: AppStrings.signOut,
+                onPressed: sessionController.logout,
+                icon: const Icon(Icons.logout_rounded),
+              ),
+            ],
+          ),
           drawer: _NavigationDrawer(
             sessionController: sessionController,
             selectedIndex: selectedIndex,
@@ -34,7 +47,9 @@ class AuthenticatedShell extends StatelessWidget {
           children: [
             NavigationRail(
               selectedIndex: selectedIndex,
-              labelType: NavigationRailLabelType.all,
+              extended: true,
+              minExtendedWidth: 216,
+              labelType: NavigationRailLabelType.none,
               scrollable: true,
               onDestinationSelected: (index) {
                 if (index == 0) context.go('/catalog/foods');
@@ -45,13 +60,55 @@ class AuthenticatedShell extends StatelessWidget {
                 if (index == 5) context.go('/meal-planning');
                 if (index == 6) context.go('/pantry');
                 if (index == 7) context.go('/recipes');
+                if (sessionController.isAdmin && index == 8) {
+                  context.go('/admin/users');
+                }
               },
-              leading: IconButton(
-                tooltip: AppStrings.signOut,
-                onPressed: sessionController.logout,
-                icon: const Icon(Icons.logout),
+              leading: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 22),
+                child: SizedBox(
+                  width: 184,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppTheme.forest,
+                          borderRadius: BorderRadius.circular(13),
+                        ),
+                        child: const Icon(
+                          Icons.spa_rounded,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      const Flexible(
+                        child: Text(
+                          AppStrings.productName,
+                          maxLines: 2,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.ink,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              destinations: const [
+              trailing: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Tooltip(
+                  message: AppStrings.signOut,
+                  child: TextButton.icon(
+                    onPressed: sessionController.logout,
+                    icon: const Icon(Icons.logout_rounded),
+                    label: const Text(AppStrings.signOut),
+                  ),
+                ),
+              ),
+              destinations: [
                 NavigationRailDestination(
                   icon: Icon(
                     Icons.restaurant,
@@ -89,16 +146,23 @@ class AuthenticatedShell extends StatelessWidget {
                   ),
                   label: Text(AppStrings.pantry),
                 ),
-                NavigationRailDestination(
+                const NavigationRailDestination(
                   icon: Icon(
                     Icons.menu_book,
                     key: ValueKey('recipes-nav-rail'),
                   ),
                   label: Text(AppStrings.recipes),
                 ),
+                if (sessionController.isAdmin)
+                  const NavigationRailDestination(
+                    icon: Icon(
+                      Icons.manage_accounts,
+                      key: ValueKey('admin-nav-users-rail'),
+                    ),
+                    label: Text(AppStrings.adminUsers),
+                  ),
               ],
             ),
-            const VerticalDivider(width: 1),
             Expanded(child: pageContent),
           ],
         ),
@@ -118,7 +182,16 @@ class _NavigationDrawer extends StatelessWidget {
   Widget build(BuildContext context) => Drawer(
     child: ListView(
       children: [
-        const DrawerHeader(child: Text(AppStrings.productName)),
+        DrawerHeader(
+          decoration: const BoxDecoration(color: AppTheme.mint),
+          child: Align(
+            alignment: Alignment.bottomLeft,
+            child: Text(
+              AppStrings.productName,
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+          ),
+        ),
         ListTile(
           key: const ValueKey('catalog-nav-foods-drawer'),
           selected: selectedIndex == 0,
@@ -172,6 +245,16 @@ class _NavigationDrawer extends StatelessWidget {
           title: const Text(AppStrings.recipes),
           onTap: () => context.go('/recipes'),
         ),
+        if (sessionController.isAdmin) ...[
+          const Divider(),
+          ListTile(
+            key: const ValueKey('admin-nav-users-drawer'),
+            selected: selectedIndex == 8,
+            leading: const Icon(Icons.manage_accounts),
+            title: const Text(AppStrings.adminUsers),
+            onTap: () => context.go('/admin/users'),
+          ),
+        ],
         const Divider(),
         ListTile(
           leading: const Icon(Icons.logout),

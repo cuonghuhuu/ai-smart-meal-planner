@@ -1,5 +1,8 @@
 package com.smartmealplanner.mealplanning.persistence;
 
+import com.smartmealplanner.recommendation.persistence.RecommendationRequest;
+import com.smartmealplanner.recommendation.persistence.RecommendationRequestRepository;
+import com.smartmealplanner.recommendation.persistence.RecommendationResultRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,8 +40,8 @@ public class MealPlanFailureWriter {
             throw new MealPlanPersistenceException(
                     MealPlanPersistenceException.Reason.EXISTING_GRAPH);
         }
-        if (requests.completePending(requestId, RecommendationRequest.Status.FAILED.name(),
-                durationMs, failureCode) != 1) {
+        if (requests.completePending(requestId, RecommendationRequest.Kind.MEAL_PLAN.name(),
+                RecommendationRequest.Status.FAILED.name(), durationMs, failureCode) != 1) {
             throw new MealPlanPersistenceException(
                     MealPlanPersistenceException.Reason.INVALID_TRANSITION);
         }

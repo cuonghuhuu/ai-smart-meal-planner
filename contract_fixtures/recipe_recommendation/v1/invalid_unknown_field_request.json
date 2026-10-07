@@ -1,0 +1,140 @@
+{
+  "contractVersion": "1",
+  "requestId": "11111111-1111-4111-8111-111111111111",
+  "algorithmVersion": "HEURISTIC_RECIPE_RANK_V1",
+  "context": {
+    "targetDate": "2026-10-06",
+    "mealSlotCode": "DINNER",
+    "servings": 2,
+    "maxMinutes": 45,
+    "resultLimit": 5
+  },
+  "hardConstraints": {
+    "allergenCodes": [
+      "PEANUT"
+    ],
+    "exclusionaryDietaryCodes": [
+      "VEGAN"
+    ],
+    "avoidIngredientPublicIds": []
+  },
+  "softPreferences": {
+    "dislikeIngredientPublicIds": [
+      "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+    ],
+    "preferenceCodes": [
+      "HIGH_PROTEIN"
+    ]
+  },
+  "nutritionTargets": [
+    {
+      "nutrientCode": "ENERGY",
+      "targetValue": 2000,
+      "minValue": 1800,
+      "maxValue": 2200,
+      "hardLimit": false,
+      "unitCode": "kcal"
+    }
+  ],
+  "recentRecipeCounts": [
+    {
+      "recipePublicId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd2",
+      "count": 2
+    }
+  ],
+  "unitDefinitions": [
+    {
+      "unitCode": "g",
+      "dimension": "MASS",
+      "baseUnitCode": "g",
+      "toBaseFactor": 1
+    },
+    {
+      "unitCode": "kcal",
+      "dimension": "ENERGY",
+      "baseUnitCode": "kcal",
+      "toBaseFactor": 1
+    }
+  ],
+  "pantryLots": [
+    {
+      "pantryItemPublicId": "cccccccc-cccc-4ccc-8ccc-ccccccccccc1",
+      "ingredientPublicId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "foodPublicId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+      "quantityRemaining": 500,
+      "unitCode": "g",
+      "expiryDate": null,
+      "expiryKind": "UNKNOWN",
+      "storageLocation": "PANTRY"
+    }
+  ],
+  "ingredientFacts": [
+    {
+      "ingredientPublicId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "allergenFacts": [
+        {
+          "allergenCode": "PEANUT",
+          "evidenceStatus": "FREE_FROM"
+        }
+      ]
+    },
+    {
+      "ingredientPublicId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+      "allergenFacts": [
+        {
+          "allergenCode": "PEANUT",
+          "evidenceStatus": "FREE_FROM"
+        }
+      ]
+    }
+  ],
+  "recipeCandidates": [
+    {
+      "recipePublicId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1",
+      "servings": 2,
+      "totalMinutes": 30,
+      "mealSlotCodes": [
+        "DINNER"
+      ],
+      "dietaryCodes": [
+        "VEGAN"
+      ],
+      "tagCodes": [
+        "HIGH_PROTEIN"
+      ],
+      "ingredients": [
+        {
+          "ingredientPublicId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+          "quantity": 200,
+          "unitCode": "g",
+          "optional": false,
+          "allowSubstitution": false
+        }
+      ],
+      "nutrition": null
+    },
+    {
+      "recipePublicId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd2",
+      "servings": 2,
+      "totalMinutes": 40,
+      "mealSlotCodes": [
+        "DINNER"
+      ],
+      "dietaryCodes": [
+        "VEGAN"
+      ],
+      "tagCodes": [],
+      "ingredients": [
+        {
+          "ingredientPublicId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+          "quantity": 150,
+          "unitCode": "g",
+          "optional": false,
+          "allowSubstitution": false
+        }
+      ],
+      "nutrition": null
+    }
+  ],
+  "unexpectedField": true
+}

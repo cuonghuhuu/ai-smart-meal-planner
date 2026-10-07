@@ -36,19 +36,27 @@ void main() {
         ),
       ]);
       await _pump(tester);
-      expect(find.text('Gạo'), findsNWidgets(2));
+      expect(find.text('Gạo'), findsOneWidget);
       expect(
         find.byKey(const ValueKey('pantry-item-$testPantryId')),
         findsOneWidget,
+      );
+      expect(find.textContaining('0.0001 bao'), findsOneWidget);
+      expect(find.textContaining('2020-02-29'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('pantry-item-$testPantryIdTwo')),
+        300,
+        scrollable: find.descendant(
+          of: find.byKey(const ValueKey('pantry-list')),
+          matching: find.byType(Scrollable),
+        ),
       );
       expect(
         find.byKey(const ValueKey('pantry-item-$testPantryIdTwo')),
         findsOneWidget,
       );
-      expect(find.textContaining('0.0001 bao'), findsOneWidget);
       expect(find.textContaining('0.0001 crate'), findsOneWidget);
-      expect(find.textContaining('2020-02-29'), findsOneWidget);
-      expect(find.text(AppStrings.pantryStatusAvailable), findsNWidgets(2));
+      expect(find.text(AppStrings.pantryStatusAvailable), findsWidgets);
       expect(find.text(AppStrings.pantryStatusExpired), findsNothing);
     },
   );

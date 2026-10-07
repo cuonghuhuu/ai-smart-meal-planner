@@ -21,6 +21,12 @@ import com.smartmealplanner.mealplanning.persistence.MealPlanPersistenceCommands
 import com.smartmealplanner.mealplanning.persistence.MealPlanPersistenceCommands.GeneratedPlan;
 import com.smartmealplanner.mealplanning.persistence.MealPlanPersistenceCommands.Score;
 import com.smartmealplanner.mealplanning.persistence.MealPlanPersistenceException.Reason;
+import com.smartmealplanner.recommendation.persistence.RecommendationRequest;
+import com.smartmealplanner.recommendation.persistence.RecommendationRequestRepository;
+import com.smartmealplanner.recommendation.persistence.RecommendationResult;
+import com.smartmealplanner.recommendation.persistence.RecommendationResultRepository;
+import com.smartmealplanner.recommendation.persistence.RecommendationResultScore;
+import com.smartmealplanner.recommendation.persistence.RecommendationResultScoreRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -106,8 +112,8 @@ public class MealPlanTerminalWriter {
                         gap.explanation()));
             }
         }
-        if (requests.completePending(request.id(), command.status().name(),
-                command.durationMs(), null) != 1) {
+        if (requests.completePending(request.id(), RecommendationRequest.Kind.MEAL_PLAN.name(),
+                command.status().name(), command.durationMs(), null) != 1) {
             throw failure(Reason.INVALID_TRANSITION);
         }
         return new StoredPlan(plan.id(), plan.publicId());
@@ -124,8 +130,8 @@ public class MealPlanTerminalWriter {
         }
         pendingRequest(requestId);
         requireEmptyGraph(requestId);
-        if (requests.completePending(requestId, RecommendationRequest.Status.INFEASIBLE.name(),
-                durationMs, null) != 1) {
+        if (requests.completePending(requestId, RecommendationRequest.Kind.MEAL_PLAN.name(),
+                RecommendationRequest.Status.INFEASIBLE.name(), durationMs, null) != 1) {
             throw failure(Reason.INVALID_TRANSITION);
         }
     }

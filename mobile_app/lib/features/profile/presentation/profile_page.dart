@@ -4,6 +4,7 @@ import 'package:smart_meal_planner/features/auth/presentation/authenticated_shel
 import 'package:smart_meal_planner/features/profile/application/profile_controller.dart';
 import 'package:smart_meal_planner/features/profile/application/profile_validation.dart';
 import 'package:smart_meal_planner/features/profile/data/profile_models.dart';
+import 'package:smart_meal_planner/core/ui/wellness_components.dart';
 import 'package:smart_meal_planner/l10n/app_strings.dart';
 import 'package:smart_meal_planner/l10n/reference_localizations.dart';
 
@@ -160,17 +161,14 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    AppStrings.profile,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    state.isNewProfile
+                  PageIntro(
+                    eyebrow: AppStrings.wellnessEyebrow,
+                    title: AppStrings.profile,
+                    subtitle: state.isNewProfile
                         ? AppStrings.completeProfileSubtitle
                         : AppStrings.updateProfileSubtitle,
+                    icon: Icons.person_outline,
                   ),
-                  const SizedBox(height: 20),
                   if (state.saveMessage != null)
                     _MessageBanner(message: state.saveMessage!, success: true),
                   if (state.errorMessage != null)
@@ -184,113 +182,122 @@ class _ProfilePageState extends State<ProfilePage> {
                           : null,
                     ),
                   if (state.errorMessage != null) const SizedBox(height: 12),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final columns = constraints.maxWidth >= 680;
-                      final fields = <Widget>[
-                        _birthDateField(),
-                        _sexField(),
-                        _activityField(state),
-                        _nutritionGoalField(state),
-                        _numberField(
-                          controller: _height,
-                          label: AppStrings.heightCm,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
+                  SectionSurface(
+                    title: AppStrings.profile,
+                    icon: Icons.tune_outlined,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final columns = constraints.maxWidth >= 680;
+                        final fields = <Widget>[
+                          _birthDateField(),
+                          _sexField(),
+                          _activityField(state),
+                          _nutritionGoalField(state),
+                          _numberField(
+                            controller: _height,
+                            label: AppStrings.heightCm,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            validator: (value) => _numberError(
+                              value,
+                              (number) => number > 30 && number < 300,
+                              AppStrings.heightInvalid,
+                            ),
                           ),
-                          validator: (value) => _numberError(
-                            value,
-                            (number) => number > 30 && number < 300,
-                            AppStrings.heightInvalid,
+                          _numberField(
+                            controller: _targetWeight,
+                            label: AppStrings.targetWeightKg,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            validator: (value) => _numberError(
+                              value,
+                              (number) => number > 2 && number < 700,
+                              AppStrings.targetWeightInvalid,
+                            ),
                           ),
-                        ),
-                        _numberField(
-                          controller: _targetWeight,
-                          label: AppStrings.targetWeightKg,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
+                          _numberField(
+                            controller: _weeklyChange,
+                            label: AppStrings.weeklyChangeKg,
+                            helperText: AppStrings.weeklyChangeHelper,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                              signed: true,
+                            ),
+                            validator:
+                                ProfileValidation.validateWeeklyChangeText,
                           ),
-                          validator: (value) => _numberError(
-                            value,
-                            (number) => number > 2 && number < 700,
-                            AppStrings.targetWeightInvalid,
+                          _numberField(
+                            controller: _householdSize,
+                            label: AppStrings.householdSize,
+                            keyboardType: TextInputType.number,
+                            required: true,
+                            validator: (value) {
+                              final number = int.tryParse(value?.trim() ?? '');
+                              return number != null && number >= 1
+                                  ? null
+                                  : AppStrings.householdSizeInvalid;
+                            },
                           ),
-                        ),
-                        _numberField(
-                          controller: _weeklyChange,
-                          label: AppStrings.weeklyChangeKg,
-                          helperText: AppStrings.weeklyChangeHelper,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                            signed: true,
+                          _numberField(
+                            controller: _maxCookMinutes,
+                            label: AppStrings.maxCookingTime,
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return null;
+                              }
+                              final number = int.tryParse(value.trim());
+                              return number != null &&
+                                      number >= 1 &&
+                                      number <= 1440
+                                  ? null
+                                  : AppStrings.maxCookingTimeInvalid;
+                            },
                           ),
-                          validator: ProfileValidation.validateWeeklyChangeText,
-                        ),
-                        _numberField(
-                          controller: _householdSize,
-                          label: AppStrings.householdSize,
-                          keyboardType: TextInputType.number,
-                          required: true,
-                          validator: (value) {
-                            final number = int.tryParse(value?.trim() ?? '');
-                            return number != null && number >= 1
-                                ? null
-                                : AppStrings.householdSizeInvalid;
-                          },
-                        ),
-                        _numberField(
-                          controller: _maxCookMinutes,
-                          label: AppStrings.maxCookingTime,
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return null;
-                            }
-                            final number = int.tryParse(value.trim());
-                            return number != null &&
-                                    number >= 1 &&
-                                    number <= 1440
-                                ? null
-                                : AppStrings.maxCookingTimeInvalid;
-                          },
-                        ),
-                      ];
-                      if (!columns) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            for (final field in fields) ...[
-                              field,
-                              const SizedBox(height: 16),
+                        ];
+                        if (!columns) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              for (final field in fields) ...[
+                                field,
+                                const SizedBox(height: 16),
+                              ],
                             ],
+                          );
+                        }
+                        final fieldWidth = (constraints.maxWidth - 16) / 2;
+                        return Wrap(
+                          spacing: 16,
+                          runSpacing: 16,
+                          children: [
+                            for (final field in fields)
+                              SizedBox(width: fieldWidth, child: field),
                           ],
                         );
-                      }
-                      return GridView.count(
-                        crossAxisCount: 2,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 4.2,
-                        children: fields,
-                      );
-                    },
+                      },
+                    ),
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _notes,
-                    minLines: 4,
-                    maxLines: 6,
-                    maxLength: 500,
-                    decoration: const InputDecoration(
-                      labelText: AppStrings.notes,
-                      alignLabelWithHint: true,
-                      border: OutlineInputBorder(),
+                  SectionSurface(
+                    title: AppStrings.profileAdditionalNotes,
+                    icon: Icons.edit_note_outlined,
+                    child: TextFormField(
+                      controller: _notes,
+                      minLines: 4,
+                      maxLines: 6,
+                      maxLength: 500,
+                      decoration: const InputDecoration(
+                        labelText: AppStrings.notes,
+                        alignLabelWithHint: true,
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) => value != null && value.length > 500
+                          ? AppStrings.notesTooLong
+                          : null,
                     ),
-                    validator: (value) => value != null && value.length > 500
-                        ? AppStrings.notesTooLong
-                        : null,
                   ),
                   const SizedBox(height: 8),
                   Align(

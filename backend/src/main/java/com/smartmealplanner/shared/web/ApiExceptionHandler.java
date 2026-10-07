@@ -10,6 +10,8 @@ import jakarta.persistence.OptimisticLockException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -30,6 +32,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @Order(-1)
 public class ApiExceptionHandler
         extends ResponseEntityExceptionHandler {
+
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(ApiExceptionHandler.class);
 
     private final ApiProblems problems;
 
@@ -156,6 +161,13 @@ public class ApiExceptionHandler
     ProblemDetail unexpected(
             Exception exception,
             HttpServletRequest request) {
+
+        LOGGER.error(
+                "Unhandled API exception requestId={} method={} path={}",
+                request.getAttribute(RequestIdFilter.ATTRIBUTE),
+                request.getMethod(),
+                request.getRequestURI(),
+                exception);
 
         return problems.create(
                 HttpStatus.INTERNAL_SERVER_ERROR,
