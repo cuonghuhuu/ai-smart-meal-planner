@@ -1,5 +1,6 @@
 package com.smartmealplanner.auth.persistence;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,4 +27,16 @@ public interface UserRoleRepository
     List<String> findRoleCodesByUserId(
             @Param("userId")
             Long userId);
+
+    @Query("""
+            select new com.smartmealplanner.auth.persistence.UserRoleCodeView(
+                userRole.user.id,
+                role.code)
+            from UserRole userRole
+            join userRole.role role
+            where userRole.user.id in :userIds
+            order by userRole.user.id asc, role.code asc
+            """)
+    List<UserRoleCodeView> findRoleCodesByUserIds(
+            @Param("userIds") Collection<Long> userIds);
 }
