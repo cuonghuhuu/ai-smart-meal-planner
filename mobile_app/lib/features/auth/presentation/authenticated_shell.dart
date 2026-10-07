@@ -60,6 +60,9 @@ class AuthenticatedShell extends StatelessWidget {
                 if (index == 5) context.go('/meal-planning');
                 if (index == 6) context.go('/pantry');
                 if (index == 7) context.go('/recipes');
+                if (sessionController.isAdmin && index == 8) {
+                  context.go('/admin/users');
+                }
               },
               leading: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 20, 16, 22),
@@ -105,7 +108,7 @@ class AuthenticatedShell extends StatelessWidget {
                   ),
                 ),
               ),
-              destinations: const [
+              destinations: [
                 NavigationRailDestination(
                   icon: Icon(
                     Icons.restaurant,
@@ -143,13 +146,21 @@ class AuthenticatedShell extends StatelessWidget {
                   ),
                   label: Text(AppStrings.pantry),
                 ),
-                NavigationRailDestination(
+                const NavigationRailDestination(
                   icon: Icon(
                     Icons.menu_book,
                     key: ValueKey('recipes-nav-rail'),
                   ),
                   label: Text(AppStrings.recipes),
                 ),
+                if (sessionController.isAdmin)
+                  const NavigationRailDestination(
+                    icon: Icon(
+                      Icons.manage_accounts,
+                      key: ValueKey('admin-nav-users-rail'),
+                    ),
+                    label: Text(AppStrings.adminUsers),
+                  ),
               ],
             ),
             Expanded(child: pageContent),
@@ -234,6 +245,16 @@ class _NavigationDrawer extends StatelessWidget {
           title: const Text(AppStrings.recipes),
           onTap: () => context.go('/recipes'),
         ),
+        if (sessionController.isAdmin) ...[
+          const Divider(),
+          ListTile(
+            key: const ValueKey('admin-nav-users-drawer'),
+            selected: selectedIndex == 8,
+            leading: const Icon(Icons.manage_accounts),
+            title: const Text(AppStrings.adminUsers),
+            onTap: () => context.go('/admin/users'),
+          ),
+        ],
         const Divider(),
         ListTile(
           leading: const Icon(Icons.logout),
